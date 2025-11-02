@@ -1,8 +1,8 @@
-﻿
+﻿using Microsoft.AspNetCore.Identity;
 
 namespace Domain.Users
 {
-    public class User
+    public class User : IdentityUser
     {
     }
 }
