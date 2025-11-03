@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Application.Users.DbContext;
 
-public class UsersDbContext : IdentityDbContext<User>
+internal class UsersDbContext : IdentityDbContext<User>
 {
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {

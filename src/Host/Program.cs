@@ -38,8 +38,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors();
 
-// app.UseHttpsRedirection();
+app.MapControllers();
 
-app.MapIdentityApi<User>();
+// app.UseHttpsRedirection();
 
 app.Run();

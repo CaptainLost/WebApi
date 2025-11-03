@@ -1,9 +1,12 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.AspNetCore.Identity;
-using Application.Users.Repositories;
-using Infrastructure.Users.Repositories;
+﻿using Application.Abstractions.Messaging.Commands;
+using Application.Abstractions.Repositories;
+using Application.Extensions;
 using Application.Users.DbContext;
 using Domain.Users;
+using Infrastructure.Messaging.InMemoryCommandDispatcher;
+using Infrastructure.Users.Repositories;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Infrastructure;
 
@@ -11,16 +14,23 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services)
     {
+        services.AddSingleton<ICommandDispatcher, InMemoryCommandDispatcher>();
+        services.AddCommandHandlers();
+
         services.AddDbContext<UsersDbContext>();
 
-        services.AddScoped<IUsersRepository, UsersRepository>();
+        services.AddScoped<IUserRepository, UserRepository>();
 
-        services.AddAuthorization();
-        services.AddAuthentication().AddCookie(IdentityConstants.ApplicationScheme);
+        services.AddAuthentication(IdentityConstants.ApplicationScheme)
+            .AddCookie(IdentityConstants.ApplicationScheme);
+
+        services.AddAuthorizationBuilder();
 
         services.AddIdentityCore<User>()
+            .AddRoles<IdentityRole>()
             .AddEntityFrameworkStores<UsersDbContext>()
-            .AddApiEndpoints();
+            .AddApiEndpoints()
+            .AddDefaultTokenProviders();
 
         return services;
     }
