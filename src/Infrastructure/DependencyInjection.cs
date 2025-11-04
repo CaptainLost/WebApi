@@ -33,7 +33,6 @@ public static class DependencyInjection
             .AddRoles<IdentityRole>()
             .AddSignInManager<SignInManager<User>>()
             .AddEntityFrameworkStores<UsersDbContext>()
-            .AddApiEndpoints()
             .AddDefaultTokenProviders();
 
         return services;

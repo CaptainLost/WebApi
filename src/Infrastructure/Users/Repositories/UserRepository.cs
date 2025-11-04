@@ -13,8 +13,13 @@ internal class UserRepository : IUserRepository
         m_userManager = userManager;
     }
 
-    public async Task<User?> GetUserByUsername(string username)
+    public async Task<User?> GetUserByUsernameAsync(string username)
     {
         return await m_userManager.FindByNameAsync(username);
+    }
+
+    public async Task<User?> GetUserByEmailAsync(string email)
+    {
+        return await m_userManager.FindByEmailAsync(email);
     }
 }
