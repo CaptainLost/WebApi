@@ -1,4 +1,5 @@
 ﻿using Application.Abstractions.Messaging.Commands;
+using Application.Errors;
 using Domain.Messaging;
 using Microsoft.Extensions.DependencyInjection;
 

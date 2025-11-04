@@ -1,7 +1,7 @@
 using System.Net;
 using Domain.Messaging;
 
-namespace Infrastructure.Messaging;
+namespace Application.Errors;
 
 public static class CommandDispatcherErrors
 {

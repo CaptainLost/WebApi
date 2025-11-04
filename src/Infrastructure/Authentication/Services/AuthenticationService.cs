@@ -1,4 +1,5 @@
 using Application.Abstractions.Services;
+using Domain.Errors;
 using Domain.Messaging;
 using Domain.Users;
 using Microsoft.AspNetCore.Identity;
@@ -26,7 +27,7 @@ internal sealed class AuthenticationService : IAuthenticationService
 
         if (!signInResult.Succeeded)
         {
-            return UserErrors.LoginFailed();
+            return AuthenticationErrors.LoginFailed();
         }
 
         return Result.Success();
@@ -38,14 +39,14 @@ internal sealed class AuthenticationService : IAuthenticationService
 
         if (existingUser != null)
         {
-            return UserErrors.UserAlreadyExists();
+            return AuthenticationErrors.UsernameAlreadyTaken();
         }
 
         User? existingEmail = await m_userManager.FindByEmailAsync(email);
 
         if (existingEmail != null)
         {
-            return UserErrors.UserAlreadyExists();
+            return AuthenticationErrors.EmailAlreadyTaken();
         }
 
         User newUser = new()
@@ -59,9 +60,7 @@ internal sealed class AuthenticationService : IAuthenticationService
         if (!result.Succeeded)
         {
             string errors = string.Join(", ", result.Errors.Select(e => e.Description));
-            return Result.Failure(new Error(
-                "Authentication.RegistrationFailed",
-                $"Registration failed: {errors}"));
+            return AuthenticationErrors.RegistrationFailed(errors);
         }
 
         return Result.Success();

@@ -1,6 +1,7 @@
 using Application.Abstractions.Messaging.Commands;
 using Application.Abstractions.Repositories;
 using Application.Abstractions.Services;
+using Domain.Errors;
 using Domain.Messaging;
 using Domain.Users;
 
@@ -26,7 +27,7 @@ internal sealed class RegisterCommandHandler(
         
         if (user == null)
         {
-            return UserErrors.LoginFailed();
+            return AuthenticationErrors.LoginFailed();
         }
 
         Result loginResult = await m_authenticationService.LoginAsync(user, command.Password);
