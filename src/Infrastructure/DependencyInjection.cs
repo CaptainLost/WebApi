@@ -1,8 +1,10 @@
 ﻿using Application.Abstractions.Messaging.Commands;
 using Application.Abstractions.Repositories;
+using Application.Abstractions.Services;
 using Application.Extensions;
-using Application.Users.DbContext;
 using Domain.Users;
+using Infrastructure.Authentication.Services;
+using Infrastructure.Users.DbContext;
 using Infrastructure.Messaging.InMemoryCommandDispatcher;
 using Infrastructure.Users.Repositories;
 using Microsoft.AspNetCore.Identity;
@@ -20,6 +22,7 @@ public static class DependencyInjection
         services.AddDbContext<UsersDbContext>();
 
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IAuthenticationService, AuthenticationService>();
 
         services.AddAuthentication(IdentityConstants.ApplicationScheme)
             .AddCookie(IdentityConstants.ApplicationScheme);
@@ -28,6 +31,7 @@ public static class DependencyInjection
 
         services.AddIdentityCore<User>()
             .AddRoles<IdentityRole>()
+            .AddSignInManager<SignInManager<User>>()
             .AddEntityFrameworkStores<UsersDbContext>()
             .AddApiEndpoints()
             .AddDefaultTokenProviders();

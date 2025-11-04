@@ -18,7 +18,7 @@ internal class InMemoryCommandDispatcher(IServiceProvider serviceProvider) : ICo
 
         if (handler == null)
         {
-            return Result.Failure(InMemoryCommandDispatcherErrors.HandlerNotFound(typeof(TCommand)));
+            return Result.Failure(CommandDispatcherErrors.HandlerNotFound(typeof(TCommand)));
         }
 
         return await handler.Handle(command, CancellationToken.None);
@@ -34,7 +34,7 @@ internal class InMemoryCommandDispatcher(IServiceProvider serviceProvider) : ICo
 
         if (handler == null)
         {
-            return Result.Failure<TResponse>(InMemoryCommandDispatcherErrors.HandlerNotFound(typeof(TCommand)));
+            return Result.Failure<TResponse>(CommandDispatcherErrors.HandlerNotFound(typeof(TCommand)));
         }
 
         return await handler.Handle(command, CancellationToken.None);

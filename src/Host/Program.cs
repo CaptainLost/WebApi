@@ -1,9 +1,9 @@
 using Application;
-using Domain.Users;
 using Infrastructure;
 using Presentation;
+using Presentation.Authentication;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
 
@@ -24,7 +24,7 @@ builder.Services.AddCors(options =>
         });
 });
 
-var app = builder.Build();
+WebApplication app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
@@ -38,7 +38,10 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors();
 
-app.MapControllers();
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapAuthenticationEndpoints();
 
 // app.UseHttpsRedirection();
 

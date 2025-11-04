@@ -7,16 +7,14 @@ namespace Infrastructure.Users.Repositories;
 internal class UserRepository : IUserRepository
 {
     private readonly UserManager<User> m_userManager;
-    private readonly SignInManager<User> m_signInManager;
 
-    public UserRepository(UserManager<User> userManager, SignInManager<User> signInManager)
+    public UserRepository(UserManager<User> userManager)
     {
         m_userManager = userManager;
-        m_signInManager = signInManager;
     }
 
-    public async Task LoginUser()
+    public async Task<User?> GetUserByUsername(string username)
     {
-        var user = await m_userManager.FindByNameAsync("xd");
+        return await m_userManager.FindByNameAsync(username);
     }
 }

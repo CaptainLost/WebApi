@@ -2,7 +2,7 @@ using Domain.Users;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace Application.Users.DbContext;
+namespace Infrastructure.Users.DbContext;
 
 internal class UsersDbContext : IdentityDbContext<User>
 {
