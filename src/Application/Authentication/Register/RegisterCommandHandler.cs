@@ -14,7 +14,7 @@ internal sealed class RegisterCommandHandler(
     private readonly IUserRepository m_userRepository = userRepository;
     private readonly IAuthenticationService m_authenticationService = authenticationService;
 
-    public async Task<Result> Handle(RegisterCommand command, CancellationToken cancellationToken)
+    public async Task<Result> HandleAwait(RegisterCommand command, CancellationToken cancellationToken)
     {
         Result registrationResult = await m_authenticationService.RegisterAsync(command.Username, command.Email, command.Password);
         

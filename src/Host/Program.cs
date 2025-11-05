@@ -1,7 +1,6 @@
 using Application;
 using Infrastructure;
 using Presentation;
-using Presentation.Authentication;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -41,7 +40,7 @@ app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapAuthenticationEndpoints();
+app.MapEndpoints();
 
 // app.UseHttpsRedirection();
 

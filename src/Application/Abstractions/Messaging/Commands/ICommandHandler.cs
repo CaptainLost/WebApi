@@ -5,7 +5,7 @@ namespace Application.Abstractions.Messaging.Commands;
 public interface ICommandHandler<in TCommand>
     where TCommand : ICommand
 {
-    Task<Result> Handle(TCommand command, CancellationToken cancellationToken);
+    Task<Result> HandleAwait(TCommand command, CancellationToken cancellationToken);
 }
 
 public interface ICommandHandler<in TCommand, TResponse>
