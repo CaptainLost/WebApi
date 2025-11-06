@@ -17,6 +17,11 @@ internal sealed class AuthenticationService : IAuthenticationService
         m_signInManager = signInManager;
     }
 
+    public async Task<User?> GetCurrentUserAsync()
+    {
+        return await m_signInManager.UserManager.GetUserAsync(m_signInManager.Context.User);
+    }
+
     public async Task<Result> LoginAsync(User user, string password)
     {
         SignInResult signInResult = await m_signInManager.PasswordSignInAsync(
@@ -31,6 +36,11 @@ internal sealed class AuthenticationService : IAuthenticationService
         }
 
         return Result.Success();
+    }
+
+    public async Task LogoutAsync()
+    {
+        await m_signInManager.SignOutAsync();
     }
 
     public async Task<Result> RegisterAsync(string username, string email, string password)
