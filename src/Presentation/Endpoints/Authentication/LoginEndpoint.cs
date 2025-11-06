@@ -19,7 +19,7 @@ internal sealed class LoginEndpoint : IEndpoint
             CancellationToken cancellationToken)
         {
             LoginCommand loginCommand = new LoginCommand(request.Username, request.Password);
-            Result loginResult = await commandHandler.HandleAwait(loginCommand, cancellationToken);
+            Result loginResult = await commandHandler.HandleAsync(loginCommand, cancellationToken);
 
             if (loginResult.IsSuccess)
             {

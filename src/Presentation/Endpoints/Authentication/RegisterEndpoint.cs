@@ -19,7 +19,7 @@ internal sealed class RegisterEndpoint : IEndpoint
             CancellationToken cancellationToken)
         {
             RegisterCommand registerCommand = new RegisterCommand(request.Username, request.Email, request.Password);
-            Result registrationResult = await commandHandler.HandleAwait(registerCommand, cancellationToken);
+            Result registrationResult = await commandHandler.HandleAsync(registerCommand, cancellationToken);
 
             if (registrationResult.IsSuccess)
             {

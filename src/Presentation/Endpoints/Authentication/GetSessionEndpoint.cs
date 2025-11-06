@@ -17,7 +17,7 @@ internal sealed class GetSessionEndpoint : IEndpoint
             CancellationToken cancellationToken)
         {
             GetSessionQuery query = new GetSessionQuery();
-            Result<SessionResponse> result = await queryHandler.Handle(query, cancellationToken);
+            Result<SessionResponse> result = await queryHandler.HandleAsync(query, cancellationToken);
 
             if (result.IsSuccess)
             {

@@ -14,7 +14,7 @@ internal sealed class QueryHandlerLoggingDecorator<TQuery, TResponse>(
     private readonly IQueryHandler<TQuery, TResponse> m_decorated = decorated;
     private readonly ILogger<QueryHandlerLoggingDecorator<TQuery, TResponse>> m_logger = logger;
 
-    public async Task<Result<TResponse>> Handle(TQuery query, CancellationToken cancellationToken)
+    public async Task<Result<TResponse>> HandleAsync(TQuery query, CancellationToken cancellationToken)
     {
         string queryName = typeof(TQuery).Name;
 
@@ -24,7 +24,7 @@ internal sealed class QueryHandlerLoggingDecorator<TQuery, TResponse>(
 
         try
         {
-            Result<TResponse> result = await m_decorated.Handle(query, cancellationToken);
+            Result<TResponse> result = await m_decorated.HandleAsync(query, cancellationToken);
 
             stopwatch.Stop();
 

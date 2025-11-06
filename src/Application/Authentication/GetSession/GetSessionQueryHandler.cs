@@ -10,7 +10,7 @@ internal sealed class GetSessionQueryHandler(
 {
     private readonly IAuthenticationService m_authenticationService = authenticationService;
 
-    public async Task<Result<SessionResponse>> Handle(GetSessionQuery query, CancellationToken cancellationToken)
+    public async Task<Result<SessionResponse>> HandleAsync(GetSessionQuery query, CancellationToken cancellationToken)
     {
         User? currentUser = await m_authenticationService.GetCurrentUserAsync();
 

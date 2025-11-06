@@ -17,7 +17,7 @@ internal sealed class LogoutEndpoint : IEndpoint
             CancellationToken cancellationToken)
         {
             LogoutCommand logoutCommand = new LogoutCommand();
-            Result logoutResult = await commandHandler.HandleAwait(logoutCommand, cancellationToken);
+            Result logoutResult = await commandHandler.HandleAsync(logoutCommand, cancellationToken);
 
             if (logoutResult.IsSuccess)
             {

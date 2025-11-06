@@ -1,1 +1,29 @@
-{}
+{
+    "chat.promptFiles": true,
+    "chat.promptFilesLocations": {
+        ".github/prompts": true
+    },
+    "chat.instructionsFilesLocations": {
+        ".github": true
+    },
+    // C# and .NET settings
+    "dotnet.defaultSolution": "WebApi.sln",
+    "omnisharp.enableRoslynAnalyzers": true,
+    "omnisharp.enableEditorConfigSupport": true,
+    "omnisharp.organizeImportsOnFormat": true,
+    // Editor settings
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+        "source.organizeImports": "explicit"
+    },
+    "files.exclude": {
+        "**/bin": true,
+        "**/obj": true
+    },
+    // Code style enforcement
+    "[csharp]": {
+        "editor.defaultFormatter": "ms-dotnettools.csharp",
+        "editor.insertSpaces": true,
+        "editor.tabSize": 4
+    }
+}

@@ -14,7 +14,7 @@ internal sealed class CommandHandlerLoggingDecorator<TCommand>(
     private readonly ICommandHandler<TCommand> m_decorated = decorated;
     private readonly ILogger<CommandHandlerLoggingDecorator<TCommand>> m_logger = logger;
 
-    public async Task<Result> HandleAwait(TCommand command, CancellationToken cancellationToken)
+    public async Task<Result> HandleAsync(TCommand command, CancellationToken cancellationToken)
     {
         string commandName = typeof(TCommand).Name;
 
@@ -24,7 +24,7 @@ internal sealed class CommandHandlerLoggingDecorator<TCommand>(
 
         try
         {
-            Result result = await m_decorated.HandleAwait(command, cancellationToken);
+            Result result = await m_decorated.HandleAsync(command, cancellationToken);
 
             stopwatch.Stop();
 
@@ -70,7 +70,7 @@ internal sealed class CommandHandlerLoggingDecorator<TCommand, TResponse>(
     private readonly ICommandHandler<TCommand, TResponse> m_decorated = decorated;
     private readonly ILogger<CommandHandlerLoggingDecorator<TCommand, TResponse>> m_logger = logger;
 
-    public async Task<Result<TResponse>> Handle(TCommand command, CancellationToken cancellationToken)
+    public async Task<Result<TResponse>> HandleAsync(TCommand command, CancellationToken cancellationToken)
     {
         string commandName = typeof(TCommand).Name;
 
@@ -80,7 +80,7 @@ internal sealed class CommandHandlerLoggingDecorator<TCommand, TResponse>(
 
         try
         {
-            Result<TResponse> result = await m_decorated.Handle(command, cancellationToken);
+            Result<TResponse> result = await m_decorated.HandleAsync(command, cancellationToken);
 
             stopwatch.Stop();
 

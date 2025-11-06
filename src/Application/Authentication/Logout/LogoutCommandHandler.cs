@@ -9,7 +9,7 @@ internal sealed class LogoutCommandHandler(
 {
     private readonly IAuthenticationService m_authenticationService = authenticationService;
 
-    public async Task<Result> HandleAwait(LogoutCommand command, CancellationToken cancellationToken)
+    public async Task<Result> HandleAsync(LogoutCommand command, CancellationToken cancellationToken)
     {
         await m_authenticationService.LogoutAsync();
 
