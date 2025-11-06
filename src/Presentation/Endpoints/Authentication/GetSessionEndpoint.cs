@@ -12,7 +12,7 @@ internal sealed class GetSessionEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder routeBuilder)
     {
-        routeBuilder.MapGet("api/auth/session", async delegate (
+        routeBuilder.MapGet(ApiRoutes.Auth.Session, async delegate (
             IQueryHandler<GetSessionQuery, SessionResponse> queryHandler,
             CancellationToken cancellationToken)
         {

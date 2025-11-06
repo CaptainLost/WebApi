@@ -14,7 +14,7 @@ internal sealed class RegisterEndpoint : IEndpoint
 
     public void MapEndpoint(IEndpointRouteBuilder routeBuilder)
     {
-        routeBuilder.MapPost("api/auth/register", async delegate (RegisterRequest request,
+        routeBuilder.MapPost(ApiRoutes.Auth.Register, async delegate (RegisterRequest request,
             ICommandHandler<RegisterCommand> commandHandler,
             CancellationToken cancellationToken)
         {

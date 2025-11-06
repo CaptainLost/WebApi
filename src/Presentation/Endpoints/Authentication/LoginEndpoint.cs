@@ -14,7 +14,7 @@ internal sealed class LoginEndpoint : IEndpoint
 
     public void MapEndpoint(IEndpointRouteBuilder routeBuilder)
     {
-        routeBuilder.MapPost("api/auth/login", async delegate (LoginRequest request,
+        routeBuilder.MapPost(ApiRoutes.Auth.Login, async delegate (LoginRequest request,
             ICommandHandler<LoginCommand> commandHandler,
             CancellationToken cancellationToken)
         {
