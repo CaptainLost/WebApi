@@ -7,8 +7,13 @@ public static class AuthenticationErrors
 {
     public static Error LoginFailed() => new(
         Code: "Authentication.LoginFailed",
-        Description: "Login failed. Invalid username or password.",
+        Description: "Invalid credentials.",
         StatusCode: HttpStatusCode.Unauthorized);
+
+    public static Error AccountLockedOut() => new(
+        Code: "Authentication.AccountLockedOut",
+        Description: "Account is locked due to multiple failed login attempts. Please try again later.",
+        StatusCode: HttpStatusCode.Forbidden);
 
     public static Error UsernameAlreadyTaken() => new(
         Code: "Authentication.UsernameAlreadyTaken",

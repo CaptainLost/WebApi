@@ -28,7 +28,12 @@ internal sealed class AuthenticationService : IAuthenticationService
             user,
             password,
             isPersistent: true,
-            lockoutOnFailure: false);
+            lockoutOnFailure: true);
+
+        if (signInResult.IsLockedOut)
+        {
+            return AuthenticationErrors.AccountLockedOut();
+        }
 
         if (!signInResult.Succeeded)
         {
