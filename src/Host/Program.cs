@@ -8,7 +8,7 @@ builder.Services.AddOpenApi();
 
 builder.Services
     .AddApplication()
-    .AddInfrastructure()
+    .AddInfrastructure(builder.Environment)
     .AddPresentation();
 
 builder.Services.AddCors(options =>
