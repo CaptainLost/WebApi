@@ -17,21 +17,21 @@ internal sealed class RegisterCommandHandler(
     public async Task<Result> HandleAwait(RegisterCommand command, CancellationToken cancellationToken)
     {
         Result registrationResult = await m_authenticationService.RegisterAsync(command.Username, command.Email, command.Password);
-        
+
         if (registrationResult.IsFailure)
         {
             return registrationResult;
         }
 
         User? user = await m_userRepository.GetUserByUsernameAsync(command.Username);
-        
+
         if (user == null)
         {
             return AuthenticationErrors.LoginFailed();
         }
 
         Result loginResult = await m_authenticationService.LoginAsync(user, command.Password);
-        
+
         return loginResult;
     }
 }

@@ -12,7 +12,7 @@ internal sealed class LogoutCommandHandler(
     public async Task<Result> HandleAwait(LogoutCommand command, CancellationToken cancellationToken)
     {
         await m_authenticationService.LogoutAsync();
-        
+
         return Result.Success();
     }
 }

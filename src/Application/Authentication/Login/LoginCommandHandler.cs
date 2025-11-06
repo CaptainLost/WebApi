@@ -24,7 +24,7 @@ internal sealed class LoginCommandHandler(
         }
 
         Result result = await m_authenticationService.LoginAsync(user, command.Password);
-        
+
         return result;
     }
 }
