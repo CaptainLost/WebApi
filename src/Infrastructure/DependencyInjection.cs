@@ -1,11 +1,15 @@
-﻿using Application.Abstractions.Repositories;
+﻿using System.Reflection;
+using Application.Abstractions.Repositories;
 using Application.Abstractions.Services;
 using Domain.Users;
 using Infrastructure.Authentication.Services;
+using Infrastructure.Database;
 using Infrastructure.Users.DbContext;
 using Infrastructure.Users.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -15,11 +19,47 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(
         this IServiceCollection services,
+        IHostEnvironment environment,
+        IConfiguration configuration)
+    {
+        services.AddDatabase(configuration);
+        services.AddRepositories();
+        services.AddAuthenticationServices(environment);
+
+        return services;
+    }
+
+    private static IServiceCollection AddDatabase(this IServiceCollection services, IConfiguration configuration)
+    {
+        string? connectionString = configuration.GetConnectionString("UsersDatabase");
+
+        services.AddDbContext<UsersDbContext>(options =>
+        {
+            options.UseSqlite(connectionString);
+        });
+
+        // Automatically register all DbContext types as DbContext for migration discovery
+        services.Scan(scan => scan
+            .FromAssemblies(Assembly.GetExecutingAssembly())
+            .AddClasses(classes => classes.AssignableTo<DbContext>(), publicOnly: false)
+            .As<DbContext>()
+            .WithScopedLifetime());
+
+        return services;
+    }
+
+    private static IServiceCollection AddRepositories(this IServiceCollection services)
+    {
+        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IDatabaseSeeder, DatabaseSeeder>();
+
+        return services;
+    }
+
+    private static IServiceCollection AddAuthenticationServices(
+        this IServiceCollection services,
         IHostEnvironment environment)
     {
-        services.AddDbContext<UsersDbContext>();
-
-        services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IAuthenticationService, AuthenticationService>();
 
         services.AddAuthentication(IdentityConstants.ApplicationScheme)

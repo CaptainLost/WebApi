@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Users.DbContext;
 
-internal class UsersDbContext : IdentityDbContext<User>
+internal sealed class UsersDbContext : IdentityDbContext<User>
 {
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    public UsersDbContext(DbContextOptions<UsersDbContext> options)
+        : base(options)
     {
-        optionsBuilder.UseSqlite("Data Source=LocalDatabase.db");
     }
 
     protected override void OnModelCreating(ModelBuilder builder)
