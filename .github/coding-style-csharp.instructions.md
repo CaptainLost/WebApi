@@ -9,6 +9,40 @@ applyTo: '**/*.cs'
 - Prefer clarity and readability over brevity.
 - Use consistent formatting and naming throughout the codebase.
 
+## Comments
+- **Do NOT add comments for obvious code** - self-explanatory code doesn't need comments.
+- Use comments only when:
+  - Explaining complex business logic or algorithms
+  - Documenting non-obvious decisions or workarounds
+  - Providing context that cannot be conveyed through code alone
+- Prefer descriptive names over comments.
+
+### Example: Avoid Obvious Comments
+```csharp
+// Bad - obvious comments
+// Create a new user
+User user = new();
+
+// Check if user is null
+if (user == null)
+{
+    // Return not found error
+    return Result.Failure(UserErrors.NotFound);
+}
+
+// Good - no comments needed (code is self-explanatory)
+User user = new();
+
+if (user == null)
+{
+    return Result.Failure(UserErrors.NotFound);
+}
+
+// Good - comment adds value (explains WHY, not WHAT)
+// Using exponential backoff to prevent thundering herd problem
+await Task.Delay(delay * attempts);
+```
+
 ## Naming Conventions
 - Use `PascalCase` for class, method, and property names.
 - Use `camelCase` for local variables and method parameters.

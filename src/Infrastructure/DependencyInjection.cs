@@ -44,13 +44,14 @@ public static class DependencyInjection
             .As<DbContext>()
             .WithScopedLifetime());
 
+        services.AddScoped<IDatabaseSeeder, DatabaseSeeder>();
+
         return services;
     }
 
     private static IServiceCollection AddRepositories(this IServiceCollection services)
     {
         services.AddScoped<IUserRepository, UserRepository>();
-        services.AddScoped<IDatabaseSeeder, DatabaseSeeder>();
 
         return services;
     }
