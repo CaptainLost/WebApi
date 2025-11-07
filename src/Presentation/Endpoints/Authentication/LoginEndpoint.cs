@@ -10,7 +10,7 @@ namespace Presentation.Endpoints.Authentication;
 
 internal sealed class LoginEndpoint : IEndpoint
 {
-    public sealed record LoginRequest(string Username, string Password);
+    public sealed record LoginRequest(string Username, string Password, bool IsPersistent = false);
 
     public void MapEndpoint(IEndpointRouteBuilder routeBuilder)
     {
@@ -18,7 +18,7 @@ internal sealed class LoginEndpoint : IEndpoint
             ICommandHandler<LoginCommand> commandHandler,
             CancellationToken cancellationToken)
         {
-            LoginCommand loginCommand = new LoginCommand(request.Username, request.Password);
+            LoginCommand loginCommand = new LoginCommand(request.Username, request.Password, request.IsPersistent);
             Result loginResult = await commandHandler.HandleAsync(loginCommand, cancellationToken);
 
             if (loginResult.IsSuccess)

@@ -30,7 +30,7 @@ internal sealed class RegisterCommandHandler(
             return AuthenticationErrors.LoginFailed();
         }
 
-        Result loginResult = await m_authenticationService.LoginAsync(user, command.Password);
+        Result loginResult = await m_authenticationService.LoginAsync(user, command.Password, isPersistent: false);
 
         return loginResult;
     }

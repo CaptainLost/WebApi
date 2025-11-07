@@ -65,7 +65,7 @@ public static class DependencyInjection
         services.AddAuthentication(IdentityConstants.ApplicationScheme)
             .AddCookie(IdentityConstants.ApplicationScheme, options =>
             {
-                options.ExpireTimeSpan = TimeSpan.FromHours(24);
+                options.ExpireTimeSpan = TimeSpan.FromHours(36);
                 options.SlidingExpiration = true;
                 options.Cookie.HttpOnly = true;
 
@@ -94,6 +94,8 @@ public static class DependencyInjection
             options.Password.RequireUppercase = true;
             options.Password.RequireNonAlphanumeric = true;
             options.Password.RequiredLength = 8;
+
+            options.SignIn.RequireConfirmedAccount = false;
         })
             .AddRoles<IdentityRole>()
             .AddSignInManager<SignInManager<User>>()

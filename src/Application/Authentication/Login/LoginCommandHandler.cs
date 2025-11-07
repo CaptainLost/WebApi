@@ -23,7 +23,7 @@ internal sealed class LoginCommandHandler(
             return AuthenticationErrors.LoginFailed();
         }
 
-        Result result = await m_authenticationService.LoginAsync(user, command.Password);
+        Result result = await m_authenticationService.LoginAsync(user, command.Password, command.IsPersistent);
 
         return result;
     }

@@ -22,12 +22,12 @@ internal sealed class AuthenticationService : IAuthenticationService
         return await m_signInManager.UserManager.GetUserAsync(m_signInManager.Context.User);
     }
 
-    public async Task<Result> LoginAsync(User user, string password)
+    public async Task<Result> LoginAsync(User user, string password, bool isPersistent)
     {
         SignInResult signInResult = await m_signInManager.PasswordSignInAsync(
             user,
             password,
-            isPersistent: true,
+            isPersistent: isPersistent,
             lockoutOnFailure: true);
 
         if (signInResult.IsLockedOut)
