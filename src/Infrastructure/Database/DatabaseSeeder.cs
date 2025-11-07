@@ -7,34 +7,34 @@ namespace Infrastructure.Database;
 
 internal sealed class DatabaseSeeder : IDatabaseSeeder
 {
-    private readonly UserManager<User> _userManager;
-    private readonly IConfiguration _configuration;
-    private readonly ILogger<DatabaseSeeder> _logger;
+    private readonly UserManager<User> m_userManager;
+    private readonly IConfiguration m_configuration;
+    private readonly ILogger<DatabaseSeeder> m_logger;
 
     public DatabaseSeeder(
         UserManager<User> userManager,
         IConfiguration configuration,
         ILogger<DatabaseSeeder> logger)
     {
-        _userManager = userManager;
-        _configuration = configuration;
-        _logger = logger;
+        m_userManager = userManager;
+        m_configuration = configuration;
+        m_logger = logger;
     }
 
     public async Task SeedAsync()
     {
-        if (_userManager.Users.Any())
+        if (m_userManager.Users.Any())
         {
             return;
         }
 
-        string? username = _configuration["DefaultUser:Username"];
-        string? email = _configuration["DefaultUser:Email"];
-        string? password = _configuration["DefaultUser:Password"];
+        string? username = m_configuration["DefaultUser:Username"];
+        string? email = m_configuration["DefaultUser:Email"];
+        string? password = m_configuration["DefaultUser:Password"];
 
         if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
         {
-            _logger.LogWarning("Default user username or password not configured. Skipping user seeding");
+            m_logger.LogWarning("Default user username or password not configured. Skipping user seeding");
 
             return;
         }
@@ -46,15 +46,15 @@ internal sealed class DatabaseSeeder : IDatabaseSeeder
             EmailConfirmed = !string.IsNullOrWhiteSpace(email)
         };
 
-        IdentityResult result = await _userManager.CreateAsync(defaultUser, password);
+        IdentityResult result = await m_userManager.CreateAsync(defaultUser, password);
 
         if (result.Succeeded)
         {
-            _logger.LogInformation("Default user created successfully: {Username}", username);
+            m_logger.LogInformation("Default user created successfully: {Username}", username);
         }
         else
         {
-            _logger.LogError("Failed to create default user. Errors: {Errors}",
+            m_logger.LogError("Failed to create default user. Errors: {Errors}",
                 string.Join(", ", result.Errors.Select(e => e.Description)));
         }
     }
