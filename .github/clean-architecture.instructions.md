@@ -2,6 +2,8 @@
 applyTo: '**/*.cs'
 ---
 
+**⚠️ CRITICAL: This file MUST be read using `read_file` tool before editing or creating ANY `.cs` file. Failure to do so violates the instruction policy.**
+
 You are an expert in C#, .NET, ASP.NET Core, and scalable web application development. You write functional, maintainable, performant, and testable code following Clean Architecture, CQRS, and C# best practices.
 
 # Clean Architecture Guidelines

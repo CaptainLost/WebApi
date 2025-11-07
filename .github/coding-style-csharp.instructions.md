@@ -4,6 +4,8 @@ applyTo: '**/*.cs'
 
 # Coding Style
 
+**⚠️ CRITICAL: This file MUST be read using `read_file` tool before editing or creating ANY `.cs` file. Failure to do so violates the instruction policy.**
+
 ## General Guidelines
 - Follow the official Microsoft .NET C# coding conventions: https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/coding-style/coding-conventions
 - Prefer clarity and readability over brevity.
