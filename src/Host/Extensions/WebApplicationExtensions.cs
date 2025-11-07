@@ -56,7 +56,7 @@ internal static class WebApplicationExtensions
 
     private static WebApplication ConfigureMiddleware(this WebApplication app)
     {
-        app.UseHttpsRedirection();
+        // app.UseHttpsRedirection();
         app.UseCors();
         app.UseAuthentication();
         app.UseAuthorization();
