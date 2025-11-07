@@ -25,31 +25,32 @@ internal sealed class DatabaseSeeder : IDatabaseSeeder
     {
         if (_userManager.Users.Any())
         {
-            _logger.LogInformation("Database already contains users, skipping seeding");
             return;
         }
 
+        string? username = _configuration["DefaultUser:Username"];
         string? email = _configuration["DefaultUser:Email"];
         string? password = _configuration["DefaultUser:Password"];
 
-        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
+        if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
         {
-            _logger.LogWarning("Default user email or password not configured. Skipping user seeding");
+            _logger.LogWarning("Default user username or password not configured. Skipping user seeding");
+
             return;
         }
 
         User defaultUser = new()
         {
-            UserName = email,
-            Email = email,
-            EmailConfirmed = true
+            UserName = username,
+            Email = string.IsNullOrWhiteSpace(email) ? null : email,
+            EmailConfirmed = !string.IsNullOrWhiteSpace(email)
         };
 
         IdentityResult result = await _userManager.CreateAsync(defaultUser, password);
 
         if (result.Succeeded)
         {
-            _logger.LogInformation("Default user created successfully: {Email}", email);
+            _logger.LogInformation("Default user created successfully: {Username}", username);
         }
         else
         {

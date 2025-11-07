@@ -60,5 +60,6 @@ nunit-*.xml
 *.db
 *.db-shm
 *.db-wal
-LocalDatabase.db-shm
-LocalDatabase.db-wal
+*.sqlite
+*.sqlite3
+*.db3

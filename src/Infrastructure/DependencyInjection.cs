@@ -38,7 +38,6 @@ public static class DependencyInjection
             options.UseSqlite(connectionString);
         });
 
-        // Automatically register all DbContext types as DbContext for migration discovery
         services.Scan(scan => scan
             .FromAssemblies(Assembly.GetExecutingAssembly())
             .AddClasses(classes => classes.AssignableTo<DbContext>(), publicOnly: false)
