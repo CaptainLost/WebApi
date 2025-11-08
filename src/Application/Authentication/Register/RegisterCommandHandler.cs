@@ -23,7 +23,7 @@ internal sealed class RegisterCommandHandler(
             return registrationResult;
         }
 
-        User? user = await m_userRepository.GetUserByUsernameAsync(command.Username);
+        User? user = await m_userRepository.GetUserByUsernameAsync(command.Username, cancellationToken);
 
         if (user == null)
         {

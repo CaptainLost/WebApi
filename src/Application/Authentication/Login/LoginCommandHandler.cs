@@ -16,7 +16,7 @@ internal sealed class LoginCommandHandler(
 
     public async Task<Result> HandleAsync(LoginCommand command, CancellationToken cancellationToken)
     {
-        User? user = await m_userRepository.GetUserByUsernameAsync(command.Username);
+        User? user = await m_userRepository.GetUserByUsernameAsync(command.Username, cancellationToken);
 
         if (user == null)
         {

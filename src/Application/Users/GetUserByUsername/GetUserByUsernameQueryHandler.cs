@@ -13,7 +13,7 @@ internal sealed class GetUserByUsernameQueryHandler(
 
     public async Task<Result<UserResponse>> HandleAsync(GetUserByUsernameQuery query, CancellationToken cancellationToken)
     {
-        User? user = await m_userRepository.GetUserByUsernameAsync(query.Username);
+        User? user = await m_userRepository.GetUserByUsernameAsync(query.Username, cancellationToken);
 
         if (user == null)
         {
