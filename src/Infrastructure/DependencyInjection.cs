@@ -1,7 +1,9 @@
 ﻿using Application.Abstractions.Services;
 using Domain.Entities;
+using Infrastructure.Authentication.Authorization;
 using Infrastructure.Authentication.Services;
 using Infrastructure.Database;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
@@ -56,7 +58,11 @@ public static class DependencyInjection
                 }
             });
 
-        services.AddAuthorizationBuilder();
+        services.AddAuthorization();
+
+        services.AddSingleton<IAuthorizationPolicyProvider, PermissionAuthorizationPolicyProvider>();
+        services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
+        services.AddScoped<IPermissionService, PermissionService>();
 
         services.AddIdentityCore<User>(options =>
         {

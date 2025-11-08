@@ -12,9 +12,9 @@ internal sealed class LoginEndpoint : IEndpoint
 {
     public sealed record LoginRequest(string Username, string Password, bool IsPersistent = false);
 
-    public void MapEndpoint(IEndpointRouteBuilder routeBuilder)
+    public void MapEndpoint(RouteGroupBuilder group)
     {
-        routeBuilder.MapPost(ApiRoutes.Auth.Login, async delegate (LoginRequest request,
+        group.MapPost(ApiRoutes.Auth.Login, async delegate (LoginRequest request,
             ICommandHandler<LoginCommand> commandHandler,
             CancellationToken cancellationToken)
         {
@@ -31,7 +31,6 @@ internal sealed class LoginEndpoint : IEndpoint
         .WithName("Login")
         .WithSummary("Authenticates a user")
         .WithDescription("Authenticates a user with username and password. Sets a session cookie upon success.")
-        .WithTags(EndpointTag.Authentication)
         .Produces(StatusCodes.Status204NoContent)
         .Produces<ErrorResponse>(StatusCodes.Status401Unauthorized);
     }

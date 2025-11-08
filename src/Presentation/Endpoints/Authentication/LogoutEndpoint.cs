@@ -10,9 +10,9 @@ namespace Presentation.Endpoints.Authentication;
 
 internal sealed class LogoutEndpoint : IEndpoint
 {
-    public void MapEndpoint(IEndpointRouteBuilder routeBuilder)
+    public void MapEndpoint(RouteGroupBuilder group)
     {
-        routeBuilder.MapPost(ApiRoutes.Auth.Logout, async delegate (
+        group.MapPost(ApiRoutes.Auth.Logout, async delegate (
             ICommandHandler<LogoutCommand> commandHandler,
             CancellationToken cancellationToken)
         {
@@ -29,7 +29,6 @@ internal sealed class LogoutEndpoint : IEndpoint
         .WithName("Logout")
         .WithSummary("Logs out the current user")
         .WithDescription("Logs out the authenticated user by clearing the session cookie.")
-        .WithTags(EndpointTag.Authentication)
         .Produces(StatusCodes.Status204NoContent)
         .Produces<ErrorResponse>(StatusCodes.Status400BadRequest);
     }

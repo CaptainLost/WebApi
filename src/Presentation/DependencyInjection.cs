@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Presentation.Endpoints;
+using Presentation.Endpoints.Authentication;
+using Presentation.Endpoints.Users;
 
 namespace Presentation;
 
@@ -11,7 +13,7 @@ public static class DependencyInjection
         services.Scan(scan => scan
             .FromAssemblyOf<IEndpoint>()
             .AddClasses(classes => classes.AssignableTo<IEndpoint>(), publicOnly: false)
-            .AsImplementedInterfaces()
+            .AsSelf()
             .WithTransientLifetime());
 
         return services;
@@ -19,12 +21,8 @@ public static class DependencyInjection
 
     public static IEndpointRouteBuilder MapEndpoints(this IEndpointRouteBuilder routeBuilder)
     {
-        IEnumerable<IEndpoint> endpoints = routeBuilder.ServiceProvider.GetRequiredService<IEnumerable<IEndpoint>>();
-
-        foreach (IEndpoint endpoint in endpoints)
-        {
-            endpoint.MapEndpoint(routeBuilder);
-        }
+        routeBuilder.MapAuthenticationEndpoints();
+        routeBuilder.MapUsersEndpoints();
 
         return routeBuilder;
     }

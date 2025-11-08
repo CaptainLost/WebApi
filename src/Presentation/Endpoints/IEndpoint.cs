@@ -4,5 +4,5 @@ namespace Presentation.Endpoints;
 
 public interface IEndpoint
 {
-    void MapEndpoint(IEndpointRouteBuilder routeBuilder);
+    void MapEndpoint(RouteGroupBuilder group);
 }

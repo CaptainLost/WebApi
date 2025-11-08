@@ -11,6 +11,9 @@ public sealed class ApplicationDbContext : IdentityDbContext<User>
     {
     }
 
+    public new DbSet<Role> Roles => Set<Role>();
+    public DbSet<Permission> Permissions => Set<Permission>();
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);

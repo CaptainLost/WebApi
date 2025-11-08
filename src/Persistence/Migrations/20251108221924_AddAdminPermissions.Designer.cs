@@ -11,8 +11,8 @@ using Persistence;
 namespace Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251108152701_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20251108221924_AddAdminPermissions")]
+    partial class AddAdminPermissions
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -37,6 +37,18 @@ namespace Persistence.Migrations
                         .IsUnique();
 
                     b.ToTable("Permissions", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "AccessUsers"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "ReadUser"
+                        });
                 });
 
             modelBuilder.Entity("Domain.Entities.Role", b =>
@@ -47,15 +59,60 @@ namespace Persistence.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Name")
-                        .IsUnique();
-
                     b.ToTable("Roles", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "User"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Admin"
+                        });
+                });
+
+            modelBuilder.Entity("Domain.Entities.RolePermission", b =>
+                {
+                    b.Property<int>("RoleId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PermissionId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("RoleId", "PermissionId");
+
+                    b.HasIndex("PermissionId");
+
+                    b.ToTable("RolePermission");
+
+                    b.HasData(
+                        new
+                        {
+                            RoleId = 1,
+                            PermissionId = 2
+                        },
+                        new
+                        {
+                            RoleId = 1,
+                            PermissionId = 1
+                        },
+                        new
+                        {
+                            RoleId = 2,
+                            PermissionId = 2
+                        },
+                        new
+                        {
+                            RoleId = 2,
+                            PermissionId = 1
+                        });
                 });
 
             modelBuilder.Entity("Domain.Entities.User", b =>
@@ -100,9 +157,6 @@ namespace Persistence.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("RoleId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("TEXT");
 
@@ -110,14 +164,10 @@ namespace Persistence.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("UserName")
-                        .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("Email")
-                        .IsUnique();
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
@@ -126,12 +176,7 @@ namespace Persistence.Migrations
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex");
 
-                    b.HasIndex("RoleId");
-
-                    b.HasIndex("UserName")
-                        .IsUnique();
-
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("AspNetUsers", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -262,26 +307,34 @@ namespace Persistence.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("PermissionRole", b =>
+            modelBuilder.Entity("RoleUser", b =>
                 {
-                    b.Property<int>("PermissionsId")
+                    b.Property<int>("RolesId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("RoleId")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("UsersId")
+                        .HasColumnType("TEXT");
 
-                    b.HasKey("PermissionsId", "RoleId");
+                    b.HasKey("RolesId", "UsersId");
 
-                    b.HasIndex("RoleId");
+                    b.HasIndex("UsersId");
 
-                    b.ToTable("RolePermissions", (string)null);
+                    b.ToTable("RoleUser");
                 });
 
-            modelBuilder.Entity("Domain.Entities.User", b =>
+            modelBuilder.Entity("Domain.Entities.RolePermission", b =>
                 {
+                    b.HasOne("Domain.Entities.Permission", null)
+                        .WithMany()
+                        .HasForeignKey("PermissionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Domain.Entities.Role", null)
-                        .WithMany("Users")
-                        .HasForeignKey("RoleId");
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -335,24 +388,19 @@ namespace Persistence.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("PermissionRole", b =>
+            modelBuilder.Entity("RoleUser", b =>
                 {
-                    b.HasOne("Domain.Entities.Permission", null)
-                        .WithMany()
-                        .HasForeignKey("PermissionsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("Domain.Entities.Role", null)
                         .WithMany()
-                        .HasForeignKey("RoleId")
+                        .HasForeignKey("RolesId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
 
-            modelBuilder.Entity("Domain.Entities.Role", b =>
-                {
-                    b.Navigation("Users");
+                    b.HasOne("Domain.Entities.User", null)
+                        .WithMany()
+                        .HasForeignKey("UsersId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

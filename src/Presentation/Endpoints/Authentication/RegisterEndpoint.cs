@@ -12,9 +12,9 @@ internal sealed class RegisterEndpoint : IEndpoint
 {
     public sealed record RegisterRequest(string Username, string Email, string Password);
 
-    public void MapEndpoint(IEndpointRouteBuilder routeBuilder)
+    public void MapEndpoint(RouteGroupBuilder group)
     {
-        routeBuilder.MapPost(ApiRoutes.Auth.Register, async delegate (RegisterRequest request,
+        group.MapPost(ApiRoutes.Auth.Register, async delegate (RegisterRequest request,
             ICommandHandler<RegisterCommand> commandHandler,
             CancellationToken cancellationToken)
         {
@@ -31,7 +31,6 @@ internal sealed class RegisterEndpoint : IEndpoint
         .WithName("Register")
         .WithSummary("Registers a new user")
         .WithDescription("Creates a new user account with the provided credentials and automatically logs them in.")
-        .WithTags(EndpointTag.Authentication)
         .Produces(StatusCodes.Status201Created)
         .Produces<ErrorResponse>(StatusCodes.Status400BadRequest)
         .Produces<ErrorResponse>(StatusCodes.Status409Conflict);

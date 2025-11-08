@@ -1,27 +1,47 @@
 using Domain.Entities;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Persistence;
 
 namespace Infrastructure.Database;
 
 internal sealed class DatabaseSeeder : IDatabaseSeeder
 {
     private readonly UserManager<User> m_userManager;
+    private readonly ApplicationDbContext m_context;
     private readonly IConfiguration m_configuration;
     private readonly ILogger<DatabaseSeeder> m_logger;
 
     public DatabaseSeeder(
         UserManager<User> userManager,
+        ApplicationDbContext context,
         IConfiguration configuration,
         ILogger<DatabaseSeeder> logger)
     {
         m_userManager = userManager;
+        m_context = context;
         m_configuration = configuration;
         m_logger = logger;
     }
 
     public async Task SeedAsync()
+    {
+        await SeedRolesAndPermissionsAsync();
+        await SeedDefaultUserAsync();
+    }
+
+    private async Task SeedRolesAndPermissionsAsync()
+    {
+        if (await m_context.Roles.AnyAsync())
+        {
+            return;
+        }
+
+    }
+
+    private async Task SeedDefaultUserAsync()
     {
         if (m_userManager.Users.Any())
         {
@@ -50,7 +70,9 @@ internal sealed class DatabaseSeeder : IDatabaseSeeder
 
         if (result.Succeeded)
         {
-            m_logger.LogInformation("Default user created successfully: {Username}", username);
+            defaultUser.Roles = [Role.Admin];
+            await m_context.SaveChangesAsync();
+            m_logger.LogInformation("Default user created successfully: {Username} with role: {Role}", username, Role.Admin.Name);
         }
         else
         {

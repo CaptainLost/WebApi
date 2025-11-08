@@ -18,5 +18,9 @@ internal sealed class PermissionConfiguration : IEntityTypeConfiguration<Permiss
 
         builder.HasIndex(p => p.Name)
             .IsUnique();
+
+        builder.HasData(
+            new Permission { Id = 1, Name = "AccessUsers" },
+            new Permission { Id = 2, Name = "ReadUser" });
     }
 }

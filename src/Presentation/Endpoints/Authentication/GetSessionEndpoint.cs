@@ -10,9 +10,9 @@ namespace Presentation.Endpoints.Authentication;
 
 internal sealed class GetSessionEndpoint : IEndpoint
 {
-    public void MapEndpoint(IEndpointRouteBuilder routeBuilder)
+    public void MapEndpoint(RouteGroupBuilder group)
     {
-        routeBuilder.MapGet(ApiRoutes.Auth.Session, async delegate (
+        group.MapGet(ApiRoutes.Auth.Session, async delegate (
             IQueryHandler<GetSessionQuery, SessionResponse> queryHandler,
             CancellationToken cancellationToken)
         {
@@ -29,7 +29,6 @@ internal sealed class GetSessionEndpoint : IEndpoint
         .WithName("GetSession")
         .WithSummary("Get current session information")
         .WithDescription("Returns information about the current authenticated user session.")
-        .WithTags(EndpointTag.Authentication)
         .Produces<SessionResponse>(StatusCodes.Status200OK)
         .Produces<ErrorResponse>(StatusCodes.Status400BadRequest);
     }

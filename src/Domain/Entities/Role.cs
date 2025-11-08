@@ -10,17 +10,13 @@ public sealed class Role : Enumeration<Role>
     private Role(int id, string name)
         : base(id, name)
     {
-        Permissions = [];
-        Users = [];
     }
 
     private Role()
     {
-        Permissions = [];
-        Users = [];
     }
 
-    public ICollection<Permission> Permissions { get; set; }
+    public ICollection<Permission> Permissions { get; set; } = [];
 
-    public ICollection<User> Users { get; set; }
+    public ICollection<User> Users { get; set; } = [];
 }
