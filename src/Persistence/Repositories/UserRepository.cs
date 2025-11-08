@@ -1,10 +1,10 @@
-﻿using Application.Abstractions.Repositories;
-using Domain.Users;
+using Application.Abstractions.Repositories;
+using Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 
-namespace Infrastructure.Users.Repositories;
+namespace Persistence.Repositories;
 
-internal class UserRepository : IUserRepository
+internal sealed class UserRepository : IUserRepository
 {
     private readonly UserManager<User> m_userManager;
 

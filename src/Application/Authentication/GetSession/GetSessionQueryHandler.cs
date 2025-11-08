@@ -1,7 +1,7 @@
 using Application.Abstractions.Messaging.Queries;
 using Application.Abstractions.Services;
+using Domain.Entities;
 using Domain.Messaging;
-using Domain.Users;
 
 namespace Application.Authentication.GetSession;
 

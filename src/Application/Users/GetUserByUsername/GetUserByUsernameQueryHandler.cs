@@ -1,8 +1,8 @@
 using Application.Abstractions.Messaging.Queries;
 using Application.Abstractions.Repositories;
+using Domain.Entities;
 using Domain.Errors;
 using Domain.Messaging;
-using Domain.Users;
 
 namespace Application.Users.GetUserByUsername;
 

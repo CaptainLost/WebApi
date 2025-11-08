@@ -1,17 +1,13 @@
-﻿using System.Reflection;
-using Application.Abstractions.Repositories;
-using Application.Abstractions.Services;
-using Domain.Users;
+﻿using Application.Abstractions.Services;
+using Domain.Entities;
 using Infrastructure.Authentication.Services;
 using Infrastructure.Database;
-using Infrastructure.Users.DbContext;
-using Infrastructure.Users.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Persistence;
 
 namespace Infrastructure;
 
@@ -22,36 +18,15 @@ public static class DependencyInjection
         IHostEnvironment environment,
         IConfiguration configuration)
     {
-        services.AddDatabase(configuration);
-        services.AddRepositories();
+        services.AddDatabaseSeeding();
         services.AddAuthenticationServices(environment);
 
         return services;
     }
 
-    private static IServiceCollection AddDatabase(this IServiceCollection services, IConfiguration configuration)
+    private static IServiceCollection AddDatabaseSeeding(this IServiceCollection services)
     {
-        string? connectionString = configuration.GetConnectionString("UsersDatabase");
-
-        services.AddDbContext<UsersDbContext>(options =>
-        {
-            options.UseSqlite(connectionString);
-        });
-
-        services.Scan(scan => scan
-            .FromAssemblies(Assembly.GetExecutingAssembly())
-            .AddClasses(classes => classes.AssignableTo<DbContext>(), publicOnly: false)
-            .As<DbContext>()
-            .WithScopedLifetime());
-
         services.AddScoped<IDatabaseSeeder, DatabaseSeeder>();
-
-        return services;
-    }
-
-    private static IServiceCollection AddRepositories(this IServiceCollection services)
-    {
-        services.AddScoped<IUserRepository, UserRepository>();
 
         return services;
     }
@@ -99,7 +74,7 @@ public static class DependencyInjection
         })
             .AddRoles<IdentityRole>()
             .AddSignInManager<SignInManager<User>>()
-            .AddEntityFrameworkStores<UsersDbContext>()
+            .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
 
         return services;

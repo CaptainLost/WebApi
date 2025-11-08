@@ -18,7 +18,8 @@ This project follows **Clean Architecture** principles combined with **Vertical 
 src/
 ├── Domain/          # Core business logic and entities
 ├── Application/     # Use cases, commands, queries, and abstractions
-├── Infrastructure/  # External concerns (Database, External Services)
+├── Persistence/     # Data access layer (DbContext, Repositories, Migrations)
+├── Infrastructure/  # External services (Authentication, Email, Caching, etc.)
 ├── Presentation/    # API endpoints and controllers
 └── Host/            # Application entry point and configuration
 ```
@@ -29,7 +30,8 @@ src/
 - Dependencies flow inward: `Presentation → Application → Domain`
 - Domain has **NO** dependencies on other layers
 - Application depends only on Domain
-- Infrastructure implements Application abstractions
+- Persistence depends on Application (implements repository abstractions)
+- Infrastructure depends on Application and Persistence (for external services)
 - Presentation depends on Application
 
 ### 2. SOLID Principles
@@ -74,16 +76,26 @@ This project adheres to SOLID principles as the foundation of Clean Architecture
 
 #### Application Layer
 - Contains **commands**, **queries**, **handlers**, and **abstractions**
-- Defines interfaces (repositories, services) implemented by Infrastructure
+- Defines interfaces (repositories, services) implemented by Persistence and Infrastructure
 - Organizes features by vertical slices (e.g., `Authentication/Login`, `Authentication/Register`)
-- No direct dependencies on Infrastructure or Presentation
-- Example: `LoginCommand`, `RegisterCommand`, `IUserRepository`
+- No direct dependencies on Persistence, Infrastructure, or Presentation
+- Example: `LoginCommand`, `RegisterCommand`, `IUserRepository`, `IAuthenticationService`
+
+#### Persistence Layer
+- **Data access layer** - separated from Infrastructure
+- Contains **DbContext**, **entity configurations**, **migrations**, and **repository implementations**
+- Implements repository abstractions defined in Application layer
+- Manages database schema and data persistence concerns
+- Example: `ApplicationDbContext`, `UserRepository`, `UserConfiguration`, EF Core migrations
+- Dependencies: Application → Domain
 
 #### Infrastructure Layer
-- Implements Application abstractions
-- Contains **database context**, **repositories**, **external service integrations**
-- EF Core migrations and database configurations
-- Example: `UserRepository`, `UsersDbContext`, authentication services
+- **External services layer** - separated from Persistence
+- Implements Application service abstractions (non-database concerns)
+- Contains **authentication services**, **email services**, **caching**, **external API integrations**
+- Database seeding (infrastructure concern - depends on configuration)
+- Example: `AuthenticationService`, `EmailService`, `CacheService`, `DatabaseSeeder`
+- Dependencies: Application, Persistence (for DbContext in Identity configuration)
 
 #### Presentation Layer
 - Contains **API endpoints** using minimal APIs
@@ -197,17 +209,34 @@ return error.Code switch
 
 ### Registration Pattern
 - Each layer has a `DependencyInjection.cs` file
-- Use extension methods: `AddApplication()`, `AddInfrastructure()`, `AddPresentation()`
+- Use extension methods: `AddApplication()`, `AddPersistence()`, `AddInfrastructure()`, `AddPresentation()`
 - Register services in the appropriate layer
+- **Order matters**: Register in Host as `AddPersistence()` → `AddInfrastructure()` (Infrastructure depends on Persistence)
 
 ### Example
 ```csharp
-// Infrastructure/DependencyInjection.cs
-public static IServiceCollection AddInfrastructure(this IServiceCollection services)
+// Persistence/DependencyInjection.cs
+public static IServiceCollection AddPersistence(this IServiceCollection services, IConfiguration configuration)
 {
+    services.AddDbContext<ApplicationDbContext>(options => options.UseSqlite(connectionString));
     services.AddScoped<IUserRepository, UserRepository>();
     return services;
 }
+
+// Infrastructure/DependencyInjection.cs
+public static IServiceCollection AddInfrastructure(this IServiceCollection services)
+{
+    services.AddScoped<IAuthenticationService, AuthenticationService>();
+    services.AddScoped<IDatabaseSeeder, DatabaseSeeder>();
+    return services;
+}
+
+// Host/Extensions/HostApplicationBuilderExtensions.cs
+builder.Services
+    .AddApplication()
+    .AddPersistence(builder.Configuration)
+    .AddInfrastructure(builder.Environment, builder.Configuration)
+    .AddPresentation();
 ```
 
 ## Best Practices
@@ -370,29 +399,40 @@ if (user == null || !passwordValid)
 
 ### Database
 - Use EF Core with Code First approach
-- Migrations in Infrastructure layer
-- Configure entities using `IEntityTypeConfiguration<T>`
-- Keep DbContext in Infrastructure, expose through repository abstractions
+- Migrations in **Persistence layer** (not Infrastructure)
+- Configure entities using `IEntityTypeConfiguration<T>` in Persistence/Configurations
+- Keep DbContext in Persistence, expose through repository abstractions
+- Repository implementations in Persistence layer
 
 ## Anti-Patterns to Avoid
 
-1. ❌ Don't reference Infrastructure from Application
+1. ❌ Don't reference Persistence or Infrastructure from Application
 2. ❌ Don't put business logic in Presentation layer
 3. ❌ Don't create anemic domain models (data without behavior)
 4. ❌ Don't use exceptions for control flow
 5. ❌ Don't create generic repositories without clear value
 6. ❌ Don't mix commands and queries in the same handler
 7. ❌ Don't leak domain entities to Presentation layer - use DTOs
+8. ❌ Don't put database concerns (DbContext, migrations, repositories) in Infrastructure - use Persistence
+9. ❌ Don't put external services (authentication, email, caching) in Persistence - use Infrastructure
 
 ## Code Generation Guidelines for Copilot
 
 When generating new features:
 1. Start with the command/query in Application layer
 2. Create the handler implementing business logic
-3. Define necessary abstractions (repositories, services)
-4. Implement abstractions in Infrastructure
-5. Create endpoint in Presentation that maps to the command/query
-6. Add appropriate error handling and validation
-7. Follow existing patterns in the codebase
+3. Define necessary abstractions (repositories, services) in Application
+4. Implement **repository abstractions** in **Persistence** layer
+5. Implement **service abstractions** in **Infrastructure** layer
+6. Create endpoint in Presentation that maps to the command/query
+7. Add appropriate error handling and validation
+8. Follow existing patterns in the codebase
+
+### Layer-Specific Guidelines
+- **Repositories** → Persistence (data access)
+- **External services** → Infrastructure (authentication, email, caching, etc.)
+- **Entity configurations** → Persistence/Configurations
+- **Migrations** → Persistence/Migrations
+- **Database seeding** → Infrastructure (infrastructure concern)
 
 Remember: **Dependencies flow inward, data flows outward!**

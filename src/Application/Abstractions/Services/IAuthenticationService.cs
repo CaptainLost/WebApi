@@ -1,5 +1,5 @@
+using Domain.Entities;
 using Domain.Messaging;
-using Domain.Users;
 
 namespace Application.Abstractions.Services;
 

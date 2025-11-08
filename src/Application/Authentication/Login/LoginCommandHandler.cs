@@ -1,9 +1,9 @@
 using Application.Abstractions.Messaging.Commands;
 using Application.Abstractions.Repositories;
 using Application.Abstractions.Services;
+using Domain.Entities;
 using Domain.Errors;
 using Domain.Messaging;
-using Domain.Users;
 
 namespace Application.Authentication.Login;
 

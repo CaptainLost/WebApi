@@ -1,5 +1,6 @@
 using Application;
 using Infrastructure;
+using Persistence;
 using Presentation;
 
 namespace Host.Extensions;
@@ -26,6 +27,7 @@ internal static class HostApplicationBuilderExtensions
     {
         builder.Services
             .AddApplication()
+            .AddPersistence(builder.Configuration)
             .AddInfrastructure(builder.Environment, builder.Configuration)
             .AddPresentation();
 

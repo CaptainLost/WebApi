@@ -20,12 +20,9 @@ internal static class WebApplicationExtensions
     private static WebApplication ApplyDatabaseMigrations(this WebApplication app)
     {
         using IServiceScope scope = app.Services.CreateScope();
-        IEnumerable<DbContext> dbContexts = scope.ServiceProvider.GetServices<DbContext>();
+        DbContext dbContext = scope.ServiceProvider.GetRequiredService<DbContext>();
 
-        foreach (DbContext dbContext in dbContexts)
-        {
-            dbContext.Database.Migrate();
-        }
+        dbContext.Database.Migrate();
 
         return app;
     }

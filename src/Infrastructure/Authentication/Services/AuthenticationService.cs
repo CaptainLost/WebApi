@@ -1,7 +1,7 @@
 using Application.Abstractions.Services;
+using Domain.Entities;
 using Domain.Errors;
 using Domain.Messaging;
-using Domain.Users;
 using Microsoft.AspNetCore.Identity;
 
 namespace Infrastructure.Authentication.Services;
