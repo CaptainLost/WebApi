@@ -11,4 +11,11 @@ internal static class ApiRoutes
         internal const string Register = $"{Base}/register";
         internal const string Session = $"{Base}/session";
     }
+
+    internal static class Users
+    {
+        private const string Base = "api/users";
+
+        internal const string GetByUsername = $"{Base}/{{username}}";
+    }
 }
