@@ -2,6 +2,7 @@ namespace Domain.Enums;
 
 public enum PermissionType
 {
-    AccessUsers = 1,
-    ReadUser = 2
+    FullAccess = 1,
+    AccessUsers = 2,
+    ReadUser = 3
 }

@@ -71,8 +71,8 @@ internal sealed class DatabaseSeeder : IDatabaseSeeder
         if (result.Succeeded)
         {
             defaultUser.Roles = [Role.Admin];
+
             await m_context.SaveChangesAsync();
-            m_logger.LogInformation("Default user created successfully: {Username} with role: {Role}", username, Role.Admin.Name);
         }
         else
         {

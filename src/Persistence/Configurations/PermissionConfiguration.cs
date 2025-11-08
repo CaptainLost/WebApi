@@ -1,6 +1,7 @@
 using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Persistence.Constants;
 
 namespace Persistence.Configurations;
 
@@ -8,19 +9,18 @@ internal sealed class PermissionConfiguration : IEntityTypeConfiguration<Permiss
 {
     public void Configure(EntityTypeBuilder<Permission> builder)
     {
-        builder.ToTable("Permissions");
+        builder.ToTable(TableNames.Permissions);
 
         builder.HasKey(p => p.Id);
 
-        builder.Property(p => p.Name)
-            .IsRequired()
-            .HasMaxLength(100);
+        IEnumerable<Permission> permissions = Enum
+            .GetValues<Domain.Enums.PermissionType>()
+            .Select(p => new Permission
+            {
+                Id = (int)p,
+                Name = p.ToString()
+            });
 
-        builder.HasIndex(p => p.Name)
-            .IsUnique();
-
-        builder.HasData(
-            new Permission { Id = 1, Name = "AccessUsers" },
-            new Permission { Id = 2, Name = "ReadUser" });
+        builder.HasData(permissions);
     }
 }

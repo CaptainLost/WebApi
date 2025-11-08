@@ -11,8 +11,8 @@ using Persistence;
 namespace Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251108221924_AddAdminPermissions")]
-    partial class AddAdminPermissions
+    [Migration("20251108230749_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -28,13 +28,9 @@ namespace Persistence.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
 
                     b.ToTable("Permissions", (string)null);
 
@@ -42,11 +38,16 @@ namespace Persistence.Migrations
                         new
                         {
                             Id = 1,
-                            Name = "AccessUsers"
+                            Name = "FullAccess"
                         },
                         new
                         {
                             Id = 2,
+                            Name = "AccessUsers"
+                        },
+                        new
+                        {
+                            Id = 3,
                             Name = "ReadUser"
                         });
                 });
@@ -96,16 +97,11 @@ namespace Persistence.Migrations
                         new
                         {
                             RoleId = 1,
-                            PermissionId = 2
+                            PermissionId = 3
                         },
                         new
                         {
                             RoleId = 1,
-                            PermissionId = 1
-                        },
-                        new
-                        {
-                            RoleId = 2,
                             PermissionId = 2
                         },
                         new

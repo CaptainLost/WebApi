@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using Application.Abstractions.Services;
+using Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -37,7 +38,7 @@ internal sealed class PermissionAuthorizationHandler : AuthorizationHandler<Perm
 
         HashSet<string> permissions = await permissionService.GetPermissionsAsync(userId);
 
-        if (permissions.Contains(requirement.Permission))
+        if (permissions.Contains(nameof(PermissionType.FullAccess)) || permissions.Contains(requirement.Permission))
         {
             context.Succeed(requirement);
         }
