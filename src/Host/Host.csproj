@@ -11,6 +11,7 @@
     <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
     <ProjectReference Include="..\Persistence\Persistence.csproj" />
     <ProjectReference Include="..\Presentation\Presentation.csproj" />
+    <ProjectReference Include="..\Modules\Authentication\Authentication.Facade\Authentication.Facade.csproj" />
   </ItemGroup>
 
 </Project>

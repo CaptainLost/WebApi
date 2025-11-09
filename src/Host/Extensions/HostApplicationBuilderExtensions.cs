@@ -1,4 +1,5 @@
 using Application;
+using Authentication.Facade;
 using Infrastructure;
 using Persistence;
 using Presentation;
@@ -10,7 +11,7 @@ internal static class HostApplicationBuilderExtensions
     internal static WebApplicationBuilder ConfigureServices(this WebApplicationBuilder builder)
     {
         builder.AddOpenApiServices();
-        builder.AddApplicationLayers();
+        builder.AddApplicationModules();
         builder.AddCorsPolicy();
 
         return builder;
@@ -23,13 +24,14 @@ internal static class HostApplicationBuilderExtensions
         return builder;
     }
 
-    private static WebApplicationBuilder AddApplicationLayers(this WebApplicationBuilder builder)
+    private static WebApplicationBuilder AddApplicationModules(this WebApplicationBuilder builder)
     {
         builder.Services
             .AddApplication()
             .AddPersistence(builder.Configuration)
             .AddInfrastructure(builder.Environment, builder.Configuration)
-            .AddPresentation();
+            .AddPresentation()
+            .AddAuthenticationModule(builder.Environment, builder.Configuration);
 
         return builder;
     }
