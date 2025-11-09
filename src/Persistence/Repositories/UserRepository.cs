@@ -28,4 +28,18 @@ internal sealed class UserRepository : IUserRepository
         return await m_dbContext.Users
             .FirstOrDefaultAsync(u => u.NormalizedEmail == normalizedEmail, cancellationToken);
     }
+
+    public async Task<IReadOnlyCollection<string>> GetUserRolesAsync(string userId, CancellationToken cancellationToken = default)
+    {
+        User? user = await m_dbContext.Users
+            .Include(u => u.Roles)
+            .FirstOrDefaultAsync(u => u.Id == userId, cancellationToken);
+
+        if (user == null)
+        {
+            return Array.Empty<string>();
+        }
+
+        return user.Roles.Select(r => r.Name).ToList();
+    }
 }
