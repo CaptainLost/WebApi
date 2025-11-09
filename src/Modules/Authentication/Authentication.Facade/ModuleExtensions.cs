@@ -17,11 +17,11 @@ public static class ModuleExtensions
         IConfiguration configuration)
     {
         services
-            .AddDomain()
-            .AddApplication()
-            .AddPersistence(configuration)
-            .AddInfrastructure(environment, configuration)
-            .AddPresentation();
+            .AddAuthenticationDomain()
+            .AddAuthenticationApplication()
+            .AddAuthenticationPersistence(configuration)
+            .AddAuthenticationInfrastructure(environment, configuration)
+            .AddAuthenticationPresentation();
 
         return services;
     }

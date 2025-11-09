@@ -4,7 +4,7 @@ namespace Authentication.Presentation;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddPresentation(this IServiceCollection services)
+    public static IServiceCollection AddAuthenticationPresentation(this IServiceCollection services)
     {
         return services;
     }

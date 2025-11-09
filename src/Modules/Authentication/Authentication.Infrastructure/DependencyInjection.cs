@@ -6,7 +6,7 @@ namespace Authentication.Infrastructure;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddInfrastructure(
+    public static IServiceCollection AddAuthenticationInfrastructure(
         this IServiceCollection services,
         IHostEnvironment environment,
         IConfiguration configuration)

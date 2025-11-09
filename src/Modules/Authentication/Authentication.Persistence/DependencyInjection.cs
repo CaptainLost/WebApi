@@ -5,7 +5,7 @@ namespace Authentication.Persistence;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddPersistence(
+    public static IServiceCollection AddAuthenticationPersistence(
         this IServiceCollection services,
         IConfiguration configuration)
     {
