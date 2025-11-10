@@ -1,3 +1,4 @@
+using System.Reflection;
 using Core.Domain.Entities;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -15,7 +16,11 @@ public sealed class ApplicationDbContext : IdentityDbContext<User>
     {
         base.OnModelCreating(builder);
 
-        foreach (System.Reflection.Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
+        Assembly[] assembliesToScan = AppDomain.CurrentDomain.GetAssemblies()
+            .Where(assembly => assembly.FullName?.Contains("Persistence") == true)
+            .ToArray();
+
+        foreach (Assembly assembly in assembliesToScan)
         {
             builder.ApplyConfigurationsFromAssembly(assembly);
         }

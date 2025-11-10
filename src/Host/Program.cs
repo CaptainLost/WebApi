@@ -6,6 +6,6 @@ builder.ConfigureServices();
 
 WebApplication app = builder.Build();
 
-app.ConfigurePipeline();
+await app.ConfigurePipelineAsync();
 
 app.Run();

@@ -1,6 +1,7 @@
 using Authentication.Facade;
 using Core.Facade;
 using Core.Persistence;
+using Core.Persistence.Database;
 using Microsoft.EntityFrameworkCore;
 using Users.Facade;
 
@@ -8,10 +9,11 @@ namespace Host.Extensions;
 
 internal static class WebApplicationExtensions
 {
-    internal static WebApplication ConfigurePipeline(this WebApplication app)
+    internal static async Task<WebApplication> ConfigurePipelineAsync(this WebApplication app)
     {
-        app.ApplyDatabaseMigrations();
-        //app.SeedDatabase();
+        await app.ApplyMigrations();
+        await app.SeedData();
+
         app.ConfigureDevelopmentFeatures();
         app.ConfigureMiddleware();
         app.ConfigureModules();
@@ -19,25 +21,26 @@ internal static class WebApplicationExtensions
         return app;
     }
 
-    private static WebApplication ApplyDatabaseMigrations(this WebApplication app)
+    private static async Task<WebApplication> ApplyMigrations(this WebApplication app)
     {
         using IServiceScope scope = app.Services.CreateScope();
-        ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        IServiceProvider services = scope.ServiceProvider;
+        ApplicationDbContext dbContext = services.GetRequiredService<ApplicationDbContext>();
 
-        dbContext.Database.Migrate();
+        await dbContext.Database.MigrateAsync();
 
         return app;
     }
 
-    // private static WebApplication SeedDatabase(this WebApplication app)
-    // {
-    //     using IServiceScope scope = app.Services.CreateScope();
-    //     IDatabaseSeeder seeder = scope.ServiceProvider.GetRequiredService<IDatabaseSeeder>();
+    private static async Task<WebApplication> SeedData(this WebApplication app)
+    {
+        using IServiceScope scope = app.Services.CreateScope();
+        IServiceProvider services = scope.ServiceProvider;
 
-    //     seeder.SeedAsync().GetAwaiter().GetResult();
+        await IdentitySeeder.SeedAsync(services);
 
-    //     return app;
-    // }
+        return app;
+    }
 
     private static WebApplication ConfigureDevelopmentFeatures(this WebApplication app)
     {
