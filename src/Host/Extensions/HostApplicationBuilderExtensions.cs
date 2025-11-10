@@ -1,8 +1,6 @@
-using Application;
 using Authentication.Facade;
-using Infrastructure;
-using Persistence;
-using Presentation;
+using Core.Facade;
+using Users.Facade;
 
 namespace Host.Extensions;
 
@@ -27,10 +25,8 @@ internal static class HostApplicationBuilderExtensions
     private static WebApplicationBuilder AddApplicationModules(this WebApplicationBuilder builder)
     {
         builder.Services
-            .AddApplication()
-            .AddPersistence(builder.Configuration)
-            .AddInfrastructure(builder.Environment, builder.Configuration)
-            .AddPresentation()
+            .AddCoreModule(builder.Environment, builder.Configuration)
+            .AddUsersModule(builder.Environment, builder.Configuration)
             .AddAuthenticationModule(builder.Environment, builder.Configuration);
 
         return builder;

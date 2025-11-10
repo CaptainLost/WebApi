@@ -5,6 +5,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Core\Core.Presentation\Core.Presentation.csproj" />
     <ProjectReference Include="..\Authentication.Application\Authentication.Application.csproj" />
   </ItemGroup>
 

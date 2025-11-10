@@ -4,4 +4,8 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\Core\Core.Domain\Core.Domain.csproj" />
+  </ItemGroup>
+
 </Project>

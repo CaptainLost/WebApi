@@ -31,7 +31,8 @@ src/
 - Domain has **NO** dependencies on other layers
 - Application depends only on Domain
 - Persistence depends on Application (implements repository abstractions)
-- Infrastructure depends on Application and Persistence (for external services)
+- Infrastructure depends **ONLY** on Application (implements service abstractions)
+- **CRITICAL**: Infrastructure **NEVER** depends on Persistence - use repository abstractions from Application
 - Presentation depends on Application
 
 ### 2. SOLID Principles
@@ -86,16 +87,19 @@ This project adheres to SOLID principles as the foundation of Clean Architecture
 - Contains **DbContext**, **entity configurations**, **migrations**, and **repository implementations**
 - Implements repository abstractions defined in Application layer
 - Manages database schema and data persistence concerns
-- Example: `ApplicationDbContext`, `UserRepository`, `UserConfiguration`, EF Core migrations
+- Contains **Identity configuration** (AddIdentityCore, EntityFrameworkStores) - database access concern
+- Example: `ApplicationDbContext`, `UserRepository`, `UserConfiguration`, EF Core migrations, Identity setup
 - Dependencies: Application → Domain
+- **NEVER** depends on Infrastructure
 
 #### Infrastructure Layer
 - **External services layer** - separated from Persistence
 - Implements Application service abstractions (non-database concerns)
-- Contains **authentication services**, **email services**, **caching**, **external API integrations**
+- Contains **authentication services** (cookies, JWT), **authorization** (policies, handlers), **email services**, **caching**, **external API integrations**
 - Database seeding (infrastructure concern - depends on configuration)
-- Example: `AuthenticationService`, `EmailService`, `CacheService`, `DatabaseSeeder`
-- Dependencies: Application, Persistence (for DbContext in Identity configuration)
+- Example: `AuthenticationService`, `EmailService`, `CacheService`, `DatabaseSeeder`, `PermissionService`
+- Dependencies: Application → Domain
+- **NEVER** depends on Persistence - use repository abstractions instead
 
 #### Presentation Layer
 - Contains **API endpoints** using minimal APIs

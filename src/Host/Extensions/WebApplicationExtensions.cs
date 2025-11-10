@@ -1,6 +1,8 @@
-using Infrastructure.Database;
+using Authentication.Facade;
+using Core.Facade;
+using Core.Persistence;
 using Microsoft.EntityFrameworkCore;
-using Presentation;
+using Users.Facade;
 
 namespace Host.Extensions;
 
@@ -9,10 +11,10 @@ internal static class WebApplicationExtensions
     internal static WebApplication ConfigurePipeline(this WebApplication app)
     {
         app.ApplyDatabaseMigrations();
-        app.SeedDatabase();
+        //app.SeedDatabase();
         app.ConfigureDevelopmentFeatures();
         app.ConfigureMiddleware();
-        app.ConfigureEndpoints();
+        app.ConfigureModules();
 
         return app;
     }
@@ -20,22 +22,22 @@ internal static class WebApplicationExtensions
     private static WebApplication ApplyDatabaseMigrations(this WebApplication app)
     {
         using IServiceScope scope = app.Services.CreateScope();
-        DbContext dbContext = scope.ServiceProvider.GetRequiredService<DbContext>();
+        ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         dbContext.Database.Migrate();
 
         return app;
     }
 
-    private static WebApplication SeedDatabase(this WebApplication app)
-    {
-        using IServiceScope scope = app.Services.CreateScope();
-        IDatabaseSeeder seeder = scope.ServiceProvider.GetRequiredService<IDatabaseSeeder>();
+    // private static WebApplication SeedDatabase(this WebApplication app)
+    // {
+    //     using IServiceScope scope = app.Services.CreateScope();
+    //     IDatabaseSeeder seeder = scope.ServiceProvider.GetRequiredService<IDatabaseSeeder>();
 
-        seeder.SeedAsync().GetAwaiter().GetResult();
+    //     seeder.SeedAsync().GetAwaiter().GetResult();
 
-        return app;
-    }
+    //     return app;
+    // }
 
     private static WebApplication ConfigureDevelopmentFeatures(this WebApplication app)
     {
@@ -61,9 +63,12 @@ internal static class WebApplicationExtensions
         return app;
     }
 
-    private static WebApplication ConfigureEndpoints(this WebApplication app)
+    private static WebApplication ConfigureModules(this WebApplication app)
     {
-        app.MapEndpoints();
+        app
+            .ConfigureCoreModule()
+            .ConfigureAuthenticationModule()
+            .ConfigureUsersModule();
 
         return app;
     }

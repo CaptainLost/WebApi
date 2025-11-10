@@ -137,7 +137,8 @@ $domainPath = "$modulesPath\$ModuleName.Domain"
 New-Item -ItemType Directory -Path $domainPath -Force | Out-Null
 
 New-ProjectFile -Path "$domainPath\$ModuleName.Domain.csproj" `
-    -Packages @('Microsoft.Extensions.DependencyInjection.Abstractions')
+    -Packages @('Microsoft.Extensions.DependencyInjection.Abstractions') `
+    -ProjectReferences @("..\..\Core\Core.Domain\Core.Domain.csproj")
 
 New-DependencyInjectionFile `
     -Path "$domainPath\DependencyInjection.cs" `
@@ -154,12 +155,33 @@ New-Item -ItemType Directory -Path $appPath -Force | Out-Null
 
 New-ProjectFile -Path "$appPath\$ModuleName.Application.csproj" `
     -Packages @('Microsoft.Extensions.DependencyInjection.Abstractions') `
-    -ProjectReferences @("..\$ModuleName.Domain\$ModuleName.Domain.csproj")
+    -ProjectReferences @(
+        "..\..\Core\Core.Application\Core.Application.csproj",
+        "..\$ModuleName.Domain\$ModuleName.Domain.csproj"
+    )
 
-New-DependencyInjectionFile `
-    -Path "$appPath\DependencyInjection.cs" `
-    -Namespace "$ModuleName.Application" `
-    -MethodName "Add${ModuleName}Application"
+# Create DependencyInjection.cs with handler registration
+$appLines = @()
+$appLines += "using System.Reflection;"
+$appLines += "using Core.Application.Extensions;"
+$appLines += "using Microsoft.Extensions.DependencyInjection;"
+$appLines += ""
+$appLines += "namespace $ModuleName.Application;"
+$appLines += ""
+$appLines += "public static class DependencyInjection"
+$appLines += "{"
+$appLines += "    public static IServiceCollection Add${ModuleName}Application(this IServiceCollection services)"
+$appLines += "    {"
+$appLines += "        Assembly assembly = typeof(DependencyInjection).Assembly;"
+$appLines += ""
+$appLines += "        services.AddCommandHandlers(assembly);"
+$appLines += "        services.AddQueryHandlers(assembly);"
+$appLines += ""
+$appLines += "        return services;"
+$appLines += "    }"
+$appLines += "}"
+
+$appLines | Out-File -FilePath "$appPath\DependencyInjection.cs" -Encoding UTF8
 
 dotnet sln $solutionPath add "$appPath\$ModuleName.Application.csproj" 2>&1 | Out-Null
 Write-Success "Created $ModuleName.Application"
@@ -175,6 +197,7 @@ New-ProjectFile -Path "$persistencePath\$ModuleName.Persistence.csproj" `
         'Microsoft.Extensions.DependencyInjection.Abstractions'
     ) `
     -ProjectReferences @(
+        "..\..\Core\Core.Persistence\Core.Persistence.csproj",
         "..\$ModuleName.Application\$ModuleName.Application.csproj"
     )
 
@@ -200,6 +223,7 @@ New-ProjectFile -Path "$infraPath\$ModuleName.Infrastructure.csproj" `
         'Microsoft.Extensions.Hosting.Abstractions'
     ) `
     -ProjectReferences @(
+        "..\..\Core\Core.Infrastructure\Core.Infrastructure.csproj",
         "..\$ModuleName.Application\$ModuleName.Application.csproj"
     )
 
@@ -220,12 +244,45 @@ New-Item -ItemType Directory -Path $presentationPath -Force | Out-Null
 
 New-ProjectFile -Path "$presentationPath\$ModuleName.Presentation.csproj" `
     -Packages @('Microsoft.Extensions.DependencyInjection.Abstractions') `
-    -ProjectReferences @("..\$ModuleName.Application\$ModuleName.Application.csproj")
+    -ProjectReferences @(
+        "..\..\Core\Core.Presentation\Core.Presentation.csproj",
+        "..\$ModuleName.Application\$ModuleName.Application.csproj"
+    )
 
-New-DependencyInjectionFile `
-    -Path "$presentationPath\DependencyInjection.cs" `
-    -Namespace "$ModuleName.Presentation" `
-    -MethodName "Add${ModuleName}Presentation"
+# Create DependencyInjection.cs for Presentation with endpoint configuration
+$presentationLines = @()
+$presentationLines += "using Core.Presentation.Endpoints;"
+$presentationLines += "using Microsoft.AspNetCore.Builder;"
+$presentationLines += "using Microsoft.AspNetCore.Http;"
+$presentationLines += "using Microsoft.AspNetCore.Routing;"
+$presentationLines += "using Microsoft.Extensions.DependencyInjection;"
+$presentationLines += ""
+$presentationLines += "namespace $ModuleName.Presentation;"
+$presentationLines += ""
+$presentationLines += "public static class DependencyInjection"
+$presentationLines += "{"
+$presentationLines += "    public static IServiceCollection Add${ModuleName}Presentation(this IServiceCollection services)"
+$presentationLines += "    {"
+$presentationLines += "        // TODO: Register endpoints here"
+$presentationLines += "        // services.AddTransient<YourEndpoint>();"
+$presentationLines += ""
+$presentationLines += "        return services;"
+$presentationLines += "    }"
+$presentationLines += ""
+$presentationLines += "    public static IEndpointRouteBuilder Configure${ModuleName}Presentation(this IEndpointRouteBuilder builder)"
+$presentationLines += "    {"
+$presentationLines += "        // TODO: Map endpoint groups here"
+$presentationLines += "        // RouteGroupBuilder group = builder"
+$presentationLines += "        //     .MapGroup(ApiRoutes.YourModule.Base)"
+$presentationLines += "        //     .WithTags(EndpointTag.YourModule);"
+$presentationLines += ""
+$presentationLines += "        // builder.ServiceProvider.GetRequiredService<YourEndpoint>().MapEndpoint(group);"
+$presentationLines += ""
+$presentationLines += "        return builder;"
+$presentationLines += "    }"
+$presentationLines += "}"
+
+$presentationLines | Out-File -FilePath "$presentationPath\DependencyInjection.cs" -Encoding UTF8
 
 dotnet sln $solutionPath add "$presentationPath\$ModuleName.Presentation.csproj" 2>&1 | Out-Null
 Write-Success "Created $ModuleName.Presentation"
@@ -256,6 +313,7 @@ $facadeLines += "using $ModuleName.Domain;"
 $facadeLines += "using $ModuleName.Infrastructure;"
 $facadeLines += "using $ModuleName.Persistence;"
 $facadeLines += "using $ModuleName.Presentation;"
+$facadeLines += "using Microsoft.AspNetCore.Builder;"
 $facadeLines += "using Microsoft.Extensions.Configuration;"
 $facadeLines += "using Microsoft.Extensions.DependencyInjection;"
 $facadeLines += "using Microsoft.Extensions.Hosting;"
@@ -277,6 +335,13 @@ $facadeLines += "            .Add${ModuleName}Infrastructure(environment, config
 $facadeLines += "            .Add${ModuleName}Presentation();"
 $facadeLines += ""
 $facadeLines += "        return services;"
+$facadeLines += "    }"
+$facadeLines += ""
+$facadeLines += "    public static WebApplication Configure${ModuleName}Module(this WebApplication app)"
+$facadeLines += "    {"
+$facadeLines += "        app.Configure${ModuleName}Presentation();"
+$facadeLines += ""
+$facadeLines += "        return app;"
 $facadeLines += "    }"
 $facadeLines += "}"
 
@@ -315,10 +380,15 @@ Write-Host "    - $ModuleName.Facade" -ForegroundColor Gray
 Write-Host ""
 
 Write-Host "To integrate the module with Host:" -ForegroundColor Cyan
+Write-Host ""
 Write-Host "1. Add reference to Host.csproj:" -ForegroundColor White
 Write-Host "   <ProjectReference Include=`"..\Modules\$ModuleName\$ModuleName.Facade\$ModuleName.Facade.csproj`" />" -ForegroundColor Gray
 Write-Host ""
 Write-Host "2. In HostApplicationBuilderExtensions.cs add:" -ForegroundColor White
 Write-Host "   using $ModuleName.Facade;" -ForegroundColor Gray
 Write-Host "   .Add${ModuleName}Module(builder.Environment, builder.Configuration)" -ForegroundColor Gray
+Write-Host ""
+Write-Host "3. In WebApplicationExtensions.cs add:" -ForegroundColor White
+Write-Host "   using $ModuleName.Facade;" -ForegroundColor Gray
+Write-Host "   .Configure${ModuleName}Module()" -ForegroundColor Gray
 Write-Host ""
