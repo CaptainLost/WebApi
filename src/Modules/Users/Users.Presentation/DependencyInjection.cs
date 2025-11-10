@@ -19,7 +19,7 @@ public static class DependencyInjection
     public static IEndpointRouteBuilder ConfigureUsersPresentation(this IEndpointRouteBuilder builder)
     {
         RouteGroupBuilder group = builder
-            .MapGroup(ApiRoutes.Users.Base)
+            .MapGroup(UsersRoutes.Base)
             .WithTags(EndpointTag.Users);
 
         builder.ServiceProvider.GetRequiredService<GetUserByUsernameEndpoint>().MapEndpoint(group);

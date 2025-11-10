@@ -13,7 +13,7 @@ internal sealed class LogoutEndpoint : IEndpoint
 {
     public void MapEndpoint(RouteGroupBuilder group)
     {
-        group.MapPost(ApiRoutes.Auth.Logout, async delegate (
+        group.MapPost(AuthRoutes.Logout, async delegate (
             ICommandHandler<LogoutCommand> commandHandler,
             CancellationToken cancellationToken)
         {

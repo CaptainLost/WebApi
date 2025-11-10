@@ -14,7 +14,7 @@ internal sealed class GetUserByUsernameEndpoint : IEndpoint
 {
     public void MapEndpoint(RouteGroupBuilder group)
     {
-        group.MapGet(ApiRoutes.Users.GetByUsername, async delegate (string username,
+        group.MapGet(UsersRoutes.GetByUsername, async delegate (string username,
             IQueryHandler<GetUserByUsernameQuery, UserResponse> queryHandler,
             CancellationToken cancellationToken)
         {

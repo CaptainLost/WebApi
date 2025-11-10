@@ -22,7 +22,7 @@ public static class DependencyInjection
     public static IEndpointRouteBuilder ConfigureAuthenticationPresentation(this IEndpointRouteBuilder builder)
     {
         RouteGroupBuilder group = builder
-            .MapGroup(ApiRoutes.Auth.Base)
+            .MapGroup(AuthRoutes.Base)
             .WithTags(EndpointTag.Authentication);
 
         builder.ServiceProvider.GetRequiredService<LoginEndpoint>().MapEndpoint(group);
