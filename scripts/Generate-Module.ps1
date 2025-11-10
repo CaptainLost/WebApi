@@ -174,7 +174,9 @@ New-ProjectFile -Path "$persistencePath\$ModuleName.Persistence.csproj" `
         'Microsoft.Extensions.Configuration.Abstractions',
         'Microsoft.Extensions.DependencyInjection.Abstractions'
     ) `
-    -ProjectReferences @("..\$ModuleName.Domain\$ModuleName.Domain.csproj")
+    -ProjectReferences @(
+        "..\$ModuleName.Application\$ModuleName.Application.csproj"
+    )
 
 New-DependencyInjectionFile `
     -Path "$persistencePath\DependencyInjection.cs" `
@@ -198,8 +200,7 @@ New-ProjectFile -Path "$infraPath\$ModuleName.Infrastructure.csproj" `
         'Microsoft.Extensions.Hosting.Abstractions'
     ) `
     -ProjectReferences @(
-        "..\$ModuleName.Application\$ModuleName.Application.csproj",
-        "..\$ModuleName.Persistence\$ModuleName.Persistence.csproj"
+        "..\$ModuleName.Application\$ModuleName.Application.csproj"
     )
 
 New-DependencyInjectionFile `
