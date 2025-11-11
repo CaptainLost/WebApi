@@ -7,26 +7,21 @@ public static class AuthenticationErrors
 {
     public static Error LoginFailed() => new(
         Code: "Authentication.LoginFailed",
-        Description: "Invalid credentials.",
-        StatusCode: HttpStatusCode.Unauthorized);
+        Description: "Invalid credentials.");
 
     public static Error AccountLockedOut() => new(
         Code: "Authentication.AccountLockedOut",
-        Description: "Account is locked due to multiple failed login attempts. Please try again later.",
-        StatusCode: HttpStatusCode.Forbidden);
+        Description: "Account is locked due to multiple failed login attempts. Please try again later.");
 
     public static Error UsernameAlreadyTaken() => new(
         Code: "Authentication.UsernameAlreadyTaken",
-        Description: "Username is already taken.",
-        StatusCode: HttpStatusCode.Conflict);
+        Description: "Username is already taken.");
 
     public static Error EmailAlreadyTaken() => new(
         Code: "Authentication.EmailAlreadyTaken",
-        Description: "Email is already taken.",
-        StatusCode: HttpStatusCode.Conflict);
+        Description: "Email is already taken.");
 
     public static Error RegistrationFailed(string details) => new(
         Code: "Authentication.RegistrationFailed",
-        Description: $"Registration failed: {details}",
-        StatusCode: HttpStatusCode.BadRequest);
+        Description: $"Registration failed: {details}");
 }

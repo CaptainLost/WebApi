@@ -27,13 +27,12 @@ internal sealed class RegisterEndpoint : IEndpoint
                 return Results.Created($"/api/users/{request.Username}", request.Username);
             }
 
-            return ErrorResults.FromError(registrationResult.Error);
+            return ErrorResults.FromError(registrationResult.Error, StatusCodes.Status400BadRequest);
         })
         .WithName("Register")
         .WithSummary("Registers a new user")
         .WithDescription("Creates a new user account with the provided credentials and automatically logs them in.")
         .Produces(StatusCodes.Status201Created)
-        .Produces<ErrorResponse>(StatusCodes.Status400BadRequest)
-        .Produces<ErrorResponse>(StatusCodes.Status409Conflict);
+        .Produces<ErrorResponse>(StatusCodes.Status400BadRequest);
     }
 }

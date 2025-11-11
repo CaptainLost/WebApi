@@ -3,7 +3,7 @@ using System.Net;
 
 namespace Core.Domain.Messaging;
 
-public sealed record Error(string Code, string Description, HttpStatusCode StatusCode = HttpStatusCode.BadRequest)
+public sealed record Error(string Code, string Description)
 {
     public static readonly Error None = new(string.Empty, string.Empty);
     public static readonly Error NullValue = new("Error.NullValue", "Null value was provided");

@@ -46,12 +46,12 @@ public abstract class Enumeration<TEnum> : IEquatable<Enumeration<TEnum>>
 
     public static bool operator ==(Enumeration<TEnum>? a, Enumeration<TEnum>? b)
     {
-        if (a == null && b == null)
+        if (a is null && b is null)
         {
             return true;
         }
 
-        if (a == null || b == null)
+        if (a is null || b is null)
         {
             return false;
         }
@@ -93,7 +93,7 @@ public abstract class Enumeration<TEnum> : IEquatable<Enumeration<TEnum>>
     /// <inheritdoc />
     public virtual bool Equals(Enumeration<TEnum>? other)
     {
-        if (other == null)
+        if (other is null)
         {
             return false;
         }
@@ -104,7 +104,7 @@ public abstract class Enumeration<TEnum> : IEquatable<Enumeration<TEnum>>
     /// <inheritdoc />
     public override bool Equals(object? obj)
     {
-        if (obj == null)
+        if (obj is null)
         {
             return false;
         }

@@ -27,7 +27,7 @@ internal sealed class LoginEndpoint : IEndpoint
                 return Results.NoContent();
             }
 
-            return ErrorResults.FromError(loginResult.Error);
+            return ErrorResults.FromError(loginResult.Error, StatusCodes.Status401Unauthorized);
         })
         .WithName("Login")
         .WithSummary("Authenticates a user")

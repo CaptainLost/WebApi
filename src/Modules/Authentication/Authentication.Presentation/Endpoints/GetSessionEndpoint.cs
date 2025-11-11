@@ -25,7 +25,7 @@ internal sealed class GetSessionEndpoint : IEndpoint
                 return Results.Ok(result.Value);
             }
 
-            return ErrorResults.FromError(result.Error);
+            return ErrorResults.FromError(result.Error, StatusCodes.Status400BadRequest);
         })
         .WithName("GetSession")
         .WithSummary("Get current session information")

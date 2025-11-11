@@ -25,7 +25,7 @@ internal sealed class LogoutEndpoint : IEndpoint
                 return Results.NoContent();
             }
 
-            return ErrorResults.FromError(logoutResult.Error);
+            return ErrorResults.FromError(logoutResult.Error, StatusCodes.Status400BadRequest);
         })
         .WithName("Logout")
         .WithSummary("Logs out the current user")

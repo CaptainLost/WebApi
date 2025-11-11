@@ -26,7 +26,7 @@ internal sealed class GetUserByUsernameEndpoint : IEndpoint
                 return Results.Ok(result.Value);
             }
 
-            return ErrorResults.FromError(result.Error);
+            return ErrorResults.FromError(result.Error, StatusCodes.Status404NotFound);
         })
         .RequireAuthorization(nameof(PermissionType.ReadUser))
         .WithName("GetUserByUsername")
