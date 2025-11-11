@@ -1,19 +1,20 @@
 using Core.Domain.Entities;
+using Core.Persistence;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace Core.Persistence.Database;
+namespace Users.Persistence.Database;
 
 public static class IdentitySeeder
 {
     public static async Task SeedAsync(IServiceProvider serviceProvider)
     {
-        var userManager = serviceProvider.GetRequiredService<UserManager<User>>();
-        var context = serviceProvider.GetRequiredService<ApplicationDbContext>();
-        var configuration = serviceProvider.GetRequiredService<IConfiguration>();
-        var logger = serviceProvider.GetRequiredService<ILogger<ApplicationDbContext>>();
+        UserManager<User> userManager = serviceProvider.GetRequiredService<UserManager<User>>();
+        ApplicationDbContext context = serviceProvider.GetRequiredService<ApplicationDbContext>();
+        IConfiguration configuration = serviceProvider.GetRequiredService<IConfiguration>();
+        ILogger<ApplicationDbContext> logger = serviceProvider.GetRequiredService<ILogger<ApplicationDbContext>>();
 
         await SeedDefaultUserAsync(userManager, context, configuration, logger);
     }

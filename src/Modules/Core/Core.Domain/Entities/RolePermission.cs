@@ -1,6 +1,6 @@
 namespace Core.Domain.Entities;
 
-public class RolePermission
+public sealed class RolePermission
 {
     public int RoleId { get; set; }
 

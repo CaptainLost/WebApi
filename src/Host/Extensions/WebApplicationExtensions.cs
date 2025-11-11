@@ -1,9 +1,9 @@
 using Authentication.Facade;
 using Core.Facade;
 using Core.Persistence;
-using Core.Persistence.Database;
 using Microsoft.EntityFrameworkCore;
 using Users.Facade;
+using Users.Persistence.Database;
 
 namespace Host.Extensions;
 
