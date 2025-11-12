@@ -14,22 +14,25 @@ internal sealed class PermissionsRepository : IPermissionsRepository
         m_context = context;
     }
 
-    public async Task<IReadOnlyCollection<Role>> GetUserRolesWithPermissionsAsync(
-        string userId,
-        CancellationToken cancellationToken = default)
+    public async Task<HashSet<string>> GetUserRolesAsync(string userId, CancellationToken cancellationToken)
     {
-        ICollection<Role>[] roles = await m_context.Set<User>()
+        return await m_context.Set<User>()
+            .Where(x => x.Id == userId)
+            .Include(x => x.Roles)
+            .SelectMany(x => x.Roles)
+            .Select(x => x.Name)
+            .ToHashSetAsync(cancellationToken);
+    }
+
+    public async Task<HashSet<string>> GetUserPermissionsAsync(string userId, CancellationToken cancellationToken)
+    {
+        return await m_context.Set<User>()
+            .Where(x => x.Id == userId)
             .Include(x => x.Roles)
             .ThenInclude(x => x.Permissions)
-            .Where(x => x.Id == userId)
-            .Select(x => x.Roles)
-            .ToArrayAsync(cancellationToken);
-
-        if (roles.Length == 0)
-        {
-            return Array.Empty<Role>();
-        }
-
-        return roles[0].ToList();
+            .SelectMany(x => x.Roles)
+            .SelectMany(x => x.Permissions)
+            .Select(x => x.Name)
+            .ToHashSetAsync(cancellationToken);
     }
 }

@@ -1,8 +1,7 @@
-using Core.Domain.Entities;
-
 namespace Authentication.Application.Abstractions.Repositories;
 
 public interface IPermissionsRepository
 {
-    Task<IReadOnlyCollection<Role>> GetUserRolesWithPermissionsAsync(string userId, CancellationToken cancellationToken = default);
+    Task<HashSet<string>> GetUserRolesAsync(string userId, CancellationToken cancellationToken = default);
+    Task<HashSet<string>> GetUserPermissionsAsync(string userId, CancellationToken cancellationToken = default);
 }

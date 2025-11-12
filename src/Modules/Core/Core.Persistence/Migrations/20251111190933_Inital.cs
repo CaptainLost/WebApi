@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Core.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class Initial : Migration
+    public partial class Inital : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -239,7 +239,8 @@ namespace Core.Persistence.Migrations
                 {
                     { 1, "FullAccess" },
                     { 2, "AccessUsers" },
-                    { 3, "ReadUser" }
+                    { 3, "ReadUser" },
+                    { 4, "ReadUserList" }
                 });
 
             migrationBuilder.InsertData(

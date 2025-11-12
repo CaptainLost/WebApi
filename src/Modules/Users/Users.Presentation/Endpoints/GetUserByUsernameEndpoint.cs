@@ -15,11 +15,11 @@ internal sealed class GetUserByUsernameEndpoint : IEndpoint
     public void MapEndpoint(RouteGroupBuilder group)
     {
         group.MapGet(UsersRoutes.GetByUsername, async delegate (string username,
-            IQueryHandler<GetUserByUsernameQuery, UserResponse> queryHandler,
+            IQueryHandler<GetUserByUsernameQuery, GetUserResponse> queryHandler,
             CancellationToken cancellationToken)
         {
             GetUserByUsernameQuery query = new GetUserByUsernameQuery(username);
-            Result<UserResponse> result = await queryHandler.HandleAsync(query, cancellationToken);
+            Result<GetUserResponse> result = await queryHandler.HandleAsync(query, cancellationToken);
 
             if (result.IsSuccess)
             {
@@ -31,8 +31,8 @@ internal sealed class GetUserByUsernameEndpoint : IEndpoint
         .RequireAuthorization(nameof(PermissionType.ReadUser))
         .WithName("GetUserByUsername")
         .WithSummary("Gets a user by username")
-        .WithDescription("Retrieves user information by their username. Requires ReadUser permission (overrides group's AccessUsers).")
-        .Produces<UserResponse>(StatusCodes.Status200OK)
+        .WithDescription("Retrieves user information by their username.")
+        .Produces<GetUserResponse>(StatusCodes.Status200OK)
         .Produces<ErrorResponse>(StatusCodes.Status404NotFound);
     }
 }

@@ -46,6 +46,11 @@ namespace Core.Persistence.Migrations
                         {
                             Id = 3,
                             Name = "ReadUser"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "ReadUserList"
                         });
                 });
 

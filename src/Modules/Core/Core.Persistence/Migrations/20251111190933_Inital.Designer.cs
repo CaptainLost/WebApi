@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Core.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251110223902_Initial")]
-    partial class Initial
+    [Migration("20251111190933_Inital")]
+    partial class Inital
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -49,6 +49,11 @@ namespace Core.Persistence.Migrations
                         {
                             Id = 3,
                             Name = "ReadUser"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "ReadUserList"
                         });
                 });
 

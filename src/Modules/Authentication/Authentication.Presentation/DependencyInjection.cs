@@ -1,5 +1,7 @@
+using System.Reflection;
 using Authentication.Presentation.Endpoints;
 using Core.Presentation.Endpoints;
+using Core.Presentation.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
@@ -11,10 +13,7 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddAuthenticationPresentation(this IServiceCollection services)
     {
-        services.AddTransient<LoginEndpoint>();
-        services.AddTransient<RegisterEndpoint>();
-        services.AddTransient<LogoutEndpoint>();
-        services.AddTransient<GetSessionEndpoint>();
+        services.AddEndpointsFromAssembly(Assembly.GetExecutingAssembly());
 
         return services;
     }
@@ -25,10 +24,7 @@ public static class DependencyInjection
             .MapGroup(AuthRoutes.Base)
             .WithTags(EndpointTag.Authentication);
 
-        builder.ServiceProvider.GetRequiredService<LoginEndpoint>().MapEndpoint(group);
-        builder.ServiceProvider.GetRequiredService<RegisterEndpoint>().MapEndpoint(group);
-        builder.ServiceProvider.GetRequiredService<LogoutEndpoint>().MapEndpoint(group);
-        builder.ServiceProvider.GetRequiredService<GetSessionEndpoint>().MapEndpoint(group);
+        builder.MapEndpointsFromAssembly(Assembly.GetExecutingAssembly(), group);
 
         return builder;
     }

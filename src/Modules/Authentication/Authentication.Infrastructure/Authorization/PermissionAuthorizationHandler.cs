@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using Authentication.Application.Abstractions.Repositories;
 using Authentication.Application.Abstractions.Services;
 using Core.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
@@ -15,8 +16,7 @@ internal sealed class PermissionAuthorizationHandler : AuthorizationHandler<Perm
         m_serviceScopeFactory = serviceScopeFactory;
     }
 
-    protected override async Task HandleRequirementAsync(
-        AuthorizationHandlerContext context,
+    protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context,
         PermissionRequirement requirement)
     {
         if (context.User.Identity == null || !context.User.Identity.IsAuthenticated)
@@ -33,10 +33,10 @@ internal sealed class PermissionAuthorizationHandler : AuthorizationHandler<Perm
 
         using IServiceScope scope = m_serviceScopeFactory.CreateScope();
 
-        IPermissionService permissionService = scope.ServiceProvider
-            .GetRequiredService<IPermissionService>();
+        IPermissionsRepository permissionsRepository = scope.ServiceProvider
+            .GetRequiredService<IPermissionsRepository>();
 
-        HashSet<string> permissions = await permissionService.GetPermissionsAsync(userId);
+        HashSet<string> permissions = await permissionsRepository.GetUserPermissionsAsync(userId);
 
         if (permissions.Contains(nameof(PermissionType.FullAccess)) || permissions.Contains(requirement.Permission))
         {

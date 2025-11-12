@@ -1,4 +1,6 @@
-﻿using Core.Presentation.Endpoints;
+﻿using System.Reflection;
+using Core.Presentation.Endpoints;
+using Core.Presentation.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
@@ -11,7 +13,7 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddUsersPresentation(this IServiceCollection services)
     {
-        services.AddTransient<GetUserByUsernameEndpoint>();
+        services.AddEndpointsFromAssembly(Assembly.GetExecutingAssembly());
 
         return services;
     }
@@ -22,7 +24,7 @@ public static class DependencyInjection
             .MapGroup(UsersRoutes.Base)
             .WithTags(EndpointTag.Users);
 
-        builder.ServiceProvider.GetRequiredService<GetUserByUsernameEndpoint>().MapEndpoint(group);
+        builder.MapEndpointsFromAssembly(Assembly.GetExecutingAssembly(), group);
 
         return builder;
     }

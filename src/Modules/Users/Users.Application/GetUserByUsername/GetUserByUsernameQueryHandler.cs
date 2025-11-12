@@ -6,21 +6,21 @@ using Users.Domain.Errors;
 
 namespace Users.Application.GetUserByUsername;
 
-internal sealed class GetUserByUsernameQueryHandler(
-    IUserRepository userRepository) : IQueryHandler<GetUserByUsernameQuery, UserResponse>
+internal sealed class GetUserByUsernameQueryHandler(IUserRepository userRepository)
+    : IQueryHandler<GetUserByUsernameQuery, GetUserResponse>
 {
     private readonly IUserRepository m_userRepository = userRepository;
 
-    public async Task<Result<UserResponse>> HandleAsync(GetUserByUsernameQuery query, CancellationToken cancellationToken)
+    public async Task<Result<GetUserResponse>> HandleAsync(GetUserByUsernameQuery query, CancellationToken cancellationToken)
     {
         User? user = await m_userRepository.GetUserByUsernameAsync(query.Username, cancellationToken);
 
         if (user == null)
         {
-            return Result.Failure<UserResponse>(UserErrors.NotFound(query.Username));
+            return Result.Failure<GetUserResponse>(UserErrors.NotFound(query.Username));
         }
 
-        UserResponse response = new UserResponse(
+        GetUserResponse response = new GetUserResponse(
             Id: user.Id,
             Username: user.UserName!);
 

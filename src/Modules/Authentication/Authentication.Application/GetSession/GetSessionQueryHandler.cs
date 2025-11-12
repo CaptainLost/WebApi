@@ -8,12 +8,10 @@ namespace Authentication.Application.GetSession;
 
 internal sealed class GetSessionQueryHandler(
     IAuthenticationService authenticationService,
-    UserManager<User> userManager,
-    IPermissionService permissionService) : IQueryHandler<GetSessionQuery, SessionResponse>
+    UserManager<User> userManager) : IQueryHandler<GetSessionQuery, SessionResponse>
 {
     private readonly IAuthenticationService m_authenticationService = authenticationService;
     private readonly UserManager<User> m_userManager = userManager;
-    private readonly IPermissionService m_permissionService = permissionService;
 
     public async Task<Result<SessionResponse>> HandleAsync(GetSessionQuery query, CancellationToken cancellationToken)
     {

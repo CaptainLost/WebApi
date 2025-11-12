@@ -4,5 +4,6 @@ public enum PermissionType
 {
     FullAccess = 1,
     AccessUsers = 2,
-    ReadUser = 3
+    ReadUser = 3,
+    ReadUserList = 4,
 }

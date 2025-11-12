@@ -251,7 +251,9 @@ New-ProjectFile -Path "$presentationPath\$ModuleName.Presentation.csproj" `
 
 # Create DependencyInjection.cs for Presentation with endpoint configuration
 $presentationLines = @()
+$presentationLines += "using System.Reflection;"
 $presentationLines += "using Core.Presentation.Endpoints;"
+$presentationLines += "using Core.Presentation.Extensions;"
 $presentationLines += "using Microsoft.AspNetCore.Builder;"
 $presentationLines += "using Microsoft.AspNetCore.Http;"
 $presentationLines += "using Microsoft.AspNetCore.Routing;"
@@ -263,20 +265,20 @@ $presentationLines += "public static class DependencyInjection"
 $presentationLines += "{"
 $presentationLines += "    public static IServiceCollection Add${ModuleName}Presentation(this IServiceCollection services)"
 $presentationLines += "    {"
-$presentationLines += "        // TODO: Register endpoints here"
-$presentationLines += "        // services.AddTransient<YourEndpoint>();"
+$presentationLines += "        // TODO: Add endpoint here"
+$presentationLines += "        // services.AddEndpointsFromAssembly(Assembly.GetExecutingAssembly());"
 $presentationLines += ""
 $presentationLines += "        return services;"
 $presentationLines += "    }"
 $presentationLines += ""
 $presentationLines += "    public static IEndpointRouteBuilder Configure${ModuleName}Presentation(this IEndpointRouteBuilder builder)"
 $presentationLines += "    {"
-$presentationLines += "        // TODO: Map endpoint groups here"
+$presentationLines += "        // TODO: Configure your route group and tags"
 $presentationLines += "        // RouteGroupBuilder group = builder"
-$presentationLines += "        //     .MapGroup(ApiRoutes.YourModule.Base)"
-$presentationLines += "        //     .WithTags(EndpointTag.YourModule);"
+$presentationLines += "        //     .MapGroup(ApiRoutes.${ModuleName}.Base)"
+$presentationLines += "        //     .WithTags(EndpointTag.${ModuleName});"
 $presentationLines += ""
-$presentationLines += "        // builder.ServiceProvider.GetRequiredService<YourEndpoint>().MapEndpoint(group);"
+$presentationLines += "        // builder.MapEndpointsFromAssembly(Assembly.GetExecutingAssembly(), group);"
 $presentationLines += ""
 $presentationLines += "        return builder;"
 $presentationLines += "    }"
@@ -391,4 +393,8 @@ Write-Host ""
 Write-Host "3. In WebApplicationExtensions.cs add:" -ForegroundColor White
 Write-Host "   using $ModuleName.Facade;" -ForegroundColor Gray
 Write-Host "   .Configure${ModuleName}Module()" -ForegroundColor Gray
+Write-Host ""
+Write-Host "4. Configure endpoints in $ModuleName.Presentation/DependencyInjection.cs:" -ForegroundColor White
+Write-Host "   - Uncomment and configure the RouteGroupBuilder" -ForegroundColor Gray
+Write-Host "   - Endpoints implementing IEndpoint will be automatically registered!" -ForegroundColor Gray
 Write-Host ""
