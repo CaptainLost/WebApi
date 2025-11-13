@@ -94,6 +94,32 @@ throw new ArgumentNullException(nameof(parameterName));
 ## Null Checks & Exceptions
 - Use guard clauses for argument validation.
 - Use `nameof` for parameter names in exceptions.
+- **Prefer `== null` and `!= null` over `is null` and `is not null`** for null checks to maintain consistency across the codebase.
+
+### Example
+```csharp
+// Incorrect - avoid is null / is not null
+if (user is null)
+{
+    return UserErrors.NotFound();
+}
+
+if (order is not null)
+{
+    // process order
+}
+
+// Correct - use == null / != null
+if (user == null)
+{
+    return UserErrors.NotFound();
+}
+
+if (order != null)
+{
+    // process order
+}
+```
 
 ## Modern C# Features
 - Use pattern matching and expression-bodied members where appropriate.
