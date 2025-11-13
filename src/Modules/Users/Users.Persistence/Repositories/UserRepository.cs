@@ -4,6 +4,7 @@ using Core.Domain.Pagination;
 using Core.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Users.Application.Abstractions.Repositories;
+using Users.Persistence.Specifications;
 
 namespace Users.Persistence.Repositories;
 
@@ -32,6 +33,13 @@ internal sealed class UserRepository : IUserRepository
             .FirstOrDefaultAsync(u => u.NormalizedEmail == normalizedEmail, cancellationToken);
     }
 
+    public async Task<User?> GetUserByIdWithRolesAsync(string userId, CancellationToken cancellationToken = default)
+    {
+        return await m_dbContext.Users
+            .Include(u => u.Roles)
+            .FirstOrDefaultAsync(u => u.Id == userId, cancellationToken);
+    }
+
     public async Task<IReadOnlyCollection<string>> GetUserRolesAsync(string userId, CancellationToken cancellationToken = default)
     {
         User? user = await m_dbContext.Users
@@ -50,8 +58,8 @@ internal sealed class UserRepository : IUserRepository
     {
         IQueryable<User> query = m_dbContext.Users.AsQueryable();
 
-        query = ApplyFiltering(query, pageRequest);
-        query = ApplySorting(query, pageRequest);
+        UserFillterSpecification specification = new UserFillterSpecification(pageRequest);
+        query = specification.Apply(query);
 
         int totalCount = await query.CountAsync(cancellationToken);
 
@@ -70,35 +78,11 @@ internal sealed class UserRepository : IUserRepository
         return pagedResult.Value;
     }
 
-    private static IQueryable<User> ApplyFiltering(IQueryable<User> query, PageRequest pageRequest)
+    public async Task<Result> UpdateUserAsync(User user, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(pageRequest.SearchTerm))
-        {
-            return query;
-        }
+        m_dbContext.Users.Update(user);
+        await m_dbContext.SaveChangesAsync(cancellationToken);
 
-        string searchTermUpper = pageRequest.SearchTerm.ToUpperInvariant();
-
-        return query.Where(u => 
-            u.NormalizedUserName != null && u.NormalizedUserName.Contains(searchTermUpper));
-    }
-
-    private static IQueryable<User> ApplySorting(IQueryable<User> query, PageRequest pageRequest)
-    {
-        if (string.IsNullOrWhiteSpace(pageRequest.SortBy))
-        {
-            return query.OrderBy(u => u.UserName);
-        }
-
-        return pageRequest.SortBy.ToLowerInvariant() switch
-        {
-            "username" => pageRequest.SortDescending
-                ? query.OrderByDescending(u => u.UserName)
-                : query.OrderBy(u => u.UserName),
-            "email" => pageRequest.SortDescending
-                ? query.OrderByDescending(u => u.Email)
-                : query.OrderBy(u => u.Email),
-            _ => query.OrderBy(u => u.UserName)
-        };
+        return Result.Success();
     }
 }

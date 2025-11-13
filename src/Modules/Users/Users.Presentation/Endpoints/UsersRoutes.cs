@@ -8,4 +8,5 @@ public static class UsersRoutes
 
     public const string GetByUsername = "{username}";
     public const string GetUserList = "";
+    public const string AssignRole = "{userId}/roles";
 }

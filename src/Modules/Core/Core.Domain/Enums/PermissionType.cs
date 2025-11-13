@@ -6,4 +6,5 @@ public enum PermissionType
     AccessUsers = 2,
     ReadUser = 3,
     ReadUserList = 4,
+    AssignRole = 5,
 }

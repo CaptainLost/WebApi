@@ -122,17 +122,69 @@ tests/
 - Follow Microsoft .NET C# coding conventions.
 - Organize files by feature/domain.
 
-## 5. Implementation Guidelines
+## 5. Layer Responsibilities
 
-- **Domain Layer**: All business logic, entities, value objects, and domain events. No dependencies on other layers.
-- **Application Layer**: Use cases, commands, queries, interfaces for repositories/services. No business logic.
-- **Infrastructure Layer**: Implementations for interfaces, database access, external integrations. No business logic.
-- **Persistence Layer**: Database-specific implementations, EF Core configurations, repositories. No business logic.
-- **Presentation Layer**: Minimal API endpoints, request/response mapping. No business logic.
-- **Facade Layer**: Module registration using `ModuleExtensions.cs` to configure services and pipeline for the module.
-- Use dependency injection for all cross-layer dependencies.
-- Avoid circular dependencies.
-- Do not use a mediator library; call service methods directly from the Presentation layer.
+### Domain Layer
+**Contains**: Core business logic and domain model
+- **Entities**: Objects with unique identity (e.g., User, Order)
+- **Value Objects**: Immutable objects defined by their attributes (e.g., Money, Address)
+- **Domain Events**: Events that represent something significant that happened in the domain
+- **Domain Services**: Business logic that doesn't naturally fit within entities or value objects
+- **Interfaces**: Abstractions for repositories and domain-specific services
+- **Exceptions**: Domain-specific exceptions for business rule violations
+- **Enums**: Domain-specific enumerations
+- **No dependencies** on other layers (except Core.Domain for shared primitives)
+- **No infrastructure concerns** (database, external APIs, etc.)
+
+### Application Layer
+**Orchestrates the domain** and defines use cases
+- **Application Services**: Orchestration of domain logic and use cases (commands/queries handlers)
+- **CQRS**: Commands (write operations) and Queries (read operations)
+- **DTOs**: Data transfer objects for application boundaries
+- **Interfaces**: Abstractions for application-specific services (e.g., IEmailService, INotificationService)
+- **Depends only on Domain** (and Core.Application for shared abstractions)
+- **No business logic** - delegates to domain services and entities
+- **No infrastructure concerns** - uses interfaces for external dependencies
+
+### Infrastructure Layer
+**Implements interfaces for external systems**
+- **External Systems Integration**: Third-party APIs, messaging systems
+- **Email Providers**: SMTP, SendGrid, etc.
+- **Storage Services**: Blob storage, file systems
+- **Identity**: Authentication and authorization implementations
+- **System Clock**: Time providers, date/time services
+- **Depends on Application and Domain**
+- **No database access** - database concerns belong in Persistence layer
+
+### Persistence Layer
+**Handles all database-related concerns** (separated from Infrastructure)
+- **Database Context**: EF Core DbContext
+- **Entity Configurations**: Fluent API configurations for EF Core
+- **Repositories**: Implementation of repository interfaces from Domain/Application
+- **Migrations**: Database migrations
+- **Database-specific implementations**: Queries, stored procedures
+- **Depends on Application and Domain**
+- **No business logic** - only data access and persistence
+
+### Presentation Layer
+**API endpoints and request/response handling**
+- **Minimal API Endpoints**: HTTP endpoints using ASP.NET Core Minimal APIs
+- **Request/Response Models**: DTOs for API contracts
+- **Input Validation**: Basic request validation
+- **Depends only on Application** (not on Infrastructure or Persistence directly)
+- **No business logic** - delegates to application services
+
+### Facade Layer
+**Module registration and configuration**
+- **Module Registration**: `ModuleExtensions.cs` to configure services and pipeline
+- **Dependency Injection Setup**: Registers all module services
+- **Depends on all other layers** within the module to orchestrate registration
+
+### General Guidelines
+- Use dependency injection for all cross-layer dependencies
+- Avoid circular dependencies
+- Do not use a mediator library; call service methods directly from the Presentation layer
+- Follow the dependency rule: outer layers depend on inner layers, never the reverse
 
 ## 6. Testing and Architecture Validation
 

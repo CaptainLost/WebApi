@@ -74,7 +74,8 @@ public static class IdentitySeeder
             return;
         }
 
-        adminUser.Roles = [Role.Admin];
+        adminUser.AssignRole(Role.Admin);
+        
         await context.SaveChangesAsync();
 
         logger.LogInformation("Admin user '{Username}' created successfully", username);
@@ -110,7 +111,7 @@ public static class IdentitySeeder
                 continue;
             }
 
-            regularUser.Roles = [Role.User];
+            regularUser.AssignRole(Role.User);
         }
 
         await context.SaveChangesAsync();

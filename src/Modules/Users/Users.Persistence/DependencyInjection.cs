@@ -12,6 +12,7 @@ public static class DependencyInjection
         IConfiguration configuration)
     {
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IRoleRepository, RoleRepository>();
 
         return services;
     }
