@@ -2,9 +2,9 @@ using Core.Domain.Entities;
 using Core.Domain.Messaging;
 using Core.Domain.Pagination;
 using Core.Persistence;
+using Core.Persistence.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Users.Application.Abstractions.Repositories;
-using Users.Persistence.Specifications;
 
 namespace Users.Persistence.Repositories;
 
@@ -56,10 +56,14 @@ internal sealed class UserRepository : IUserRepository
 
     public async Task<PagedResult<User>> GetUsersPagedAsync(PageRequest pageRequest, CancellationToken cancellationToken = default)
     {
-        IQueryable<User> query = m_dbContext.Users.AsQueryable();
-
-        UserFillterSpecification specification = new UserFillterSpecification(pageRequest);
-        query = specification.Apply(query);
+        IQueryable<User> query = m_dbContext.Users
+            .Search(pageRequest.SearchTerm)
+                .By(u => u.NormalizedUserName!)
+                .By(u => u.NormalizedEmail!)
+            .Sort(pageRequest.SortBy, pageRequest.SortDescending)
+                .By("username", u => u.UserName!)
+                .By("email", u => u.Email!)
+                .WithDefault(u => u.UserName!);
 
         int totalCount = await query.CountAsync(cancellationToken);
 

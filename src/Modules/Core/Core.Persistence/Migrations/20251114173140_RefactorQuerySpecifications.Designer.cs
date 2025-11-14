@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Core.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251111190933_Inital")]
-    partial class Inital
+    [Migration("20251114173140_RefactorQuerySpecifications")]
+    partial class RefactorQuerySpecifications
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -54,6 +54,11 @@ namespace Core.Persistence.Migrations
                         {
                             Id = 4,
                             Name = "ReadUserList"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Name = "AssignRole"
                         });
                 });
 

@@ -51,6 +51,11 @@ namespace Core.Persistence.Migrations
                         {
                             Id = 4,
                             Name = "ReadUserList"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Name = "AssignRole"
                         });
                 });
 
