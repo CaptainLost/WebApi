@@ -1,6 +1,6 @@
-namespace Core.Domain.Pagination;
-
 using Core.Domain.Messaging;
+
+namespace Core.Domain.Pagination;
 
 public static class PaginationErrors
 {

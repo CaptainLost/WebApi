@@ -5,7 +5,10 @@ namespace Core.Presentation.Common;
 
 public static class ErrorResults
 {
-    public static IResult FromError(Error error, int statusCode) => Results.Json(
-        data: new ErrorResponse(error.Code, error.Description),
-        statusCode: statusCode);
+    public static IResult FromError(Error error, int statusCode)
+    {
+        return Results.Json(
+            data: new ErrorResponse(error.Code, error.Description),
+            statusCode: statusCode);
+    }
 }

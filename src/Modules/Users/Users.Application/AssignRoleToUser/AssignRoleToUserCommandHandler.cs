@@ -1,8 +1,8 @@
 using Core.Application.Abstractions.Messaging.Commands;
-using Core.Domain.Entities;
-using Core.Domain.Errors;
 using Core.Domain.Messaging;
 using Users.Application.Abstractions.Repositories;
+using Users.Domain.Entities;
+using Users.Domain.Errors;
 
 namespace Users.Application.AssignRoleToUser;
 

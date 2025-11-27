@@ -1,18 +1,19 @@
-using Core.Domain.Entities;
+using Users.Domain.Entities;
 using Core.Domain.Messaging;
 using Core.Domain.Pagination;
 using Core.Persistence;
 using Core.Persistence.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Users.Application.Abstractions.Repositories;
+using Users.Persistence.Database;
 
 namespace Users.Persistence.Repositories;
 
 internal sealed class UserRepository : IUserRepository
 {
-    private readonly ApplicationDbContext m_dbContext;
+    private readonly UsersDbContext m_dbContext;
 
-    public UserRepository(ApplicationDbContext dbContext)
+    public UserRepository(UsersDbContext dbContext)
     {
         m_dbContext = dbContext;
     }
@@ -88,5 +89,17 @@ internal sealed class UserRepository : IUserRepository
         await m_dbContext.SaveChangesAsync(cancellationToken);
 
         return Result.Success();
+    }
+
+    public async Task<HashSet<string>> GetUserPermissionsAsync(string userId, CancellationToken cancellationToken = default)
+    {
+        return await m_dbContext.Users
+            .Where(x => x.Id == userId)
+            .Include(x => x.Roles)
+            .ThenInclude(x => x.Permissions)
+            .SelectMany(x => x.Roles)
+            .SelectMany(x => x.Permissions)
+            .Select(x => x.Name)
+            .ToHashSetAsync(cancellationToken);
     }
 }

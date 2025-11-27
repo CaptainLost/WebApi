@@ -8,4 +8,4 @@ WebApplication app = builder.Build();
 
 await app.ConfigurePipelineAsync();
 
-app.Run();
+await app.RunAsync();

@@ -1,8 +1,8 @@
 using Core.Application.Abstractions.Messaging.Queries;
-using Core.Domain.Entities;
 using Core.Domain.Messaging;
 using Core.Domain.Pagination;
 using Users.Application.Abstractions.Repositories;
+using Users.Domain.Entities;
 
 namespace Users.Application.GetUsers;
 

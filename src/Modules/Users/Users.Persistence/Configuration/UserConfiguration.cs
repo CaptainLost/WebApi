@@ -1,4 +1,5 @@
-using Core.Domain.Entities;
+using Authentication.Persistence.Constants;
+using Users.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -8,6 +9,6 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
 {
     public void Configure(EntityTypeBuilder<User> builder)
     {
-
+        builder.ToTable(TableNames.Users);
     }
 }

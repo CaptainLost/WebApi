@@ -1,4 +1,3 @@
-using Authentication.Facade;
 using Core.Facade;
 using Users.Facade;
 
@@ -26,8 +25,7 @@ internal static class HostApplicationBuilderExtensions
     {
         builder.Services
             .AddCoreModule(builder.Environment, builder.Configuration)
-            .AddUsersModule(builder.Environment, builder.Configuration)
-            .AddAuthenticationModule(builder.Environment, builder.Configuration);
+            .AddUsersModule(builder.Environment, builder.Configuration);
 
         return builder;
     }

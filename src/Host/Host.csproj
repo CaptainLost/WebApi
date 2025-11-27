@@ -9,7 +9,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Modules\Core\Core.Facade\Core.Facade.csproj" />
     <ProjectReference Include="..\Modules\Users\Users.Facade\Users.Facade.csproj" />
-    <ProjectReference Include="..\Modules\Authentication\Authentication.Facade\Authentication.Facade.csproj" />
   </ItemGroup>
 
 </Project>
