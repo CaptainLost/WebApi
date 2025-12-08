@@ -1,7 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Net;
-
-namespace Core.Domain.Messaging;
+﻿namespace Core.Domain.Messaging;
 
 public sealed record Error(string Code, string Description)
 {

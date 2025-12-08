@@ -5,18 +5,23 @@ namespace Host.Extensions;
 
 internal static class MigrationExtensions
 {
-    internal static void ApplyMigrations(this IApplicationBuilder app)
+    internal static async Task ApplyMigrationsAsync(this IApplicationBuilder app)
     {
         using var scope = app.ApplicationServices.CreateScope();
 
-        ApplyMigrations<UsersDbContext>(scope);
+        await ApplyMigrationsAsync<UsersDbContext>(scope);
+        await SeedDataAsync(scope);
     }
 
-    private static void ApplyMigrations<TDbContext>(IServiceScope scope)
+    private static async Task ApplyMigrationsAsync<TDbContext>(IServiceScope scope)
         where TDbContext : DbContext
     {
-        using var context = scope.ServiceProvider.GetRequiredService<TDbContext>();
+        var context = scope.ServiceProvider.GetRequiredService<TDbContext>();
+        await context.Database.MigrateAsync();
+    }
 
-        context.Database.Migrate();
+    private static async Task SeedDataAsync(IServiceScope scope)
+    {
+        await IdentitySeeder.SeedAsync(scope.ServiceProvider);
     }
 }

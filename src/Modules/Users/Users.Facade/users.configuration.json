@@ -1,0 +1,13 @@
+{
+    "Jwt": {
+        "Secret": "SuperDuperSecretKeyThatIsAtLeast32CharactersLongForHS256Algorithm",
+        "Issuer": "AppName",
+        "Audience": "AppName",
+        "ExpirationInMinutes": 60
+    },
+    "DefaultUser": {
+        "Username": "admin",
+        "Email": "admin@localhost.com",
+        "Password": "AdminPassword123!"
+    }
+}

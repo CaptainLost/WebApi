@@ -1,44 +1,45 @@
 using System.Security.Claims;
-using Users.Application.Abstractions.Repositories;
-using Users.Application.Abstractions.Services;
-using Core.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
+using Users.Domain.Users;
 
 namespace Users.Infrastructure.Authorization;
 
 internal sealed class PermissionAuthorizationHandler : AuthorizationHandler<PermissionRequirement>
 {
-    private readonly IServiceScopeFactory m_serviceScopeFactory;
+    private readonly IServiceScopeFactory _serviceScopeFactory;
 
     public PermissionAuthorizationHandler(IServiceScopeFactory serviceScopeFactory)
     {
-        m_serviceScopeFactory = serviceScopeFactory;
+        _serviceScopeFactory = serviceScopeFactory;
     }
 
     protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context,
         PermissionRequirement requirement)
     {
-        if (context.User.Identity == null || !context.User.Identity.IsAuthenticated)
+        string? userId = context.User.Claims.FirstOrDefault(
+            x => x.Type == ClaimTypes.NameIdentifier)?.Value;
+
+        if (!Guid.TryParse(userId, out Guid parsedUserId))
         {
             return;
         }
 
-        string? userId = context.User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-        if (string.IsNullOrWhiteSpace(userId))
-        {
-            return;
-        }
-
-        using IServiceScope scope = m_serviceScopeFactory.CreateScope();
+        using IServiceScope scope = _serviceScopeFactory.CreateScope();
 
         IUserRepository userRepository = scope.ServiceProvider
             .GetRequiredService<IUserRepository>();
 
-        HashSet<string> permissions = await userRepository.GetUserPermissionsAsync(userId);
+        User? user = await userRepository.GetByIdAsync(parsedUserId);
 
-        if (permissions.Contains(nameof(PermissionType.FullAccess)) || permissions.Contains(requirement.Permission))
+        if (user == null)
+        {
+            return;
+        }
+
+        HashSet<string> permissions = user.GetPermissions();
+
+        if (permissions.Contains(requirement.Permission))
         {
             context.Succeed(requirement);
         }

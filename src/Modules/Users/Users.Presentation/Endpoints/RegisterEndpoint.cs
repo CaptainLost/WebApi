@@ -1,39 +1,39 @@
-using Users.Application.Register;
 using Core.Application.Abstractions.Messaging.Commands;
 using Core.Domain.Messaging;
 using Core.Presentation.Common;
 using Core.Presentation.Endpoints;
-using Users.Presentation.Endpoints;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
+using Users.Application.Users.RegisterUser;
 
 namespace Users.Presentation.Endpoints;
 
 internal sealed class RegisterEndpoint : IEndpoint
 {
     public sealed record RegisterRequest(string Username, string Email, string Password);
+    public sealed record RegisterResponse(string Token);
 
     public void MapEndpoint(RouteGroupBuilder group)
     {
         group.MapPost(UsersRoutes.Register, async delegate (RegisterRequest request,
-            ICommandHandler<RegisterCommand> commandHandler,
+            ICommandHandler<RegisterUserCommand, string> commandHandler,
             CancellationToken cancellationToken)
         {
-            RegisterCommand registerCommand = new(request.Username, request.Email, request.Password);
-            Result registrationResult = await commandHandler.HandleAsync(registerCommand, cancellationToken);
+            RegisterUserCommand registerCommand = new(request.Username, request.Email, request.Password);
+            Result<string> tokenResult = await commandHandler.HandleAsync(registerCommand, cancellationToken);
 
-            if (registrationResult.IsSuccess)
+            if (tokenResult.IsSuccess)
             {
-                return Results.Created($"/api/users/{request.Username}", request.Username);
+                return Results.Ok(new RegisterResponse(tokenResult.Value));
             }
 
-            return ErrorResults.FromError(registrationResult.Error, StatusCodes.Status400BadRequest);
+            return ErrorResults.FromError(tokenResult.Error, StatusCodes.Status400BadRequest);
         })
         .WithName("Register")
         .WithSummary("Registers a new user")
-        .WithDescription("Creates a new user account with the provided credentials and automatically logs them in.")
-        .Produces(StatusCodes.Status201Created)
+        .WithDescription("Creates a new user account with the provided credentials and returns a JWT token.")
+        .Produces<RegisterResponse>(StatusCodes.Status200OK)
         .Produces<ErrorResponse>(StatusCodes.Status400BadRequest);
     }
 }

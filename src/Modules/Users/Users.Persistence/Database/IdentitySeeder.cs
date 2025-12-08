@@ -1,119 +1,122 @@
-using Users.Domain.Entities;
-using Core.Persistence;
-using Microsoft.AspNetCore.Identity;
+using Core.Domain.Messaging;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Users.Application.Abstractions;
+using Users.Domain.Users;
+using Users.Domain.ValueObjects;
 
 namespace Users.Persistence.Database;
 
 public static class IdentitySeeder
 {
-    // public static async Task SeedAsync(IServiceProvider serviceProvider)
-    // {
-    //     UserManager<User> userManager = serviceProvider.GetRequiredService<UserManager<User>>();
-    //     ApplicationDbContext context = serviceProvider.GetRequiredService<ApplicationDbContext>();
-    //     IConfiguration configuration = serviceProvider.GetRequiredService<IConfiguration>();
-    //     ILogger<ApplicationDbContext> logger = serviceProvider.GetRequiredService<ILogger<ApplicationDbContext>>();
+    public static async Task SeedAsync(IServiceProvider serviceProvider)
+    {
+        IUserRepository userRepository = serviceProvider.GetRequiredService<IUserRepository>();
+        IPasswordHashingService passwordHashingService = serviceProvider.GetRequiredService<IPasswordHashingService>();
+        UsersDbContext dbContext = serviceProvider.GetRequiredService<UsersDbContext>();
 
-    //     await SeedUsersAsync(userManager, context, configuration, logger);
-    // }
+        var configuration = serviceProvider.GetRequiredService<IConfiguration>();
+        var logger = serviceProvider.GetRequiredService<ILogger<UsersDbContext>>();
 
-    // private static async Task SeedUsersAsync(
-    //     UserManager<User> userManager,
-    //     ApplicationDbContext context,
-    //     IConfiguration configuration,
-    //     ILogger logger)
-    // {
-    //     if (userManager.Users.Any())
-    //     {
-    //         return;
-    //     }
+        await SeedAdminUserAsync(userRepository, passwordHashingService, dbContext, configuration, logger);
+    }
 
-    //     string? password = configuration["DefaultUser:Password"];
+    private static async Task SeedAdminUserAsync(
+        IUserRepository userRepository,
+        IPasswordHashingService passwordHashingService,
+        UsersDbContext dbContext,
+        IConfiguration configuration,
+        ILogger<UsersDbContext> logger)
+    {
+        var username = configuration["DefaultUser:Username"];
+        var email = configuration["DefaultUser:Email"];
+        var password = configuration["DefaultUser:Password"];
 
-    //     if (string.IsNullOrWhiteSpace(password))
-    //     {
-    //         logger.LogWarning("Default user password not configured. Skipping user seeding");
-    //         return;
-    //     }
+        if (string.IsNullOrWhiteSpace(password))
+        {
+            logger.LogWarning("Default user password not configured. Skipping user seeding");
+            return;
+        }
 
-    //     await SeedAdminUserAsync(userManager, context, configuration, password, logger);
-    //     await SeedRegularUsersAsync(userManager, context, password, logger);
-    // }
+        if (string.IsNullOrWhiteSpace(username))
+        {
+            username = "admin";
+        }
 
-    // private static async Task SeedAdminUserAsync(
-    //     UserManager<User> userManager,
-    //     ApplicationDbContext context,
-    //     IConfiguration configuration,
-    //     string password,
-    //     ILogger logger)
-    // {
-    //     string? username = configuration["DefaultUser:Username"];
-    //     string? email = configuration["DefaultUser:Email"];
+        var emailValue = string.IsNullOrWhiteSpace(email) ? $"{username}@localhost.com" : email;
 
-    //     if (string.IsNullOrWhiteSpace(username))
-    //     {
-    //         username = "admin";
-    //     }
+        Result<User> createUserResult = await CreateUser(username, emailValue, password, userRepository, passwordHashingService);
+        if (createUserResult.IsFailure)
+        {
+            logger.LogError("Failed to create admin user: {Error}", createUserResult.Error.Description);
+            return;
+        }
 
-    //     User adminUser = new User
-    //     {
-    //         UserName = username,
-    //         Email = string.IsNullOrWhiteSpace(email) ? null : email,
-    //         EmailConfirmed = !string.IsNullOrWhiteSpace(email)
-    //     };
+        // Fetch the existing role from the database instead of using the static instance
+        Role? defaultRole = await dbContext.Roles
+            .FirstOrDefaultAsync(r => r.Id == Role.DefaultUserRole.Id);
 
-    //     IdentityResult result = await userManager.CreateAsync(adminUser, password);
+        if (defaultRole is null)
+        {
+            logger.LogError("Default role not found in database. Cannot assign role to admin user");
+            return;
+        }
 
-    //     if (!result.Succeeded)
-    //     {
-    //         logger.LogError("Failed to create admin user. Errors: {Errors}",
-    //             string.Join(", ", result.Errors.Select(e => e.Description)));
-                
-    //         return;
-    //     }
+        createUserResult.Value.AssignRole(defaultRole);
 
-    //     adminUser.AssignRole(Role.Admin);
-        
-    //     await context.SaveChangesAsync();
+        userRepository.Add(createUserResult.Value);
 
-    //     logger.LogInformation("Admin user '{Username}' created successfully", username);
-    // }
+        await userRepository.SaveChangesAsync();
 
-    // private static async Task SeedRegularUsersAsync(
-    //     UserManager<User> userManager,
-    //     ApplicationDbContext context,
-    //     string password,
-    //     ILogger logger)
-    // {
-    //     const int userCount = 100;
+        logger.LogInformation("Admin user '{Username}' created successfully", username);
+    }
 
-    //     for (int i = 1; i <= userCount; i++)
-    //     {
-    //         string username = $"user{i}";
-    //         string email = $"user{i}@example.com";
+    private static async Task<Result<User>> CreateUser(
+        string username, string email, string password,
+        IUserRepository userRepository,
+        IPasswordHashingService passwordHashingService,
+        CancellationToken cancellationToken = default)
+    {
+        Result<Username> usernameResult = Username.Create(username);
+        if (usernameResult.IsFailure)
+        {
+            return Result.Failure<User>(usernameResult.Error);
+        }
 
-    //         User regularUser = new User
-    //         {
-    //             UserName = username,
-    //             Email = email,
-    //             EmailConfirmed = true
-    //         };
+        Result<Email> emailResult = Email.Create(email);
+        if (emailResult.IsFailure)
+        {
+            return Result.Failure<User>(emailResult.Error);
+        }
 
-    //         IdentityResult result = await userManager.CreateAsync(regularUser, password);
+        Result<Nickname> nicknameResult = Nickname.Create(username);
+        if (nicknameResult.IsFailure)
+        {
+            return Result.Failure<User>(nicknameResult.Error);
+        }
 
-    //         if (!result.Succeeded)
-    //         {
-    //             logger.LogWarning("Failed to create user '{Username}'. Errors: {Errors}",
-    //                 username,
-    //                 string.Join(", ", result.Errors.Select(e => e.Description)));
-    //             continue;
-    //         }
+        bool isUsernameUnique = await userRepository.IsUsernameUniqueAsync(usernameResult.Value, cancellationToken);
+        if (!isUsernameUnique)
+        {
+            return Result.Failure<User>(UserErrors.UsernameAlreadyTaken(username));
+        }
 
-    //         regularUser.AssignRole(Role.User);
-    //     }
+        bool isEmailUnique = await userRepository.IsEmailUniqueAsync(emailResult.Value, cancellationToken);
+        if (!isEmailUnique)
+        {
+            return Result.Failure<User>(UserErrors.EmailAlreadyTaken(email));
+        }
 
-    //     await context.SaveChangesAsync();
-    // }
+        string passwordHash = passwordHashingService.HashPassword(password, out byte[] passwordSalt);
+
+        Result<User> createUserResult = User.Create(Guid.NewGuid(), usernameResult.Value, emailResult.Value, passwordHash, passwordSalt, nicknameResult.Value);
+        if (createUserResult.IsFailure)
+        {
+            return Result.Failure<User>(createUserResult.Error);
+        }
+
+        return createUserResult;
+    }
 }

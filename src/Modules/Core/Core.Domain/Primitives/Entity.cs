@@ -39,7 +39,17 @@ public abstract class Entity : IEquatable<Entity>
     /// <returns>True if both entities are equal, otherwise false.</returns>
     public static bool operator ==(Entity? first, Entity? second)
     {
-        return first != null && second != null && first.Equals(second);
+        if (ReferenceEquals(first, second))
+        {
+            return true;
+        }
+
+        if (first is null || second is null)
+        {
+            return false;
+        }
+
+        return first.Equals(second);
     }
 
     /// <summary>

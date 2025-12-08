@@ -1,13 +1,13 @@
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Users.Domain.Entities;
+using Users.Domain.Users;
 
 namespace Users.Persistence.Database;
 
-public sealed class UsersDbContext : IdentityDbContext<User>
+public sealed class UsersDbContext : DbContext
 {
     internal DbSet<User> Users => Set<User>();
     internal DbSet<Role> Roles => Set<Role>();
+    internal DbSet<Permission> Permissions => Set<Permission>();
 
     public UsersDbContext(DbContextOptions<UsersDbContext> options)
         : base(options)

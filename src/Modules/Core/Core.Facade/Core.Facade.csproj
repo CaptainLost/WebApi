@@ -14,4 +14,10 @@
     <ProjectReference Include="..\Core.Presentation\Core.Presentation.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="*.configuration*.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

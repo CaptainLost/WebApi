@@ -7,11 +7,18 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Core\Core.Facade\Core.Facade.csproj" />
     <ProjectReference Include="..\Users.Domain\Users.Domain.csproj" />
     <ProjectReference Include="..\Users.Application\Users.Application.csproj" />
     <ProjectReference Include="..\Users.Persistence\Users.Persistence.csproj" />
     <ProjectReference Include="..\Users.Infrastructure\Users.Infrastructure.csproj" />
     <ProjectReference Include="..\Users.Presentation\Users.Presentation.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="*.configuration*.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

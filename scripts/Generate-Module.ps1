@@ -172,10 +172,10 @@ $appLines += "public static class DependencyInjection"
 $appLines += "{"
 $appLines += "    public static IServiceCollection Add${ModuleName}Application(this IServiceCollection services)"
 $appLines += "    {"
-$appLines += "        Assembly assembly = typeof(DependencyInjection).Assembly;"
-$appLines += ""
-$appLines += "        services.AddCommandHandlers(assembly);"
-$appLines += "        services.AddQueryHandlers(assembly);"
+$appLines += "        // Assembly assembly = typeof(DependencyInjection).Assembly;"
+$appLines += "        //"
+$appLines += "        // services.AddCommandHandlers(assembly);"
+$appLines += "        // services.AddQueryHandlers(assembly);"
 $appLines += ""
 $appLines += "        return services;"
 $appLines += "    }"
@@ -294,60 +294,79 @@ Write-Step "Creating $ModuleName.Facade..."
 $facadePath = "$modulesPath\$ModuleName.Facade"
 New-Item -ItemType Directory -Path $facadePath -Force | Out-Null
 
-New-ProjectFile -Path "$facadePath\$ModuleName.Facade.csproj" `
-    -Packages @(
-        'Microsoft.Extensions.Configuration.Abstractions',
-        'Microsoft.Extensions.DependencyInjection.Abstractions',
-        'Microsoft.Extensions.Hosting.Abstractions'
-    ) `
-    -ProjectReferences @(
-        "..\$ModuleName.Domain\$ModuleName.Domain.csproj",
-        "..\$ModuleName.Application\$ModuleName.Application.csproj",
-        "..\$ModuleName.Persistence\$ModuleName.Persistence.csproj",
-        "..\$ModuleName.Infrastructure\$ModuleName.Infrastructure.csproj",
-        "..\$ModuleName.Presentation\$ModuleName.Presentation.csproj"
-    )
+# Create csproj with copy configuration files
+$facadeCsprojLines = @()
+$facadeCsprojLines += '<Project Sdk="Microsoft.NET.Sdk">'
+$facadeCsprojLines += ''
+$facadeCsprojLines += '  <ItemGroup>'
+$facadeCsprojLines += '    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" />'
+$facadeCsprojLines += '    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />'
+$facadeCsprojLines += '    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />'
+$facadeCsprojLines += '  </ItemGroup>'
+$facadeCsprojLines += ''
+$facadeCsprojLines += '  <ItemGroup>'
+$facadeCsprojLines += "    <ProjectReference Include=`"..\..\Core\Core.Facade\Core.Facade.csproj`" />"
+$facadeCsprojLines += "    <ProjectReference Include=`"..\$ModuleName.Domain\$ModuleName.Domain.csproj`" />"
+$facadeCsprojLines += "    <ProjectReference Include=`"..\$ModuleName.Application\$ModuleName.Application.csproj`" />"
+$facadeCsprojLines += "    <ProjectReference Include=`"..\$ModuleName.Persistence\$ModuleName.Persistence.csproj`" />"
+$facadeCsprojLines += "    <ProjectReference Include=`"..\$ModuleName.Infrastructure\$ModuleName.Infrastructure.csproj`" />"
+$facadeCsprojLines += "    <ProjectReference Include=`"..\$ModuleName.Presentation\$ModuleName.Presentation.csproj`" />"
+$facadeCsprojLines += '  </ItemGroup>'
+$facadeCsprojLines += ''
+$facadeCsprojLines += '  <ItemGroup>'
+$facadeCsprojLines += '    <None Update="*.configuration*.json">'
+$facadeCsprojLines += '      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>'
+$facadeCsprojLines += '    </None>'
+$facadeCsprojLines += '  </ItemGroup>'
+$facadeCsprojLines += ''
+$facadeCsprojLines += '</Project>'
 
-# Create ModuleExtensions.cs for Facade
-$facadeLines = @()
-$facadeLines += "using $ModuleName.Application;"
-$facadeLines += "using $ModuleName.Domain;"
-$facadeLines += "using $ModuleName.Infrastructure;"
-$facadeLines += "using $ModuleName.Persistence;"
-$facadeLines += "using $ModuleName.Presentation;"
-$facadeLines += "using Microsoft.AspNetCore.Builder;"
-$facadeLines += "using Microsoft.Extensions.Configuration;"
-$facadeLines += "using Microsoft.Extensions.DependencyInjection;"
-$facadeLines += "using Microsoft.Extensions.Hosting;"
-$facadeLines += ""
-$facadeLines += "namespace $ModuleName.Facade;"
-$facadeLines += ""
-$facadeLines += "public static class ModuleExtensions"
-$facadeLines += "{"
-$facadeLines += "    public static IServiceCollection Add${ModuleName}Module("
-$facadeLines += "        this IServiceCollection services,"
-$facadeLines += "        IHostEnvironment environment,"
-$facadeLines += "        IConfiguration configuration)"
-$facadeLines += "    {"
-$facadeLines += "        services"
-$facadeLines += "            .Add${ModuleName}Domain()"
-$facadeLines += "            .Add${ModuleName}Application()"
-$facadeLines += "            .Add${ModuleName}Persistence(configuration)"
-$facadeLines += "            .Add${ModuleName}Infrastructure(environment, configuration)"
-$facadeLines += "            .Add${ModuleName}Presentation();"
-$facadeLines += ""
-$facadeLines += "        return services;"
-$facadeLines += "    }"
-$facadeLines += ""
-$facadeLines += "    public static WebApplication Configure${ModuleName}Module(this WebApplication app)"
-$facadeLines += "    {"
-$facadeLines += "        app.Configure${ModuleName}Presentation();"
-$facadeLines += ""
-$facadeLines += "        return app;"
-$facadeLines += "    }"
-$facadeLines += "}"
+$facadeCsprojLines | Out-File -FilePath "$facadePath\$ModuleName.Facade.csproj" -Encoding UTF8
 
-$facadeLines | Out-File -FilePath "$facadePath\ModuleExtensions.cs" -Encoding UTF8
+# Create Module class implementing IModule
+$moduleClassLines = @()
+$moduleClassLines += "using Core.Facade.Abstractions;"
+$moduleClassLines += "using Core.Facade.Extensions;"
+$moduleClassLines += "using Microsoft.AspNetCore.Builder;"
+$moduleClassLines += "using $ModuleName.Application;"
+$moduleClassLines += "using $ModuleName.Domain;"
+$moduleClassLines += "using $ModuleName.Infrastructure;"
+$moduleClassLines += "using $ModuleName.Persistence;"
+$moduleClassLines += "using $ModuleName.Presentation;"
+$moduleClassLines += ""
+$moduleClassLines += "namespace $ModuleName.Facade;"
+$moduleClassLines += ""
+$moduleClassLines += "public sealed class ${ModuleName}Module : IModule"
+$moduleClassLines += "{"
+$moduleClassLines += "    public string Name => `"$ModuleName`";"
+$moduleClassLines += "    public int Order => 10;"
+$moduleClassLines += ""
+$moduleClassLines += "    public void RegisterServices(WebApplicationBuilder builder)"
+$moduleClassLines += "    {"
+$moduleClassLines += "        builder.Services"
+$moduleClassLines += "            .Add${ModuleName}Domain()"
+$moduleClassLines += "            .Add${ModuleName}Application()"
+$moduleClassLines += "            .Add${ModuleName}Persistence(builder.Configuration)"
+$moduleClassLines += "            .Add${ModuleName}Infrastructure(builder.Environment, builder.Configuration)"
+$moduleClassLines += "            .Add${ModuleName}Presentation();"
+$moduleClassLines += "    }"
+$moduleClassLines += ""
+$moduleClassLines += "    public void ConfigureApplication(WebApplication app)"
+$moduleClassLines += "    {"
+$moduleClassLines += "        app.Configure${ModuleName}Presentation();"
+$moduleClassLines += "    }"
+$moduleClassLines += "}"
+
+$moduleClassLines | Out-File -FilePath "$facadePath\${ModuleName}Module.cs" -Encoding UTF8
+
+# Create empty configuration files
+$moduleNameLower = $ModuleName.ToLower()
+$configLines = @()
+$configLines += "{"
+$configLines += "}"
+
+$configLines | Out-File -FilePath "$facadePath\${moduleNameLower}.configuration.json" -Encoding UTF8
+$configLines | Out-File -FilePath "$facadePath\${moduleNameLower}.configuration.Development.json" -Encoding UTF8
 
 dotnet sln $solutionPath add "$facadePath\$ModuleName.Facade.csproj" 2>&1 | Out-Null
 Write-Success "Created $ModuleName.Facade"
@@ -386,15 +405,15 @@ Write-Host ""
 Write-Host "1. Add reference to Host.csproj:" -ForegroundColor White
 Write-Host "   <ProjectReference Include=`"..\Modules\$ModuleName\$ModuleName.Facade\$ModuleName.Facade.csproj`" />" -ForegroundColor Gray
 Write-Host ""
-Write-Host "2. In HostApplicationBuilderExtensions.cs add:" -ForegroundColor White
+Write-Host "2. In ModuleRegistry.cs add:" -ForegroundColor White
 Write-Host "   using $ModuleName.Facade;" -ForegroundColor Gray
-Write-Host "   .Add${ModuleName}Module(builder.Environment, builder.Configuration)" -ForegroundColor Gray
+Write-Host "   public static IModule[] Modules { get; } = [new CoreModule(), new UsersModule(), new ${ModuleName}Module()];" -ForegroundColor Gray
 Write-Host ""
-Write-Host "3. In WebApplicationExtensions.cs add:" -ForegroundColor White
-Write-Host "   using $ModuleName.Facade;" -ForegroundColor Gray
-Write-Host "   .Configure${ModuleName}Module()" -ForegroundColor Gray
-Write-Host ""
-Write-Host "4. Configure endpoints in $ModuleName.Presentation/DependencyInjection.cs:" -ForegroundColor White
+Write-Host "3. Configure endpoints in $ModuleName.Presentation/DependencyInjection.cs:" -ForegroundColor White
 Write-Host "   - Uncomment and configure the RouteGroupBuilder" -ForegroundColor Gray
 Write-Host "   - Endpoints implementing IEndpoint will be automatically registered!" -ForegroundColor Gray
+Write-Host ""
+Write-Host "4. Configure module-specific settings in:" -ForegroundColor White
+Write-Host "   - ${moduleNameLower}.configuration.json (production settings)" -ForegroundColor Gray
+Write-Host "   - ${moduleNameLower}.configuration.Development.json (development settings)" -ForegroundColor Gray
 Write-Host ""
