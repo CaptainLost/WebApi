@@ -1,6 +1,5 @@
 using Core.Domain.Messaging;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -36,27 +35,13 @@ public static class IdentitySeeder
         var email = defaultUserSettings.Email;
         var password = defaultUserSettings.Password;
 
-        if (string.IsNullOrWhiteSpace(password))
-        {
-            logger.LogWarning("Default user password not configured. Skipping user seeding");
-            return;
-        }
-
-        if (string.IsNullOrWhiteSpace(username))
-        {
-            username = "admin";
-        }
-
-        var emailValue = string.IsNullOrWhiteSpace(email) ? $"{username}@localhost.com" : email;
-
-        Result<User> createUserResult = await CreateUser(username, emailValue, password, userRepository, passwordHashingService);
+        Result<User> createUserResult = await CreateUser(username, email, password, userRepository, passwordHashingService);
         if (createUserResult.IsFailure)
         {
             logger.LogError("Failed to create admin user: {Error}", createUserResult.Error.Description);
             return;
         }
 
-        // Fetch the existing role from the database instead of using the static instance
         Role? defaultRole = await dbContext.Roles
             .FirstOrDefaultAsync(r => r.Id == Role.DefaultUserRole.Id);
 
