@@ -1,4 +1,3 @@
-using Core.Domain.Errors;
 using Core.Domain.Messaging;
 using Core.Domain.Primitives;
 
@@ -17,18 +16,22 @@ public sealed class Email : ValueObject
 
     public string Value { get; private set; } = string.Empty;
 
-    public static Result<Email> Create(string email) =>
-        Result.Create(email)
+    public static Result<Email> Create(string email)
+    {
+        return Result.Create(email)
             .Ensure(
                 e => !string.IsNullOrWhiteSpace(e),
-                DomainErrors.IsEmpty(Name))
+                EmailErrors.Empty)
             .Ensure(
                 e => e.Length <= MaxLength,
-                DomainErrors.TooLong(Name))
+                EmailErrors.TooLong)
             .Ensure(
-                e => e.Split('@').Length == 2,
-                DomainErrors.InvalidFormat(Name))
+                e => e.Split('@').Length == 2
+                     && !string.IsNullOrWhiteSpace(e.Split('@')[0])
+                     && !string.IsNullOrWhiteSpace(e.Split('@')[1]),
+                EmailErrors.InvalidFormat)
             .Map(e => new Email(e));
+    }
 
     public override IEnumerable<object> GetAtomicValues()
     {

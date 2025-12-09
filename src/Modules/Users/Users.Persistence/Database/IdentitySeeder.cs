@@ -18,7 +18,7 @@ public static class IdentitySeeder
         IPasswordHashingService passwordHashingService = serviceProvider.GetRequiredService<IPasswordHashingService>();
         UsersDbContext dbContext = serviceProvider.GetRequiredService<UsersDbContext>();
 
-        var defaultUserSettings = serviceProvider.GetRequiredService<IOptions<DefaultUserSettings>>();
+        var defaultUserSettings = serviceProvider.GetRequiredService<IOptions<AdminUserSettings>>();
         var logger = serviceProvider.GetRequiredService<ILogger<UsersDbContext>>();
 
         await SeedAdminUserAsync(userRepository, passwordHashingService, dbContext, defaultUserSettings.Value, logger);
@@ -28,7 +28,7 @@ public static class IdentitySeeder
         IUserRepository userRepository,
         IPasswordHashingService passwordHashingService,
         UsersDbContext dbContext,
-        DefaultUserSettings defaultUserSettings,
+        AdminUserSettings defaultUserSettings,
         ILogger<UsersDbContext> logger)
     {
         var username = defaultUserSettings.Username;

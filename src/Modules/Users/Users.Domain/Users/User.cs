@@ -1,5 +1,6 @@
 using Core.Domain.Messaging;
 using Core.Domain.Primitives;
+using Users.Domain.Configuration;
 using Users.Domain.ValueObjects;
 
 namespace Users.Domain.Users;
@@ -73,14 +74,14 @@ public sealed class User : Entity
         return LockoutEnd.HasValue && LockoutEnd.Value > DateTime.UtcNow;
     }
 
-    public void RecordFailedLogin()
+    public void RecordFailedLogin(UserSettings settings)
     {
         FailedLoginAttempts++;
 
-        if (FailedLoginAttempts >= 5)
+        if (FailedLoginAttempts >= settings.MaxFailedLoginAttempts)
         {
             LockoutCount++;
-            LockoutEnd = DateTime.UtcNow.AddMinutes(CalculateLockoutDurationInMinutes());
+            LockoutEnd = DateTime.UtcNow.AddMinutes(CalculateLockoutDurationInMinutes(settings));
             LastLockout = DateTime.UtcNow;
         }
     }
@@ -118,11 +119,8 @@ public sealed class User : Entity
             .ToHashSet();
     }
 
-    private int CalculateLockoutDurationInMinutes()
+    private int CalculateLockoutDurationInMinutes(UserSettings settings)
     {
-        // Move to configuration
-        const int baseLockoutTime = 15;
-
-        return baseLockoutTime * (int)Math.Pow(2, LockoutCount - 1);
+        return settings.BaseLockoutDurationMinutes * (int)Math.Pow(2, LockoutCount - 1);
     }
 }

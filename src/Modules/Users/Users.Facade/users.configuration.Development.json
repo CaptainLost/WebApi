@@ -5,9 +5,13 @@
         "Audience": "AppName.Development",
         "ExpirationInMinutes": 120
     },
-    "DefaultUser": {
+    "AdminUser": {
         "Username": "admin",
         "Email": "admin@localhost.com",
         "Password": "/"
+    },
+    "UserSettings": {
+        "MaxFailedLoginAttempts": 3,
+        "BaseLockoutDurationMinutes": 5
     }
 }

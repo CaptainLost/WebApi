@@ -1,5 +1,7 @@
 using Core.Domain.Messaging;
+using Microsoft.Extensions.Options;
 using Users.Application.Abstractions;
+using Users.Domain.Configuration;
 using Users.Domain.Users;
 using Users.Domain.ValueObjects;
 
@@ -10,15 +12,18 @@ internal sealed class AuthenticationService : IAuthenticationService
     private readonly IUserRepository _userRepository;
     private readonly IPasswordHashingService _passwordHashingService;
     private readonly IJwtTokenService _jwtTokenService;
+    private readonly UserSettings _userSettings;
 
     public AuthenticationService(
         IUserRepository userRepository,
         IPasswordHashingService passwordHashingService,
-        IJwtTokenService jwtTokenService)
+        IJwtTokenService jwtTokenService,
+        IOptions<UserSettings> userSettings)
     {
         _userRepository = userRepository;
         _passwordHashingService = passwordHashingService;
         _jwtTokenService = jwtTokenService;
+        _userSettings = userSettings.Value;
     }
 
     public async Task<Result<string>> LoginAsync(User user, string password, CancellationToken cancellationToken = default)
@@ -32,7 +37,7 @@ internal sealed class AuthenticationService : IAuthenticationService
 
         if (!isPasswordValid)
         {
-            user.RecordFailedLogin();
+            user.RecordFailedLogin(_userSettings);
             await _userRepository.SaveChangesAsync();
 
             return Result.Failure<string>(UserErrors.InvalidCredentials);

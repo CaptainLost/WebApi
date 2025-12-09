@@ -9,4 +9,8 @@
     <ProjectReference Include="..\Users.Domain\Users.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="Users.UnitTests" />
+  </ItemGroup>
+
 </Project>

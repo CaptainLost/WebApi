@@ -5,9 +5,13 @@
         "Audience": "AppName",
         "ExpirationInMinutes": 60
     },
-    "DefaultUser": {
+    "AdminUser": {
         "Username": "admin",
         "Email": "admin@localhost.com",
         "Password": "AdminPassword123!"
+    },
+    "UserSettings": {
+        "MaxFailedLoginAttempts": 5,
+        "BaseLockoutDurationMinutes": 15
     }
 }

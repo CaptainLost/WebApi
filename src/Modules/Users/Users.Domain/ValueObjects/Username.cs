@@ -1,4 +1,3 @@
-using Core.Domain.Errors;
 using Core.Domain.Messaging;
 using Core.Domain.Primitives;
 
@@ -24,12 +23,12 @@ public sealed class Username : ValueObject
     {
         if (string.IsNullOrWhiteSpace(username))
         {
-            return Result.Failure<Username>(DomainErrors.IsEmpty(Name));
+            return Result.Failure<Username>(UsernameErrors.Empty);
         }
 
         if (username.Length > MaxLength)
         {
-            return Result.Failure<Username>(DomainErrors.TooLong(Name));
+            return Result.Failure<Username>(UsernameErrors.TooLong);
         }
 
         return new Username(username);
