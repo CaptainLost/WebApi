@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Users.Application.Abstractions;
+using Users.Domain.Configuration;
 using Users.Infrastructure.Authentication;
 using Users.Infrastructure.Authorization;
 
@@ -30,9 +32,8 @@ public static class DependencyInjection
         services.AddScoped<IPasswordHashingService, PasswordHashingService>();
         services.AddScoped<IJwtTokenService, JwtTokenService>();
 
-        string jwtSecret = configuration["Jwt:Secret"] ?? throw new InvalidOperationException("JWT Secret is not configured");
-        string jwtIssuer = configuration["Jwt:Issuer"] ?? throw new InvalidOperationException("JWT Issuer is not configured");
-        string jwtAudience = configuration["Jwt:Audience"] ?? throw new InvalidOperationException("JWT Audience is not configured");
+        var jwtSettings = configuration.GetSection(JwtSettings.SectionName).Get<JwtSettings>()
+            ?? throw new InvalidOperationException("JWT configuration is not configured");
 
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
@@ -43,11 +44,11 @@ public static class DependencyInjection
                 {
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(
-                        System.Text.Encoding.UTF8.GetBytes(jwtSecret)),
+                        Encoding.UTF8.GetBytes(jwtSettings.Secret)),
                     ValidateIssuer = true,
-                    ValidIssuer = jwtIssuer,
+                    ValidIssuer = jwtSettings.Issuer,
                     ValidateAudience = true,
-                    ValidAudience = jwtAudience,
+                    ValidAudience = jwtSettings.Audience,
                     ValidateLifetime = true,
                     ClockSkew = TimeSpan.Zero
                 };

@@ -137,13 +137,34 @@ $domainPath = "$modulesPath\$ModuleName.Domain"
 New-Item -ItemType Directory -Path $domainPath -Force | Out-Null
 
 New-ProjectFile -Path "$domainPath\$ModuleName.Domain.csproj" `
-    -Packages @('Microsoft.Extensions.DependencyInjection.Abstractions') `
+    -Packages @(
+        'Microsoft.Extensions.Configuration.Abstractions',
+        'Microsoft.Extensions.DependencyInjection.Abstractions',
+        'Microsoft.Extensions.Options.ConfigurationExtensions'
+    ) `
     -ProjectReferences @("..\..\Core\Core.Domain\Core.Domain.csproj")
 
-New-DependencyInjectionFile `
-    -Path "$domainPath\DependencyInjection.cs" `
-    -Namespace "$ModuleName.Domain" `
-    -MethodName "Add${ModuleName}Domain"
+# Create DependencyInjection.cs for Domain with configuration support
+$domainLines = @()
+$domainLines += "using Microsoft.Extensions.Configuration;"
+$domainLines += "using Microsoft.Extensions.DependencyInjection;"
+$domainLines += ""
+$domainLines += "namespace $ModuleName.Domain;"
+$domainLines += ""
+$domainLines += "public static class DependencyInjection"
+$domainLines += "{"
+$domainLines += "    public static IServiceCollection Add${ModuleName}Domain("
+$domainLines += "        this IServiceCollection services,"
+$domainLines += "        IConfiguration configuration)"
+$domainLines += "    {"
+$domainLines += "        // TODO: Configure domain settings here using Options pattern"
+$domainLines += "        // services.Configure<YourSettings>(configuration.GetSection(YourSettings.SectionName));"
+$domainLines += ""
+$domainLines += "        return services;"
+$domainLines += "    }"
+$domainLines += "}"
+
+$domainLines | Out-File -FilePath "$domainPath\DependencyInjection.cs" -Encoding UTF8
 
 dotnet sln $solutionPath add "$domainPath\$ModuleName.Domain.csproj" 2>&1 | Out-Null
 Write-Success "Created $ModuleName.Domain"
@@ -344,7 +365,7 @@ $moduleClassLines += ""
 $moduleClassLines += "    public void RegisterServices(WebApplicationBuilder builder)"
 $moduleClassLines += "    {"
 $moduleClassLines += "        builder.Services"
-$moduleClassLines += "            .Add${ModuleName}Domain()"
+$moduleClassLines += "            .Add${ModuleName}Domain(builder.Configuration)"
 $moduleClassLines += "            .Add${ModuleName}Application()"
 $moduleClassLines += "            .Add${ModuleName}Persistence(builder.Configuration)"
 $moduleClassLines += "            .Add${ModuleName}Infrastructure(builder.Environment, builder.Configuration)"

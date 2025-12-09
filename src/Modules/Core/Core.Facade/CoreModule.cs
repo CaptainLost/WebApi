@@ -16,7 +16,7 @@ public sealed class CoreModule : IModule
     public void RegisterServices(WebApplicationBuilder builder)
     {
         builder.Services
-            .AddCoreDomain()
+            .AddCoreDomain(builder.Configuration)
             .AddCoreApplication()
             .AddCorePersistence(builder.Configuration)
             .AddCoreInfrastructure(builder.Environment, builder.Configuration)

@@ -3,7 +3,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Users.Application.Abstractions;
+using Users.Domain.Configuration;
 using Users.Domain.Users;
 using Users.Domain.ValueObjects;
 
@@ -17,22 +19,22 @@ public static class IdentitySeeder
         IPasswordHashingService passwordHashingService = serviceProvider.GetRequiredService<IPasswordHashingService>();
         UsersDbContext dbContext = serviceProvider.GetRequiredService<UsersDbContext>();
 
-        var configuration = serviceProvider.GetRequiredService<IConfiguration>();
+        var defaultUserSettings = serviceProvider.GetRequiredService<IOptions<DefaultUserSettings>>();
         var logger = serviceProvider.GetRequiredService<ILogger<UsersDbContext>>();
 
-        await SeedAdminUserAsync(userRepository, passwordHashingService, dbContext, configuration, logger);
+        await SeedAdminUserAsync(userRepository, passwordHashingService, dbContext, defaultUserSettings.Value, logger);
     }
 
     private static async Task SeedAdminUserAsync(
         IUserRepository userRepository,
         IPasswordHashingService passwordHashingService,
         UsersDbContext dbContext,
-        IConfiguration configuration,
+        DefaultUserSettings defaultUserSettings,
         ILogger<UsersDbContext> logger)
     {
-        var username = configuration["DefaultUser:Username"];
-        var email = configuration["DefaultUser:Email"];
-        var password = configuration["DefaultUser:Password"];
+        var username = defaultUserSettings.Username;
+        var email = defaultUserSettings.Email;
+        var password = defaultUserSettings.Password;
 
         if (string.IsNullOrWhiteSpace(password))
         {

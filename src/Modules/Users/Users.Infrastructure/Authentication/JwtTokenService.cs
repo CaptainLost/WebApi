@@ -1,28 +1,21 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Users.Application.Abstractions;
+using Users.Domain.Configuration;
 using Users.Domain.Users;
 
 namespace Users.Infrastructure.Authentication;
 
 internal sealed class JwtTokenService : IJwtTokenService
 {
-    private readonly IConfiguration _configuration;
-    private readonly string _secret;
-    private readonly string _issuer;
-    private readonly string _audience;
-    private readonly int _expirationInMinutes;
+    private readonly JwtSettings _jwtSettings;
 
-    public JwtTokenService(IConfiguration configuration)
+    public JwtTokenService(IOptions<JwtSettings> jwtSettings)
     {
-        _configuration = configuration;
-        _secret = configuration["Jwt:Secret"] ?? throw new InvalidOperationException("JWT Secret is not configured");
-        _issuer = configuration["Jwt:Issuer"] ?? throw new InvalidOperationException("JWT Issuer is not configured");
-        _audience = configuration["Jwt:Audience"] ?? throw new InvalidOperationException("JWT Audience is not configured");
-        _expirationInMinutes = int.Parse(configuration["Jwt:ExpirationInMinutes"] ?? "60");
+        _jwtSettings = jwtSettings.Value;
     }
 
     public string GenerateToken(User user)
@@ -41,14 +34,14 @@ internal sealed class JwtTokenService : IJwtTokenService
             claims.Add(new Claim(ClaimTypes.Role, role.Name));
         }
 
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secret));
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Secret));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var token = new JwtSecurityToken(
-            issuer: _issuer,
-            audience: _audience,
+            issuer: _jwtSettings.Issuer,
+            audience: _jwtSettings.Audience,
             claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(_expirationInMinutes),
+            expires: DateTime.UtcNow.AddMinutes(_jwtSettings.ExpirationInMinutes),
             signingCredentials: credentials
         );
 

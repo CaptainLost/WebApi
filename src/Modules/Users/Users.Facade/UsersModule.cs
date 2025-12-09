@@ -16,7 +16,7 @@ public sealed class UsersModule : IModule
     public void RegisterServices(WebApplicationBuilder builder)
     {
         builder.Services
-            .AddUsersDomain()
+            .AddUsersDomain(builder.Configuration)
             .AddUsersApplication()
             .AddUsersPersistence(builder.Configuration)
             .AddUsersInfrastructure(builder.Environment, builder.Configuration)
