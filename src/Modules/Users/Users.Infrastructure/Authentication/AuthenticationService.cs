@@ -10,17 +10,20 @@ namespace Users.Infrastructure.Authentication;
 internal sealed class AuthenticationService : IAuthenticationService
 {
     private readonly IUserRepository _userRepository;
+    private readonly IRoleRepository _roleRepository;
     private readonly IPasswordHashingService _passwordHashingService;
     private readonly IJwtTokenService _jwtTokenService;
     private readonly UserSettings _userSettings;
 
     public AuthenticationService(
         IUserRepository userRepository,
+        IRoleRepository roleRepository,
         IPasswordHashingService passwordHashingService,
         IJwtTokenService jwtTokenService,
         IOptions<UserSettings> userSettings)
     {
         _userRepository = userRepository;
+        _roleRepository = roleRepository;
         _passwordHashingService = passwordHashingService;
         _jwtTokenService = jwtTokenService;
         _userSettings = userSettings.Value;
@@ -96,7 +99,14 @@ internal sealed class AuthenticationService : IAuthenticationService
 
         User newUser = createUserResult.Value;
 
-        newUser.AssignRole(Role.DefaultUserRole);
+        Role? defaultRole = await _roleRepository.GetByName(Role.DefaultUserRoleName, cancellationToken);
+
+        if (defaultRole == null)
+        {
+            return Result.Failure<string>(RoleErrors.NotFound(Role.DefaultUserRoleName));
+        }
+
+        newUser.AssignRole(defaultRole);
 
         _userRepository.Add(newUser);
         await _userRepository.SaveChangesAsync();
