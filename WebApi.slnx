@@ -1,4 +1,8 @@
 <Solution>
+  <Properties>
+    <Property Name="Configuration.ActiveConfiguration.Id" Value="Debug|Any CPU" />
+    <Property Name="Configuration.DefaultStartupProject" Value="src/Host/Host.csproj" />
+  </Properties>
   <Configurations>
     <Platform Name="Any CPU" />
     <Platform Name="x64" />
