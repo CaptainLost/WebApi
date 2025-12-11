@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Users.Application.Users.AssignRoleToUser;
 using Users.Domain.Users;
-using Core.Presentation.Extensions;
+
 
 namespace Users.Presentation.Endpoints;
 
@@ -26,14 +26,9 @@ internal sealed class AssignRoleToUserEndpoint : IEndpoint
             AssignRoleToUserCommand command = new(userId, request.RoleName);
             Result result = await commandHandler.HandleAsync(command, cancellationToken);
 
-            if (result.IsSuccess)
-            {
-                return Results.NoContent();
-            }
-
-            return ErrorResults.FromError(result.Error, StatusCodes.Status400BadRequest);
+            return result.Match(() => Results.Ok(), ApiResults.Problem);
         })
-        .RequireAuthorization(Permission.AssignRole)
+        .RequireAuthorization(Permission.AssignRole.Name)
         .WithName("AssignRoleToUser")
         .WithSummary("Assigns a role to a user")
         .WithDescription("Assigns a specified role to a user by their user ID.")

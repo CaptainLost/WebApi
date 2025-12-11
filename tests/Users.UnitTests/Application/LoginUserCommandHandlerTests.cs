@@ -67,7 +67,7 @@ public sealed class LoginUserCommandHandlerTests
         // Arrange
         var command = new LoginUserCommand("testuser", "WrongPassword");
         var user = CreateValidUser();
-        var error = new Error("Auth.InvalidPassword", "Invalid password");
+        var error = Error.Failure("Auth.InvalidPassword", "Invalid password");
         
         A.CallTo(() => _userRepository.GetByUsernameAsync(A<Username>._, A<CancellationToken>._))
             .Returns(user);

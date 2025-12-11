@@ -29,7 +29,7 @@ public sealed class UsernameTests
 
         // Assert
         Assert.True(result.IsFailure);
-        Assert.Equal("Username.Empty", result.Error.Code);
+        Assert.Equal(UsernameErrors.Empty.Code, result.Error.Code);
     }
 
     [Fact]
@@ -43,7 +43,7 @@ public sealed class UsernameTests
 
         // Assert
         Assert.True(result.IsFailure);
-        Assert.Equal("Username.TooLong", result.Error.Code);
+        Assert.Equal(UsernameErrors.TooLong.Code, result.Error.Code);
     }
 
     [Fact]

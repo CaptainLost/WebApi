@@ -1,12 +1,11 @@
 using Microsoft.AspNetCore.Builder;
-using Users.Domain.Users;
 
 namespace Users.Presentation.Extensions;
 
 internal static class AuthorizationExtensions
 {
-    public static RouteHandlerBuilder RequireAuthorization(this RouteHandlerBuilder builder, Permission permission)
+    public static RouteHandlerBuilder RequireAuthorization(this RouteHandlerBuilder builder, string permissionName)
     {
-        return builder.RequireAuthorization(permission.Name);
+        return builder.RequireAuthorization(permissionName);
     }
 }

@@ -2,6 +2,7 @@ using Core.Application.Abstractions.Messaging.Commands;
 using Core.Domain.Messaging;
 using Core.Presentation.Common;
 using Core.Presentation.Endpoints;
+
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
@@ -23,12 +24,9 @@ internal sealed class LoginEndpoint : IEndpoint
             LoginUserCommand loginCommand = new(request.Username, request.Password);
             Result<string> tokenResult = await commandHandler.HandleAsync(loginCommand, cancellationToken);
 
-            if (tokenResult.IsSuccess)
-            {
-                return Results.Ok(new LoginResponse(tokenResult.Value));
-            }
-
-            return ErrorResults.FromError(tokenResult.Error, StatusCodes.Status401Unauthorized);
+            return tokenResult.Match(
+                token => Results.Ok(new LoginResponse(token)),
+                ApiResults.Problem);
         })
         .WithName("Login")
         .WithSummary("Authenticates a user")

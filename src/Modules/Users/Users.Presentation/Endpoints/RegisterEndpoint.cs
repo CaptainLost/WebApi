@@ -2,6 +2,7 @@ using Core.Application.Abstractions.Messaging.Commands;
 using Core.Domain.Messaging;
 using Core.Presentation.Common;
 using Core.Presentation.Endpoints;
+
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
@@ -23,12 +24,9 @@ internal sealed class RegisterEndpoint : IEndpoint
             RegisterUserCommand registerCommand = new(request.Username, request.Email, request.Password);
             Result<string> tokenResult = await commandHandler.HandleAsync(registerCommand, cancellationToken);
 
-            if (tokenResult.IsSuccess)
-            {
-                return Results.Ok(new RegisterResponse(tokenResult.Value));
-            }
-
-            return ErrorResults.FromError(tokenResult.Error, StatusCodes.Status400BadRequest);
+            return tokenResult.Match(
+                token => Results.Ok(new RegisterResponse(token)),
+                ApiResults.Problem);
         })
         .WithName("Register")
         .WithSummary("Registers a new user")

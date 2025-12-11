@@ -273,8 +273,8 @@ New-ProjectFile -Path "$presentationPath\$ModuleName.Presentation.csproj" `
 # Create DependencyInjection.cs for Presentation with endpoint configuration
 $presentationLines = @()
 $presentationLines += "using System.Reflection;"
+$presentationLines += "using Core.Domain.Messaging;"
 $presentationLines += "using Core.Presentation.Endpoints;"
-$presentationLines += "using Core.Presentation.Extensions;"
 $presentationLines += "using Microsoft.AspNetCore.Builder;"
 $presentationLines += "using Microsoft.AspNetCore.Http;"
 $presentationLines += "using Microsoft.AspNetCore.Routing;"

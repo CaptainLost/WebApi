@@ -2,13 +2,13 @@ using Core.Application.Abstractions.Messaging.Queries;
 using Core.Domain.Messaging;
 using Core.Presentation.Common;
 using Core.Presentation.Endpoints;
+
 using Core.Presentation.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Users.Application.Users.GetUsers;
 using Users.Domain.Users;
-using Core.Presentation.Extensions;
 
 namespace Users.Presentation.Endpoints;
 
@@ -30,14 +30,9 @@ internal sealed class GetUserListEndpoint : IEndpoint
 
             Result<GetUsersResponse> result = await queryHandler.HandleAsync(query, cancellationToken);
 
-            if (result.IsSuccess)
-            {
-                return Results.Ok(result.Value);
-            }
-
-            return ErrorResults.FromError(result.Error, StatusCodes.Status400BadRequest);
+            return result.Match(Results.Ok, ApiResults.Problem);
         })
-        .RequireAuthorization(Permission.GetUserList)
+        .RequireAuthorization(Permission.GetUserList.Name)
         .WithName("GetUserList")
         .WithSummary("Get paginated list of users with filtering and sorting")
         .WithDescription("Retrieves a paginated list of users with optional filtering by username and sorting capabilities")

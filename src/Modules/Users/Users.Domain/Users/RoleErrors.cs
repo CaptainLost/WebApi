@@ -4,7 +4,7 @@ namespace Users.Domain.Users;
 
 public static class RoleErrors
 {
-    public static Error NotFound(string roleName) => new(
-        Code: "Role.NotFound",
-        Description: $"Role '{roleName}' not found.");
+    public static Error NotFound(string roleName) => Error.NotFound(
+        "Role.NotFound",
+        $"Role '{roleName}' not found.");
 }

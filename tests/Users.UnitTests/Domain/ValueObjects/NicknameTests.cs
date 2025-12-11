@@ -29,7 +29,7 @@ public sealed class NicknameTests
 
         // Assert
         Assert.True(result.IsFailure);
-        Assert.Equal("Nickname.Empty", result.Error.Code);
+        Assert.Equal(NicknameErrors.Empty.Code, result.Error.Code);
     }
 
     [Fact]
@@ -43,7 +43,7 @@ public sealed class NicknameTests
 
         // Assert
         Assert.True(result.IsFailure);
-        Assert.Equal("Nickname.TooLong", result.Error.Code);
+        Assert.Equal(NicknameErrors.TooLong.Code, result.Error.Code);
     }
 
     [Fact]

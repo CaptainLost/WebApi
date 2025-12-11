@@ -11,4 +11,8 @@
     <ProjectReference Include="..\Modules\Users\Users.Facade\Users.Facade.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="Users.ArchitectureTests" />
+  </ItemGroup>
+
 </Project>

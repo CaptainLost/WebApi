@@ -4,11 +4,11 @@ namespace Users.Domain.ValueObjects;
 
 public static class NicknameErrors
 {
-    public static Error Empty => new(
-        Code: "Nickname.Empty",
-        Description: "Nickname cannot be empty.");
+    public static Error Empty => Error.Validation(
+        "Nickname.Empty",
+        "Nickname cannot be empty.");
 
-    public static Error TooLong => new(
-        Code: "Nickname.TooLong",
-        Description: $"Nickname cannot be longer than {Nickname.MaxLength} characters.");
+    public static Error TooLong => Error.Validation(
+        "Nickname.TooLong",
+        $"Nickname cannot be longer than {Nickname.MaxLength} characters.");
 }

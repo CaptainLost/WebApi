@@ -1,3 +1,4 @@
+using Core.Domain.Messaging;
 using Users.Domain.ValueObjects;
 
 namespace Users.UnitTests.Domain.ValueObjects;
@@ -29,7 +30,7 @@ public sealed class EmailTests
 
         // Assert
         Assert.True(result.IsFailure);
-        Assert.True(result.Error.Code == "Email.Empty" || result.Error.Code == "Error.NullValue");
+        Assert.True(result.Error.Code == EmailErrors.Empty.Code || result.Error.Code == Error.NullValue.Code);
     }
 
     [Fact]
@@ -43,7 +44,7 @@ public sealed class EmailTests
 
         // Assert
         Assert.True(result.IsFailure);
-        Assert.Equal("Email.TooLong", result.Error.Code);
+        Assert.Equal(EmailErrors.TooLong.Code, result.Error.Code);
     }
 
     [Theory]
@@ -58,7 +59,7 @@ public sealed class EmailTests
 
         // Assert
         Assert.True(result.IsFailure);
-        Assert.Equal("Email.InvalidFormat", result.Error.Code);
+        Assert.Equal(EmailErrors.InvalidFormat.Code, result.Error.Code);
     }
 
     [Fact]
@@ -72,7 +73,7 @@ public sealed class EmailTests
 
         // Assert
         Assert.True(result.IsFailure);
-        Assert.Equal("Email.InvalidFormat", result.Error.Code);
+        Assert.Equal(EmailErrors.InvalidFormat.Code, result.Error.Code);
     }
 
     [Fact]

@@ -68,7 +68,7 @@ public sealed class RegisterUserCommandHandlerTests
     {
         // Arrange
         var command = new RegisterUserCommand("testuser", "test@example.com", "Password123!");
-        var error = new Error("Auth.Failed", "Registration failed");
+        var error = Error.Failure("Auth.Failed", "Registration failed");
         
         A.CallTo(() => _authenticationService.RegisterAsync(
             A<string>._,
