@@ -6,7 +6,7 @@
     Name of the module to create (e.g., "Authentication", "Orders", "Payments")
 
 .EXAMPLE
-    .\Generate-Module-Simple.ps1 -ModuleName "Orders"
+    .\Generate-Module.ps1 -ModuleName "Orders"
 #>
 
 param(
@@ -31,7 +31,7 @@ function Write-ErrorMsg {
 }
 
 # Constants
-$SolutionFile = "..\WebApi.sln"
+$SolutionFile = "..\WebApi.slnx"
 $ModulesBasePath = "..\src\Modules"
 
 # Check if we are in the scripts directory
@@ -392,6 +392,12 @@ $configLines | Out-File -FilePath "$facadePath\${moduleNameLower}.configuration.
 dotnet sln $solutionPath add "$facadePath\$ModuleName.Facade.csproj" 2>&1 | Out-Null
 Write-Success "Created $ModuleName.Facade"
 
+# 7. Add reference to Host project
+Write-Step "Adding reference to Host.csproj..."
+$hostCsprojPath = "..\src\Host\Host.csproj"
+dotnet add $hostCsprojPath reference "$facadePath\$ModuleName.Facade.csproj" 2>&1 | Out-Null
+Write-Success "Added reference to Host.csproj"
+
 # Build solution
 Write-Host ""
 Write-Step "Building solution..."
@@ -423,18 +429,15 @@ Write-Host ""
 
 Write-Host "To integrate the module with Host:" -ForegroundColor Cyan
 Write-Host ""
-Write-Host "1. Add reference to Host.csproj:" -ForegroundColor White
-Write-Host "   <ProjectReference Include=`"..\Modules\$ModuleName\$ModuleName.Facade\$ModuleName.Facade.csproj`" />" -ForegroundColor Gray
+Write-Host "1. In ModuleRegistry.cs add:" -ForegroundColor White
+Write-Host "   - Add using statement: using $ModuleName.Facade;" -ForegroundColor Gray
+Write-Host "   - Add to _modules array: new ${ModuleName}Module()" -ForegroundColor Gray
 Write-Host ""
-Write-Host "2. In ModuleRegistry.cs add:" -ForegroundColor White
-Write-Host "   using $ModuleName.Facade;" -ForegroundColor Gray
-Write-Host "   public static IModule[] Modules { get; } = [new CoreModule(), new UsersModule(), new ${ModuleName}Module()];" -ForegroundColor Gray
-Write-Host ""
-Write-Host "3. Configure endpoints in $ModuleName.Presentation/DependencyInjection.cs:" -ForegroundColor White
+Write-Host "2. Configure endpoints in $ModuleName.Presentation/DependencyInjection.cs:" -ForegroundColor White
 Write-Host "   - Uncomment and configure the RouteGroupBuilder" -ForegroundColor Gray
 Write-Host "   - Endpoints implementing IEndpoint will be automatically registered!" -ForegroundColor Gray
 Write-Host ""
-Write-Host "4. Configure module-specific settings in:" -ForegroundColor White
+Write-Host "3. Configure module-specific settings in:" -ForegroundColor White
 Write-Host "   - ${moduleNameLower}.configuration.json (production settings)" -ForegroundColor Gray
 Write-Host "   - ${moduleNameLower}.configuration.Development.json (development settings)" -ForegroundColor Gray
 Write-Host ""
