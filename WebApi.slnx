@@ -1,0 +1,43 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/Solution Items/">
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+  </Folder>
+  <Folder Name="/src/" />
+  <Folder Name="/src/Host/">
+    <Project Path="src/Host/Host.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/" />
+  <Folder Name="/src/Modules/Core/">
+    <Project Path="src/Modules/Core/Core.Application/Core.Application.csproj" />
+    <Project Path="src/Modules/Core/Core.Domain/Core.Domain.csproj" />
+    <Project Path="src/Modules/Core/Core.Facade/Core.Facade.csproj" />
+    <Project Path="src/Modules/Core/Core.Infrastructure/Core.Infrastructure.csproj" />
+    <Project Path="src/Modules/Core/Core.Persistence/Core.Persistence.csproj" />
+    <Project Path="src/Modules/Core/Core.Presentation/Core.Presentation.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Users/">
+    <Project Path="src/Modules/Users/Users.Application/Users.Application.csproj" />
+    <Project Path="src/Modules/Users/Users.Domain/Users.Domain.csproj" />
+    <Project Path="src/Modules/Users/Users.Facade/Users.Facade.csproj" />
+    <Project Path="src/Modules/Users/Users.Infrastructure/Users.Infrastructure.csproj" />
+    <Project Path="src/Modules/Users/Users.Persistence/Users.Persistence.csproj" />
+    <Project Path="src/Modules/Users/Users.Presentation/Users.Presentation.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Common.ArchitectureTests/Common.ArchitectureTests.csproj" />
+  </Folder>
+  <Folder Name="/tests/Core/">
+    <Project Path="tests/Core.ArchitectureTests/Core.ArchitectureTests.csproj" />
+    <Project Path="tests/Core.UnitTests/Core.UnitTests.csproj" />
+  </Folder>
+  <Folder Name="/tests/Users/">
+    <Project Path="tests/Users.ArchitectureTests/Users.ArchitectureTests.csproj" />
+    <Project Path="tests/Users.UnitTests/Users.UnitTests.csproj" />
+  </Folder>
+</Solution>
