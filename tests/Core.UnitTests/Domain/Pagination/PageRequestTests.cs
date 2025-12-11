@@ -118,7 +118,7 @@ public sealed class PageRequestTests
     }
 
     [Fact]
-    public void Create_WithWhitespaceSearchTerm_ShouldSetSearchTermToNull()
+    public void Create_WithWhitespaceSearchTer_ShouldSetSearchTermToNull()
     {
         // Act
         var pageRequest = PageRequest.Create(pageNumber: 1, pageSize: 10, searchTerm: "   ");
@@ -138,7 +138,7 @@ public sealed class PageRequestTests
     }
 
     [Fact]
-    public void Create_WithEmptySearchTerm_ShouldSetSearchTermToNull()
+    public void Create_WithEmptySearchTer_ShouldSetSearchTermToNull()
     {
         // Act
         var pageRequest = PageRequest.Create(pageNumber: 1, pageSize: 10, searchTerm: string.Empty);

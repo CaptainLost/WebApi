@@ -4,19 +4,19 @@ namespace Core.Persistence.Extensions;
 
 public sealed class SearchBuilder<T>
 {
-    private readonly IQueryable<T> m_query;
-    private readonly string? m_searchTerm;
-    private readonly List<Expression<Func<T, string>>> m_searchProperties = new();
+    private readonly IQueryable<T> _query;
+    private readonly string? _searchTerm;
+    private readonly List<Expression<Func<T, string>>> _searchProperties = new();
 
     internal SearchBuilder(IQueryable<T> query, string? searchTerm)
     {
-        m_query = query;
-        m_searchTerm = searchTerm;
+        _query = query;
+        _searchTerm = searchTerm;
     }
 
     public SearchBuilder<T> By(Expression<Func<T, string>> property)
     {
-        m_searchProperties.Add(property);
+        _searchProperties.Add(property);
 
         return this;
     }
@@ -30,15 +30,15 @@ public sealed class SearchBuilder<T>
 
     private IQueryable<T> Apply()
     {
-        if (string.IsNullOrWhiteSpace(m_searchTerm) || m_searchProperties.Count == 0)
+        if (string.IsNullOrWhiteSpace(_searchTerm) || _searchProperties.Count == 0)
         {
-            return m_query;
+            return _query;
         }
 
-        string searchUpper = m_searchTerm.ToUpperInvariant();
+        string searchUpper = _searchTerm.ToUpperInvariant();
         Expression<Func<T, bool>>? combinedFilter = null;
 
-        foreach (Expression<Func<T, string>> property in m_searchProperties)
+        foreach (Expression<Func<T, string>> property in _searchProperties)
         {
             Expression<Func<T, bool>> filter = QueryableExtensions.BuildContainsExpression(property, searchUpper);
             combinedFilter = combinedFilter == null
@@ -46,6 +46,6 @@ public sealed class SearchBuilder<T>
                 : QueryableExtensions.CombineOr(combinedFilter, filter);
         }
 
-        return combinedFilter != null ? m_query.Where(combinedFilter) : m_query;
+        return combinedFilter != null ? _query.Where(combinedFilter) : _query;
     }
 }

@@ -11,33 +11,33 @@ internal sealed class QueryHandlerLoggingDecorator<TQuery, TResponse>(
     : IQueryHandler<TQuery, TResponse>
     where TQuery : IQuery<TResponse>
 {
-    private readonly IQueryHandler<TQuery, TResponse> m_decorated = decorated;
-    private readonly ILogger<QueryHandlerLoggingDecorator<TQuery, TResponse>> m_logger = logger;
+    private readonly IQueryHandler<TQuery, TResponse> _decorated = decorated;
+    private readonly ILogger<QueryHandlerLoggingDecorator<TQuery, TResponse>> _logger = logger;
 
     public async Task<Result<TResponse>> HandleAsync(TQuery query, CancellationToken cancellationToken)
     {
         string queryName = typeof(TQuery).Name;
 
-        m_logger.LogInformation("Executing query: {QueryName}", queryName);
+        _logger.LogInformation("Executing query: {QueryName}", queryName);
 
         Stopwatch stopwatch = Stopwatch.StartNew();
 
         try
         {
-            Result<TResponse> result = await m_decorated.HandleAsync(query, cancellationToken);
+            Result<TResponse> result = await _decorated.HandleAsync(query, cancellationToken);
 
             stopwatch.Stop();
 
             if (result.IsSuccess)
             {
-                m_logger.LogInformation(
+                _logger.LogInformation(
                     "Query {QueryName} executed successfully in {ElapsedMilliseconds}ms",
                     queryName,
                     stopwatch.ElapsedMilliseconds);
             }
             else
             {
-                m_logger.LogWarning(
+                _logger.LogWarning(
                     "Query {QueryName} failed in {ElapsedMilliseconds}ms with error: {Error}",
                     queryName,
                     stopwatch.ElapsedMilliseconds,
@@ -50,7 +50,7 @@ internal sealed class QueryHandlerLoggingDecorator<TQuery, TResponse>(
         {
             stopwatch.Stop();
 
-            m_logger.LogError(
+            _logger.LogError(
                 ex,
                 "Query {QueryName} threw an exception after {ElapsedMilliseconds}ms",
                 queryName,

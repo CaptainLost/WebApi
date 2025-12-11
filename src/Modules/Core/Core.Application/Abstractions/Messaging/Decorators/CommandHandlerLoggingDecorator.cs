@@ -11,33 +11,33 @@ internal sealed class CommandHandlerLoggingDecorator<TCommand>(
     : ICommandHandler<TCommand>
     where TCommand : ICommand
 {
-    private readonly ICommandHandler<TCommand> m_decorated = decorated;
-    private readonly ILogger<CommandHandlerLoggingDecorator<TCommand>> m_logger = logger;
+    private readonly ICommandHandler<TCommand> _decorated = decorated;
+    private readonly ILogger<CommandHandlerLoggingDecorator<TCommand>> _logger = logger;
 
     public async Task<Result> HandleAsync(TCommand command, CancellationToken cancellationToken)
     {
         string commandName = typeof(TCommand).Name;
 
-        m_logger.LogInformation("Executing command: {CommandName}", commandName);
+        _logger.LogInformation("Executing command: {CommandName}", commandName);
 
         Stopwatch stopwatch = Stopwatch.StartNew();
 
         try
         {
-            Result result = await m_decorated.HandleAsync(command, cancellationToken);
+            Result result = await _decorated.HandleAsync(command, cancellationToken);
 
             stopwatch.Stop();
 
             if (result.IsSuccess)
             {
-                m_logger.LogInformation(
+                _logger.LogInformation(
                     "Command {CommandName} executed successfully in {ElapsedMilliseconds}ms",
                     commandName,
                     stopwatch.ElapsedMilliseconds);
             }
             else
             {
-                m_logger.LogWarning(
+                _logger.LogWarning(
                     "Command {CommandName} failed in {ElapsedMilliseconds}ms with error: {Error}",
                     commandName,
                     stopwatch.ElapsedMilliseconds,
@@ -50,7 +50,7 @@ internal sealed class CommandHandlerLoggingDecorator<TCommand>(
         {
             stopwatch.Stop();
 
-            m_logger.LogError(
+            _logger.LogError(
                 ex,
                 "Command {CommandName} threw an exception after {ElapsedMilliseconds}ms",
                 commandName,
@@ -67,33 +67,33 @@ internal sealed class CommandHandlerLoggingDecorator<TCommand, TResponse>(
     : ICommandHandler<TCommand, TResponse>
     where TCommand : ICommand<TResponse>
 {
-    private readonly ICommandHandler<TCommand, TResponse> m_decorated = decorated;
-    private readonly ILogger<CommandHandlerLoggingDecorator<TCommand, TResponse>> m_logger = logger;
+    private readonly ICommandHandler<TCommand, TResponse> _decorated = decorated;
+    private readonly ILogger<CommandHandlerLoggingDecorator<TCommand, TResponse>> _logger = logger;
 
     public async Task<Result<TResponse>> HandleAsync(TCommand command, CancellationToken cancellationToken)
     {
         string commandName = typeof(TCommand).Name;
 
-        m_logger.LogInformation("Executing command: {CommandName}", commandName);
+        _logger.LogInformation("Executing command: {CommandName}", commandName);
 
         Stopwatch stopwatch = Stopwatch.StartNew();
 
         try
         {
-            Result<TResponse> result = await m_decorated.HandleAsync(command, cancellationToken);
+            Result<TResponse> result = await _decorated.HandleAsync(command, cancellationToken);
 
             stopwatch.Stop();
 
             if (result.IsSuccess)
             {
-                m_logger.LogInformation(
+                _logger.LogInformation(
                     "Command {CommandName} executed successfully in {ElapsedMilliseconds}ms",
                     commandName,
                     stopwatch.ElapsedMilliseconds);
             }
             else
             {
-                m_logger.LogWarning(
+                _logger.LogWarning(
                     "Command {CommandName} failed in {ElapsedMilliseconds}ms with error: {Error}",
                     commandName,
                     stopwatch.ElapsedMilliseconds,
@@ -106,7 +106,7 @@ internal sealed class CommandHandlerLoggingDecorator<TCommand, TResponse>(
         {
             stopwatch.Stop();
 
-            m_logger.LogError(
+            _logger.LogError(
                 ex,
                 "Command {CommandName} threw an exception after {ElapsedMilliseconds}ms",
                 commandName,

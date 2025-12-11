@@ -200,7 +200,7 @@ public sealed class PaginationMetadataTests
     }
 
     [Fact]
-    public void Create_WithSingleItem_ShouldHaveOnePage()
+    public void Create_WithSingleIte_ShouldHaveOnePage()
     {
         // Act
         var result = PaginationMetadata.Create(totalCount: 1, pageNumber: 1, pageSize: 10);

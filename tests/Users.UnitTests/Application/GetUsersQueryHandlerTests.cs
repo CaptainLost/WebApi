@@ -91,7 +91,7 @@ public sealed class GetUsersQueryHandlerTests
     }
 
     [Fact]
-    public async Task HandleAsync_WithSearchTerm_ShouldPassToRepository()
+    public async Task HandleAsync_WithSearchTer_ShouldPassToRepository()
     {
         // Arrange
         var query = new GetUsersQuery(PageNumber: 1, PageSize: 10, SearchTerm: "test");
