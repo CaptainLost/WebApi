@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" />
+    <PackageReference Include="FluentAssertions" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="NetArchTest.Rules" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Shared\Shared.ArchitectureTests\Shared.ArchitectureTests.csproj" />
+    <ProjectReference Include="..\..\..\src\Modules\Users\Users.Application\Users.Application.csproj" />
+    <ProjectReference Include="..\..\..\src\Modules\Users\Users.Domain\Users.Domain.csproj" />
+    <ProjectReference Include="..\..\..\src\Modules\Users\Users.Facade\Users.Facade.csproj" />
+    <ProjectReference Include="..\..\..\src\Modules\Users\Users.Infrastructure\Users.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\..\src\Modules\Users\Users.Persistence\Users.Persistence.csproj" />
+    <ProjectReference Include="..\..\..\src\Modules\Users\Users.Presentation\Users.Presentation.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+</Project>

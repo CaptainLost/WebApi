@@ -29,15 +29,16 @@
     <Project Path="src/Modules/Users/Users.Persistence/Users.Persistence.csproj" />
     <Project Path="src/Modules/Users/Users.Presentation/Users.Presentation.csproj" />
   </Folder>
-  <Folder Name="/tests/">
-    <Project Path="tests/Common.ArchitectureTests/Common.ArchitectureTests.csproj" />
-  </Folder>
+  <Folder Name="/tests/" />
   <Folder Name="/tests/Core/">
-    <Project Path="tests/Core.ArchitectureTests/Core.ArchitectureTests.csproj" />
-    <Project Path="tests/Core.UnitTests/Core.UnitTests.csproj" />
+    <Project Path="tests/Core/Core.ArchitectureTests/Core.ArchitectureTests.csproj" />
+    <Project Path="tests/Core/Core.UnitTests/Core.UnitTests.csproj" />
+  </Folder>
+  <Folder Name="/tests/Shared/">
+    <Project Path="tests/Shared/Shared.ArchitectureTests/Shared.ArchitectureTests.csproj" />
   </Folder>
   <Folder Name="/tests/Users/">
-    <Project Path="tests/Users.ArchitectureTests/Users.ArchitectureTests.csproj" />
-    <Project Path="tests/Users.UnitTests/Users.UnitTests.csproj" />
+    <Project Path="tests/Users/Users.ArchitectureTests/Users.ArchitectureTests.csproj" />
+    <Project Path="tests/Users/Users.UnitTests/Users.UnitTests.csproj" />
   </Folder>
 </Solution>

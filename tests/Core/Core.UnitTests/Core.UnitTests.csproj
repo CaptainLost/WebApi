@@ -14,8 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Modules\Users\Users.Application\Users.Application.csproj" />
-    <ProjectReference Include="..\..\src\Modules\Users\Users.Domain\Users.Domain.csproj" />
+    <ProjectReference Include="..\..\..\src\Modules\Core\Core.Domain\Core.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>
