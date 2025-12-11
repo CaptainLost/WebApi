@@ -1,3 +1,4 @@
+using FluentAssertions;
 using Users.Domain.Configuration;
 using Users.Domain.Users;
 using Users.Domain.ValueObjects;
@@ -9,8 +10,9 @@ public sealed class UserTests
     private static Username CreateValidUsername() => Username.Create("testuser").Value;
     private static Email CreateValidEmail() => Email.Create("test@example.com").Value;
     private static Nickname CreateValidNickname() => Nickname.Create("TestNick").Value;
-    private const string ValidPasswordHash = "valid-hash";
-    private static readonly byte[] ValidPasswordSalt = [1, 2, 3, 4];
+    private static Password CreateValidPassword() => Password.Create(
+        new string('A', PasswordHashingConstants.HashHexLength),
+        new byte[PasswordHashingConstants.SaltSize]).Value;
 
     private static UserSettings CreateUserSettings(int maxFailedAttempts = 5, int baseLockoutMinutes = 15)
     {
@@ -29,20 +31,20 @@ public sealed class UserTests
         var username = CreateValidUsername();
         var email = CreateValidEmail();
         var nickname = CreateValidNickname();
+        var password = CreateValidPassword();
 
         // Act
-        var result = User.Create(id, username, email, ValidPasswordHash, ValidPasswordSalt, nickname);
+        var result = User.Create(id, username, email, password, nickname);
 
         // Assert
-        Assert.True(result.IsSuccess);
-        Assert.Equal(id, result.Value.Id);
-        Assert.Equal(username, result.Value.Username);
-        Assert.Equal(email, result.Value.Email);
-        Assert.Equal(nickname, result.Value.Nickname);
-        Assert.Equal(ValidPasswordHash, result.Value.PasswordHash);
-        Assert.Equal(ValidPasswordSalt, result.Value.PasswordSalt);
-        Assert.Equal(0, result.Value.FailedLoginAttempts);
-        Assert.Null(result.Value.LockoutEnd);
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Id.Should().Be(id);
+        result.Value.Username.Should().Be(username);
+        result.Value.Email.Should().Be(email);
+        result.Value.Nickname.Should().Be(nickname);
+        result.Value.Password.Should().Be(password);
+        result.Value.FailedLoginAttempts.Should().Be(0);
+        result.Value.LockoutEnd.Should().BeNull();
     }
 
     [Theory]
@@ -52,52 +54,43 @@ public sealed class UserTests
     public void Create_WithEmptyPasswordHash_ShouldReturnFailure(string? passwordHash)
     {
         // Arrange
-        var id = Guid.NewGuid();
-        var username = CreateValidUsername();
-        var email = CreateValidEmail();
-        var nickname = CreateValidNickname();
+        byte[] validSalt = [1, 2, 3, 4];
 
         // Act
-        var result = User.Create(id, username, email, passwordHash!, ValidPasswordSalt, nickname);
+        var passwordResult = Password.Create(passwordHash!, validSalt);
 
         // Assert
-        Assert.True(result.IsFailure);
-        Assert.Equal(UserErrors.InvalidPasswordHash, result.Error);
+        passwordResult.IsFailure.Should().BeTrue();
+        passwordResult.Error.Should().Be(PasswordErrors.EmptyHash);
     }
 
     [Fact]
     public void Create_WithEmptyPasswordSalt_ShouldReturnFailure()
     {
         // Arrange
-        var id = Guid.NewGuid();
-        var username = CreateValidUsername();
-        var email = CreateValidEmail();
-        var nickname = CreateValidNickname();
+        string validHash = new string('A', PasswordHashingConstants.HashHexLength);
         byte[] emptySalt = [];
 
         // Act
-        var result = User.Create(id, username, email, ValidPasswordHash, emptySalt, nickname);
+        var result = Password.Create(validHash, emptySalt);
 
         // Assert
-        Assert.True(result.IsFailure);
-        Assert.Equal(UserErrors.InvalidPasswordHash, result.Error);
+        result.IsFailure.Should().BeTrue();
+        result.Error.Should().Be(PasswordErrors.EmptySalt);
     }
 
     [Fact]
     public void Create_WithNullPasswordSalt_ShouldReturnFailure()
     {
         // Arrange
-        var id = Guid.NewGuid();
-        var username = CreateValidUsername();
-        var email = CreateValidEmail();
-        var nickname = CreateValidNickname();
+        string validHash = new string('A', PasswordHashingConstants.HashHexLength);
 
         // Act
-        var result = User.Create(id, username, email, ValidPasswordHash, null!, nickname);
+        var result = Password.Create(validHash, null!);
 
         // Assert
-        Assert.True(result.IsFailure);
-        Assert.Equal(UserErrors.InvalidPasswordHash, result.Error);
+        result.IsFailure.Should().BeTrue();
+        result.Error.Should().Be(PasswordErrors.EmptySalt);
     }
 
     [Fact]
@@ -112,7 +105,7 @@ public sealed class UserTests
         bool hasRole = user.HasRole(role.Name);
 
         // Assert
-        Assert.True(hasRole);
+        hasRole.Should().BeTrue();
     }
 
     [Fact]
@@ -125,7 +118,7 @@ public sealed class UserTests
         bool hasRole = user.HasRole("NonExistentRole");
 
         // Assert
-        Assert.False(hasRole);
+        hasRole.Should().BeFalse();
     }
 
     [Fact]
@@ -139,8 +132,8 @@ public sealed class UserTests
         var result = user.AssignRole(role);
 
         // Assert
-        Assert.True(result.IsSuccess);
-        Assert.Contains(role, user.Roles);
+        result.IsSuccess.Should().BeTrue();
+        user.Roles.Should().Contain(role);
     }
 
     [Fact]
@@ -155,8 +148,8 @@ public sealed class UserTests
         var result = user.AssignRole(role);
 
         // Assert
-        Assert.True(result.IsFailure);
-        Assert.Equal(UserErrors.AlreadyHasRole(role.Name), result.Error);
+        result.IsFailure.Should().BeTrue();
+        result.Error.Should().Be(UserErrors.AlreadyHasRole(role.Name));
     }
 
     [Fact]
@@ -170,7 +163,7 @@ public sealed class UserTests
         bool isLockedOut = user.IsLockedOut();
 
         // Assert
-        Assert.True(isLockedOut);
+        isLockedOut.Should().BeTrue();
     }
 
     [Fact]
@@ -184,7 +177,7 @@ public sealed class UserTests
         bool isLockedOut = user.IsLockedOut();
 
         // Assert
-        Assert.False(isLockedOut);
+        isLockedOut.Should().BeFalse();
     }
 
     [Fact]
@@ -197,7 +190,7 @@ public sealed class UserTests
         bool isLockedOut = user.IsLockedOut();
 
         // Assert
-        Assert.False(isLockedOut);
+        isLockedOut.Should().BeFalse();
     }
 
     [Fact]
@@ -211,7 +204,7 @@ public sealed class UserTests
         user.RecordFailedLogin(settings);
 
         // Assert
-        Assert.Equal(1, user.FailedLoginAttempts);
+        user.FailedLoginAttempts.Should().Be(1);
     }
 
     [Fact]
@@ -228,11 +221,11 @@ public sealed class UserTests
         }
 
         // Assert
-        Assert.Equal(settings.MaxFailedLoginAttempts, user.FailedLoginAttempts);
-        Assert.NotNull(user.LockoutEnd);
-        Assert.True(user.LockoutEnd > DateTime.UtcNow);
-        Assert.Equal(1, user.LockoutCount);
-        Assert.NotNull(user.LastLockout);
+        user.FailedLoginAttempts.Should().Be(settings.MaxFailedLoginAttempts);
+        user.LockoutEnd.Should().NotBeNull();
+        user.LockoutEnd.Should().BeAfter(DateTime.UtcNow);
+        user.LockoutCount.Should().Be(1);
+        user.LastLockout.Should().NotBeNull();
     }
 
     [Fact]
@@ -257,8 +250,8 @@ public sealed class UserTests
         }
 
         // Assert
-        Assert.Equal(2, user.LockoutCount);
-        Assert.NotNull(user.LockoutEnd);
+        user.LockoutCount.Should().Be(2);
+        user.LockoutEnd.Should().NotBeNull();
         // Second lockout should be longer (exponential backoff)
     }
 
@@ -274,8 +267,8 @@ public sealed class UserTests
         user.ResetFailedLoginAttempts();
 
         // Assert
-        Assert.Equal(0, user.FailedLoginAttempts);
-        Assert.Null(user.LockoutEnd);
+        user.FailedLoginAttempts.Should().Be(0);
+        user.LockoutEnd.Should().BeNull();
     }
 
     [Fact]
@@ -283,16 +276,16 @@ public sealed class UserTests
     {
         // Arrange
         var user = CreateValidUser();
-        const string newHash = "new-hash";
-        byte[] newSalt = [5, 6, 7, 8];
+        Password newPassword = Password.Create(
+            new string('B', PasswordHashingConstants.HashHexLength),
+            new byte[PasswordHashingConstants.SaltSize]).Value;
 
         // Act
-        var result = user.UpdatePassword(newHash, newSalt);
+        var result = user.UpdatePassword(newPassword);
 
         // Assert
-        Assert.True(result.IsSuccess);
-        Assert.Equal(newHash, user.PasswordHash);
-        Assert.Equal(newSalt, user.PasswordSalt);
+        result.IsSuccess.Should().BeTrue();
+        user.Password.Should().Be(newPassword);
     }
 
     [Theory]
@@ -302,31 +295,29 @@ public sealed class UserTests
     public void UpdatePassword_WithEmptyHash_ShouldFail(string? newHash)
     {
         // Arrange
-        var user = CreateValidUser();
         byte[] newSalt = [5, 6, 7, 8];
 
         // Act
-        var result = user.UpdatePassword(newHash!, newSalt);
+        var result = Password.Create(newHash!, newSalt);
 
         // Assert
-        Assert.True(result.IsFailure);
-        Assert.Equal(UserErrors.InvalidPasswordHash, result.Error);
+        result.IsFailure.Should().BeTrue();
+        result.Error.Should().Be(PasswordErrors.EmptyHash);
     }
 
     [Fact]
     public void UpdatePassword_WithEmptySalt_ShouldFail()
     {
         // Arrange
-        var user = CreateValidUser();
-        const string newHash = "new-hash";
+        string newHash = new string('A', PasswordHashingConstants.HashHexLength);
         byte[] emptySalt = [];
 
         // Act
-        var result = user.UpdatePassword(newHash, emptySalt);
+        var result = Password.Create(newHash, emptySalt);
 
         // Assert
-        Assert.True(result.IsFailure);
-        Assert.Equal(UserErrors.InvalidPasswordHash, result.Error);
+        result.IsFailure.Should().BeTrue();
+        result.Error.Should().Be(PasswordErrors.EmptySalt);
     }
 
     [Fact]
@@ -351,11 +342,11 @@ public sealed class UserTests
         var permissions = user.GetPermissions();
 
         // Assert
-        Assert.Equal(4, permissions.Count); // Should have unique permissions
-        Assert.Contains(Permission.GetUser.Name, permissions);
-        Assert.Contains(Permission.GetUserList.Name, permissions);
-        Assert.Contains(Permission.ModifyUser.Name, permissions);
-        Assert.Contains(Permission.DeleteUser.Name, permissions);
+        permissions.Count.Should().Be(4); // Should have unique permissions
+        permissions.Should().Contain(Permission.GetUser.Name);
+        permissions.Should().Contain(Permission.GetUserList.Name);
+        permissions.Should().Contain(Permission.ModifyUser.Name);
+        permissions.Should().Contain(Permission.DeleteUser.Name);
     }
 
     [Fact]
@@ -368,7 +359,7 @@ public sealed class UserTests
         var permissions = user.GetPermissions();
 
         // Assert
-        Assert.Empty(permissions);
+        permissions.Should().BeEmpty();
     }
 
     private static User CreateValidUser()
@@ -377,8 +368,7 @@ public sealed class UserTests
             Guid.NewGuid(),
             CreateValidUsername(),
             CreateValidEmail(),
-            ValidPasswordHash,
-            ValidPasswordSalt,
+            CreateValidPassword(),
             CreateValidNickname()).Value;
     }
 }

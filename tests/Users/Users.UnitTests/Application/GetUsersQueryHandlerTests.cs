@@ -1,5 +1,6 @@
 using Core.Domain.Messaging;
 using Core.Domain.Pagination;
+using FluentAssertions;
 using Users.Application.Users.GetUsers;
 using Users.Domain.Users;
 using Users.Domain.ValueObjects;
@@ -36,11 +37,11 @@ public sealed class GetUsersQueryHandlerTests
         var result = await _handler.HandleAsync(query, CancellationToken.None);
 
         // Assert
-        Assert.True(result.IsSuccess);
-        Assert.Equal(3, result.Value.Items.Count);
-        Assert.Equal(3, result.Value.Metadata.TotalCount);
-        Assert.Equal(1, result.Value.Metadata.PageNumber);
-        Assert.Equal(10, result.Value.Metadata.PageSize);
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Items.Count.Should().Be(3);
+        result.Value.Metadata.TotalCount.Should().Be(3);
+        result.Value.Metadata.PageNumber.Should().Be(1);
+        result.Value.Metadata.PageSize.Should().Be(10);
     }
 
     [Fact]
@@ -63,13 +64,13 @@ public sealed class GetUsersQueryHandlerTests
         var result = await _handler.HandleAsync(query, CancellationToken.None);
 
         // Assert
-        Assert.True(result.IsSuccess);
+        result.IsSuccess.Should().BeTrue();
         var items = result.Value.Items.ToList();
-        Assert.Equal(2, items.Count);
-        Assert.Equal(userId1, items[0].Id);
-        Assert.Equal("user1", items[0].Username);
-        Assert.Equal(userId2, items[1].Id);
-        Assert.Equal("user2", items[1].Username);
+        items.Count.Should().Be(2);
+        items[0].Id.Should().Be(userId1);
+        items[0].Username.Should().Be("user1");
+        items[1].Id.Should().Be(userId2);
+        items[1].Username.Should().Be("user2");
     }
 
     [Fact]
@@ -85,9 +86,9 @@ public sealed class GetUsersQueryHandlerTests
         var result = await _handler.HandleAsync(query, CancellationToken.None);
 
         // Assert
-        Assert.True(result.IsSuccess);
-        Assert.Empty(result.Value.Items);
-        Assert.Equal(0, result.Value.Metadata.TotalCount);
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Items.Should().BeEmpty();
+        result.Value.Metadata.TotalCount.Should().Be(0);
     }
 
     [Fact]
@@ -200,13 +201,13 @@ public sealed class GetUsersQueryHandlerTests
         var result = await _handler.HandleAsync(query, CancellationToken.None);
 
         // Assert
-        Assert.True(result.IsSuccess);
-        Assert.Equal(12, result.Value.Metadata.TotalCount);
-        Assert.Equal(2, result.Value.Metadata.PageNumber);
-        Assert.Equal(5, result.Value.Metadata.PageSize);
-        Assert.Equal(3, result.Value.Metadata.TotalPages); // 12 / 5 = 3 pages
-        Assert.True(result.Value.Metadata.HasPreviousPage);
-        Assert.True(result.Value.Metadata.HasNextPage);
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Metadata.TotalCount.Should().Be(12);
+        result.Value.Metadata.PageNumber.Should().Be(2);
+        result.Value.Metadata.PageSize.Should().Be(5);
+        result.Value.Metadata.TotalPages.Should().Be(3); // 12 / 5 = 3 pages
+        result.Value.Metadata.HasPreviousPage.Should().BeTrue();
+        result.Value.Metadata.HasNextPage.Should().BeTrue();
     }
 
     [Fact]
@@ -226,9 +227,9 @@ public sealed class GetUsersQueryHandlerTests
         var result = await _handler.HandleAsync(query, CancellationToken.None);
 
         // Assert
-        Assert.True(result.IsSuccess);
-        Assert.True(result.Value.Metadata.HasPreviousPage);
-        Assert.False(result.Value.Metadata.HasNextPage);
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Metadata.HasPreviousPage.Should().BeTrue();
+        result.Value.Metadata.HasNextPage.Should().BeFalse();
     }
 
     [Fact]
@@ -254,9 +255,10 @@ public sealed class GetUsersQueryHandlerTests
         var username = Username.Create(usernameValue).Value;
         var email = Email.Create($"{usernameValue}@example.com").Value;
         var nickname = Nickname.Create($"{usernameValue}Nick").Value;
-        const string passwordHash = "hash";
-        byte[] passwordSalt = [1, 2, 3, 4];
+        var password = Password.Create(
+            new string('A', PasswordHashingConstants.HashHexLength),
+            new byte[PasswordHashingConstants.SaltSize]).Value;
 
-        return User.Create(id, username, email, passwordHash, passwordSalt, nickname).Value;
+        return User.Create(id, username, email, password, nickname).Value;
     }
 }

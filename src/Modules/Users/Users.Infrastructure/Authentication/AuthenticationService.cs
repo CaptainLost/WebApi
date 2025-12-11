@@ -36,7 +36,7 @@ internal sealed class AuthenticationService : IAuthenticationService
             return Result.Failure<string>(UserErrors.AccountLockedOut);
         }
 
-        bool isPasswordValid = _passwordHashingService.VerifyPassword(password, user.PasswordHash, user.PasswordSalt);
+        bool isPasswordValid = _passwordHashingService.VerifyPassword(password, user.Password.Hash, user.Password.Salt);
 
         if (!isPasswordValid)
         {
@@ -89,9 +89,21 @@ internal sealed class AuthenticationService : IAuthenticationService
             return Result.Failure<string>(UserErrors.EmailAlreadyTaken(email));
         }
 
-        string passwordHash = _passwordHashingService.HashPassword(password, out byte[] passwordSalt);
+        Result<PlainPassword> plainPasswordResult = PlainPassword.Create(password);
+        if (plainPasswordResult.IsFailure)
+        {
+            return Result.Failure<string>(plainPasswordResult.Error);
+        }
 
-        Result<User> createUserResult = User.Create(Guid.NewGuid(), usernameResult.Value, emailResult.Value, passwordHash, passwordSalt, nicknameResult.Value);
+        string passwordHash = _passwordHashingService.HashPassword(plainPasswordResult.Value.Value, out byte[] passwordSalt);
+
+        Result<Password> passwordResult = Password.Create(passwordHash, passwordSalt);
+        if (passwordResult.IsFailure)
+        {
+            return Result.Failure<string>(UserErrors.RegistrationFailed);
+        }
+
+        Result<User> createUserResult = User.Create(Guid.NewGuid(), usernameResult.Value, emailResult.Value, passwordResult.Value, nicknameResult.Value);
         if (createUserResult.IsFailure)
         {
             return Result.Failure<string>(createUserResult.Error);

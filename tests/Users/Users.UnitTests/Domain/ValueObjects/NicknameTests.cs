@@ -1,3 +1,4 @@
+using FluentAssertions;
 using Users.Domain.ValueObjects;
 
 namespace Users.UnitTests.Domain.ValueObjects;
@@ -14,8 +15,8 @@ public sealed class NicknameTests
         var result = Nickname.Create(validNickname);
 
         // Assert
-        Assert.True(result.IsSuccess);
-        Assert.Equal(validNickname, result.Value.Value);
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Value.Should().Be(validNickname);
     }
 
     [Theory]
@@ -28,8 +29,8 @@ public sealed class NicknameTests
         var result = Nickname.Create(emptyNickname!);
 
         // Assert
-        Assert.True(result.IsFailure);
-        Assert.Equal(NicknameErrors.Empty.Code, result.Error.Code);
+        result.IsFailure.Should().BeTrue();
+        result.Error.Should().Be(NicknameErrors.Empty);
     }
 
     [Fact]
@@ -42,8 +43,8 @@ public sealed class NicknameTests
         var result = Nickname.Create(tooLongNickname);
 
         // Assert
-        Assert.True(result.IsFailure);
-        Assert.Equal(NicknameErrors.TooLong.Code, result.Error.Code);
+        result.IsFailure.Should().BeTrue();
+        result.Error.Should().Be(NicknameErrors.TooLong);
     }
 
     [Fact]
@@ -56,7 +57,7 @@ public sealed class NicknameTests
         var result = Nickname.Create(maxLengthNickname);
 
         // Assert
-        Assert.True(result.IsSuccess);
+        result.IsSuccess.Should().BeTrue();
     }
 
     [Fact]
@@ -68,9 +69,9 @@ public sealed class NicknameTests
         var nickname2 = Nickname.Create(nicknameValue).Value;
 
         // Act & Assert
-        Assert.Equal(nickname1, nickname2);
-        Assert.True(nickname1.Equals(nickname2));
-        Assert.Equal(nickname1.GetHashCode(), nickname2.GetHashCode());
+        nickname1.Should().Be(nickname2);
+        nickname1.Equals(nickname2).Should().BeTrue();
+        nickname1.GetHashCode().Should().Be(nickname2.GetHashCode());
     }
 
     [Fact]
@@ -81,7 +82,7 @@ public sealed class NicknameTests
         var nickname2 = Nickname.Create("Gamer2").Value;
 
         // Act & Assert
-        Assert.NotEqual(nickname1, nickname2);
-        Assert.False(nickname1.Equals(nickname2));
+        nickname1.Should().NotBe(nickname2);
+        nickname1.Equals(nickname2).Should().BeFalse();
     }
 }

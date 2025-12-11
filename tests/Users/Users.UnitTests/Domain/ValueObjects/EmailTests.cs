@@ -1,4 +1,5 @@
 using Core.Domain.Messaging;
+using FluentAssertions;
 using Users.Domain.ValueObjects;
 
 namespace Users.UnitTests.Domain.ValueObjects;
@@ -15,8 +16,8 @@ public sealed class EmailTests
         var result = Email.Create(validEmail);
 
         // Assert
-        Assert.True(result.IsSuccess);
-        Assert.Equal(validEmail, result.Value.Value);
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Value.Should().Be(validEmail);
     }
 
     [Theory]
@@ -29,8 +30,8 @@ public sealed class EmailTests
         var result = Email.Create(emptyEmail!);
 
         // Assert
-        Assert.True(result.IsFailure);
-        Assert.True(result.Error.Code == EmailErrors.Empty.Code || result.Error.Code == Error.NullValue.Code);
+        result.IsFailure.Should().BeTrue();
+        result.Error.Should().BeOneOf(EmailErrors.Empty, Error.NullValue);
     }
 
     [Fact]
@@ -43,8 +44,8 @@ public sealed class EmailTests
         var result = Email.Create(tooLongEmail);
 
         // Assert
-        Assert.True(result.IsFailure);
-        Assert.Equal(EmailErrors.TooLong.Code, result.Error.Code);
+        result.IsFailure.Should().BeTrue();
+        result.Error.Should().Be(EmailErrors.TooLong);
     }
 
     [Theory]
@@ -58,8 +59,8 @@ public sealed class EmailTests
         var result = Email.Create(invalidEmail);
 
         // Assert
-        Assert.True(result.IsFailure);
-        Assert.Equal(EmailErrors.InvalidFormat.Code, result.Error.Code);
+        result.IsFailure.Should().BeTrue();
+        result.Error.Should().Be(EmailErrors.InvalidFormat);
     }
 
     [Fact]
@@ -72,8 +73,8 @@ public sealed class EmailTests
         var result = Email.Create(invalidEmail);
 
         // Assert
-        Assert.True(result.IsFailure);
-        Assert.Equal(EmailErrors.InvalidFormat.Code, result.Error.Code);
+        result.IsFailure.Should().BeTrue();
+        result.Error.Should().Be(EmailErrors.InvalidFormat);
     }
 
     [Fact]
@@ -85,9 +86,9 @@ public sealed class EmailTests
         var email2 = Email.Create(emailValue).Value;
 
         // Act & Assert
-        Assert.Equal(email1, email2);
-        Assert.True(email1.Equals(email2));
-        Assert.Equal(email1.GetHashCode(), email2.GetHashCode());
+        email1.Should().Be(email2);
+        email1.Equals(email2).Should().BeTrue();
+        email1.GetHashCode().Should().Be(email2.GetHashCode());
     }
 
     [Fact]
@@ -98,7 +99,7 @@ public sealed class EmailTests
         var email2 = Email.Create("test2@example.com").Value;
 
         // Act & Assert
-        Assert.NotEqual(email1, email2);
-        Assert.False(email1.Equals(email2));
+        email1.Should().NotBe(email2);
+        email1.Equals(email2).Should().BeFalse();
     }
 }

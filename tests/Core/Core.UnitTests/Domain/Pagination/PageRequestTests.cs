@@ -1,4 +1,5 @@
 using Core.Domain.Pagination;
+using FluentAssertions;
 
 namespace Core.UnitTests.Domain.Pagination;
 
@@ -16,11 +17,11 @@ public sealed class PageRequestTests
             sortDescending: true);
 
         // Assert
-        Assert.Equal(2, pageRequest.PageNumber);
-        Assert.Equal(20, pageRequest.PageSize);
-        Assert.Equal("test", pageRequest.SearchTerm);
-        Assert.Equal("Name", pageRequest.SortBy);
-        Assert.True(pageRequest.SortDescending);
+        pageRequest.PageNumber.Should().Be(2);
+        pageRequest.PageSize.Should().Be(20);
+        pageRequest.SearchTerm.Should().Be("test");
+        pageRequest.SortBy.Should().Be("Name");
+        pageRequest.SortDescending.Should().BeTrue();
     }
 
     [Fact]
@@ -30,7 +31,7 @@ public sealed class PageRequestTests
         var pageRequest = PageRequest.Create(pageNumber: null, pageSize: 10);
 
         // Assert
-        Assert.Equal(PaginationConstants.DefaultPageNumber, pageRequest.PageNumber);
+        pageRequest.PageNumber.Should().Be(PaginationConstants.DefaultPageNumber);
     }
 
     [Fact]
@@ -40,7 +41,7 @@ public sealed class PageRequestTests
         var pageRequest = PageRequest.Create(pageNumber: 1, pageSize: null);
 
         // Assert
-        Assert.Equal(PaginationConstants.DefaultPageSize, pageRequest.PageSize);
+        pageRequest.PageSize.Should().Be(PaginationConstants.DefaultPageSize);
     }
 
     [Fact]
@@ -50,11 +51,11 @@ public sealed class PageRequestTests
         var pageRequest = PageRequest.Create();
 
         // Assert
-        Assert.Equal(PaginationConstants.DefaultPageNumber, pageRequest.PageNumber);
-        Assert.Equal(PaginationConstants.DefaultPageSize, pageRequest.PageSize);
-        Assert.Null(pageRequest.SearchTerm);
-        Assert.Null(pageRequest.SortBy);
-        Assert.False(pageRequest.SortDescending);
+        pageRequest.PageNumber.Should().Be(PaginationConstants.DefaultPageNumber);
+        pageRequest.PageSize.Should().Be(PaginationConstants.DefaultPageSize);
+        pageRequest.SearchTerm.Should().BeNull();
+        pageRequest.SortBy.Should().BeNull();
+        pageRequest.SortDescending.Should().BeFalse();
     }
 
     [Fact]
@@ -64,7 +65,7 @@ public sealed class PageRequestTests
         var pageRequest = PageRequest.Create(pageNumber: -1, pageSize: 10);
 
         // Assert
-        Assert.Equal(PaginationConstants.DefaultPageNumber, pageRequest.PageNumber);
+        pageRequest.PageNumber.Should().Be(PaginationConstants.DefaultPageNumber);
     }
 
     [Fact]
@@ -74,7 +75,7 @@ public sealed class PageRequestTests
         var pageRequest = PageRequest.Create(pageNumber: 0, pageSize: 10);
 
         // Assert
-        Assert.Equal(PaginationConstants.DefaultPageNumber, pageRequest.PageNumber);
+        pageRequest.PageNumber.Should().Be(PaginationConstants.DefaultPageNumber);
     }
 
     [Fact]
@@ -84,7 +85,7 @@ public sealed class PageRequestTests
         var pageRequest = PageRequest.Create(pageNumber: 1, pageSize: -5);
 
         // Assert
-        Assert.Equal(PaginationConstants.DefaultPageSize, pageRequest.PageSize);
+        pageRequest.PageSize.Should().Be(PaginationConstants.DefaultPageSize);
     }
 
     [Fact]
@@ -94,7 +95,7 @@ public sealed class PageRequestTests
         var pageRequest = PageRequest.Create(pageNumber: 1, pageSize: 0);
 
         // Assert
-        Assert.Equal(PaginationConstants.DefaultPageSize, pageRequest.PageSize);
+        pageRequest.PageSize.Should().Be(PaginationConstants.DefaultPageSize);
     }
 
     [Fact]
@@ -104,7 +105,7 @@ public sealed class PageRequestTests
         var pageRequest = PageRequest.Create(pageNumber: 1, pageSize: 100);
 
         // Assert
-        Assert.Equal(PaginationConstants.MaxPageSize, pageRequest.PageSize);
+        pageRequest.PageSize.Should().Be(PaginationConstants.MaxPageSize);
     }
 
     [Fact]
@@ -114,7 +115,7 @@ public sealed class PageRequestTests
         var pageRequest = PageRequest.Create(pageNumber: 1, pageSize: PaginationConstants.MaxPageSize);
 
         // Assert
-        Assert.Equal(PaginationConstants.MaxPageSize, pageRequest.PageSize);
+        pageRequest.PageSize.Should().Be(PaginationConstants.MaxPageSize);
     }
 
     [Fact]
@@ -124,7 +125,7 @@ public sealed class PageRequestTests
         var pageRequest = PageRequest.Create(pageNumber: 1, pageSize: 10, searchTerm: "   ");
 
         // Assert
-        Assert.Null(pageRequest.SearchTerm);
+        pageRequest.SearchTerm.Should().BeNull();
     }
 
     [Fact]
@@ -134,7 +135,7 @@ public sealed class PageRequestTests
         var pageRequest = PageRequest.Create(pageNumber: 1, pageSize: 10, searchTerm: "  test  ");
 
         // Assert
-        Assert.Equal("test", pageRequest.SearchTerm);
+        pageRequest.SearchTerm.Should().Be("test");
     }
 
     [Fact]
@@ -144,7 +145,7 @@ public sealed class PageRequestTests
         var pageRequest = PageRequest.Create(pageNumber: 1, pageSize: 10, searchTerm: string.Empty);
 
         // Assert
-        Assert.Null(pageRequest.SearchTerm);
+        pageRequest.SearchTerm.Should().BeNull();
     }
 
     [Fact]
@@ -154,7 +155,7 @@ public sealed class PageRequestTests
         var pageRequest = PageRequest.Create(pageNumber: 1, pageSize: 10, sortBy: "   ");
 
         // Assert
-        Assert.Null(pageRequest.SortBy);
+        pageRequest.SortBy.Should().BeNull();
     }
 
     [Fact]
@@ -164,7 +165,7 @@ public sealed class PageRequestTests
         var pageRequest = PageRequest.Create(pageNumber: 1, pageSize: 10, sortBy: "  Name  ");
 
         // Assert
-        Assert.Equal("Name", pageRequest.SortBy);
+        pageRequest.SortBy.Should().Be("Name");
     }
 
     [Fact]
@@ -174,7 +175,7 @@ public sealed class PageRequestTests
         var pageRequest = PageRequest.Create(pageNumber: 1, pageSize: 10, sortBy: string.Empty);
 
         // Assert
-        Assert.Null(pageRequest.SortBy);
+        pageRequest.SortBy.Should().BeNull();
     }
 
     [Fact]
@@ -187,7 +188,7 @@ public sealed class PageRequestTests
         var skip = pageRequest.CalculateSkip();
 
         // Assert
-        Assert.Equal(0, skip);
+        skip.Should().Be(0);
     }
 
     [Fact]
@@ -200,7 +201,7 @@ public sealed class PageRequestTests
         var skip = pageRequest.CalculateSkip();
 
         // Assert
-        Assert.Equal(10, skip);
+        skip.Should().Be(10);
     }
 
     [Fact]
@@ -213,7 +214,7 @@ public sealed class PageRequestTests
         var skip = pageRequest.CalculateSkip();
 
         // Assert
-        Assert.Equal(30, skip);
+        skip.Should().Be(30);
     }
 
     [Fact]
@@ -228,8 +229,8 @@ public sealed class PageRequestTests
         var skip2 = pageRequest2.CalculateSkip();
 
         // Assert
-        Assert.Equal(80, skip1); // (5-1) * 20 = 80
-        Assert.Equal(45, skip2); // (10-1) * 5 = 45
+        skip1.Should().Be(80); // (5-1) * 20 = 80
+        skip2.Should().Be(45); // (10-1) * 5 = 45
     }
 
     [Fact]
@@ -244,11 +245,11 @@ public sealed class PageRequestTests
             sortDescending: false);
 
         // Assert
-        Assert.Equal(PaginationConstants.DefaultPageNumber, pageRequest.PageNumber);
-        Assert.Equal(PaginationConstants.DefaultPageSize, pageRequest.PageSize);
-        Assert.Null(pageRequest.SearchTerm);
-        Assert.Null(pageRequest.SortBy);
-        Assert.False(pageRequest.SortDescending);
+        pageRequest.PageNumber.Should().Be(PaginationConstants.DefaultPageNumber);
+        pageRequest.PageSize.Should().Be(PaginationConstants.DefaultPageSize);
+        pageRequest.SearchTerm.Should().BeNull();
+        pageRequest.SortBy.Should().BeNull();
+        pageRequest.SortDescending.Should().BeFalse();
     }
 
     [Fact]
@@ -259,8 +260,8 @@ public sealed class PageRequestTests
         var pageRequestFalse = PageRequest.Create(sortDescending: false);
 
         // Assert
-        Assert.True(pageRequestTrue.SortDescending);
-        Assert.False(pageRequestFalse.SortDescending);
+        pageRequestTrue.SortDescending.Should().BeTrue();
+        pageRequestFalse.SortDescending.Should().BeFalse();
     }
 
     [Theory]
@@ -278,6 +279,6 @@ public sealed class PageRequestTests
         var skip = pageRequest.CalculateSkip();
 
         // Assert
-        Assert.Equal(expectedSkip, skip);
+        skip.Should().Be(expectedSkip);
     }
 }

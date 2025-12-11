@@ -98,7 +98,13 @@ public static class IdentitySeeder
 
         string passwordHash = passwordHashingService.HashPassword(password, out byte[] passwordSalt);
 
-        Result<User> createUserResult = User.Create(Guid.NewGuid(), usernameResult.Value, emailResult.Value, passwordHash, passwordSalt, nicknameResult.Value);
+        Result<Password> passwordResult = Password.Create(passwordHash, passwordSalt);
+        if (passwordResult.IsFailure)
+        {
+            return Result.Failure<User>(passwordResult.Error);
+        }
+
+        Result<User> createUserResult = User.Create(Guid.NewGuid(), usernameResult.Value, emailResult.Value, passwordResult.Value, nicknameResult.Value);
         if (createUserResult.IsFailure)
         {
             return Result.Failure<User>(createUserResult.Error);

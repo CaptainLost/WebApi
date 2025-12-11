@@ -1,4 +1,5 @@
 using Core.Domain.Messaging;
+using FluentAssertions;
 using Users.Application.Users.AssignRoleToUser;
 using Users.Domain.Users;
 using Users.Domain.ValueObjects;
@@ -37,8 +38,8 @@ public sealed class AssignRoleToUserCommandHandlerTests
         var result = await _handler.HandleAsync(command, CancellationToken.None);
 
         // Assert
-        Assert.True(result.IsSuccess);
-        Assert.Contains(role, user.Roles);
+        result.IsSuccess.Should().BeTrue();
+        user.Roles.Should().Contain(role);
     }
 
     [Fact]
@@ -55,8 +56,8 @@ public sealed class AssignRoleToUserCommandHandlerTests
         var result = await _handler.HandleAsync(command, CancellationToken.None);
 
         // Assert
-        Assert.True(result.IsFailure);
-        Assert.Equal(UserErrors.UserNotFoundById(userId), result.Error);
+        result.IsFailure.Should().BeTrue();
+        result.Error.Should().Be(UserErrors.UserNotFoundById(userId));
         
         A.CallTo(() => _roleRepository.GetByName(A<string>._, A<CancellationToken>._))
             .MustNotHaveHappened();
@@ -80,8 +81,8 @@ public sealed class AssignRoleToUserCommandHandlerTests
         var result = await _handler.HandleAsync(command, CancellationToken.None);
 
         // Assert
-        Assert.True(result.IsFailure);
-        Assert.Equal(RoleErrors.NotFound(command.RoleName), result.Error);
+        result.IsFailure.Should().BeTrue();
+        result.Error.Should().Be(RoleErrors.NotFound(command.RoleName));
     }
 
     [Fact]
@@ -105,8 +106,8 @@ public sealed class AssignRoleToUserCommandHandlerTests
         var result = await _handler.HandleAsync(command, CancellationToken.None);
 
         // Assert
-        Assert.True(result.IsFailure);
-        Assert.Equal(UserErrors.AlreadyHasRole(role.Name), result.Error);
+        result.IsFailure.Should().BeTrue();
+        result.Error.Should().Be(UserErrors.AlreadyHasRole(role.Name));
     }
 
     [Fact]
@@ -181,7 +182,7 @@ public sealed class AssignRoleToUserCommandHandlerTests
         var result = await _handler.HandleAsync(command, CancellationToken.None);
 
         // Assert
-        Assert.True(result.IsFailure);
+        result.IsFailure.Should().BeTrue();
     }
 
     private static User CreateValidUser(Guid? id = null)
@@ -189,9 +190,10 @@ public sealed class AssignRoleToUserCommandHandlerTests
         var username = Username.Create("testuser").Value;
         var email = Email.Create("test@example.com").Value;
         var nickname = Nickname.Create("TestNick").Value;
-        const string passwordHash = "hash";
-        byte[] passwordSalt = [1, 2, 3, 4];
+        var password = Password.Create(
+            new string('A', PasswordHashingConstants.HashHexLength),
+            new byte[PasswordHashingConstants.SaltSize]).Value;
 
-        return User.Create(id ?? Guid.NewGuid(), username, email, passwordHash, passwordSalt, nickname).Value;
+        return User.Create(id ?? Guid.NewGuid(), username, email, password, nickname).Value;
     }
 }

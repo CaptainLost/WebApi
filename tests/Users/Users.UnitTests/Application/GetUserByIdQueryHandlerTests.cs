@@ -1,4 +1,5 @@
 using Core.Domain.Messaging;
+using FluentAssertions;
 using Users.Application.Users.GetUserById;
 using Users.Domain.Users;
 using Users.Domain.ValueObjects;
@@ -31,9 +32,9 @@ public sealed class GetUserByIdQueryHandlerTests
         var result = await _handler.HandleAsync(query, CancellationToken.None);
 
         // Assert
-        Assert.True(result.IsSuccess);
-        Assert.Equal(userId, result.Value.Id);
-        Assert.Equal("testuser", result.Value.Username);
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Id.Should().Be(userId);
+        result.Value.Username.Should().Be("testuser");
     }
 
     [Fact]
@@ -50,8 +51,8 @@ public sealed class GetUserByIdQueryHandlerTests
         var result = await _handler.HandleAsync(query, CancellationToken.None);
 
         // Assert
-        Assert.True(result.IsFailure);
-        Assert.Equal(UserErrors.UserNotFoundById(userId), result.Error);
+        result.IsFailure.Should().BeTrue();
+        result.Error.Should().Be(UserErrors.UserNotFoundById(userId));
     }
 
     [Fact]
@@ -108,10 +109,10 @@ public sealed class GetUserByIdQueryHandlerTests
         var result = await _handler.HandleAsync(query, CancellationToken.None);
 
         // Assert
-        Assert.True(result.IsSuccess);
-        Assert.NotNull(result.Value);
-        Assert.Equal(userId, result.Value.Id);
-        Assert.Equal("specificUsername", result.Value.Username);
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().NotBeNull();
+        result.Value.Id.Should().Be(userId);
+        result.Value.Username.Should().Be("specificUsername");
     }
 
     [Fact]
@@ -128,8 +129,8 @@ public sealed class GetUserByIdQueryHandlerTests
         var result = await _handler.HandleAsync(query, CancellationToken.None);
 
         // Assert
-        Assert.True(result.IsFailure);
-        Assert.Contains(userId.ToString(), result.Error.Description);
+        result.IsFailure.Should().BeTrue();
+        result.Error.Description.Should().Contain(userId.ToString());
     }
 
     [Fact]
@@ -153,10 +154,10 @@ public sealed class GetUserByIdQueryHandlerTests
         var result2 = await _handler.HandleAsync(query2, CancellationToken.None);
 
         // Assert
-        Assert.True(result1.IsSuccess);
-        Assert.True(result2.IsSuccess);
-        Assert.Equal("user1", result1.Value.Username);
-        Assert.Equal("user2", result2.Value.Username);
+        result1.IsSuccess.Should().BeTrue();
+        result2.IsSuccess.Should().BeTrue();
+        result1.Value.Username.Should().Be("user1");
+        result2.Value.Username.Should().Be("user2");
     }
 
     private static User CreateValidUser(Guid id, string usernameValue)
@@ -164,9 +165,10 @@ public sealed class GetUserByIdQueryHandlerTests
         var username = Username.Create(usernameValue).Value;
         var email = Email.Create($"{usernameValue}@example.com").Value;
         var nickname = Nickname.Create($"{usernameValue}Nick").Value;
-        const string passwordHash = "hash";
-        byte[] passwordSalt = [1, 2, 3, 4];
+        var password = Password.Create(
+            new string('A', PasswordHashingConstants.HashHexLength),
+            new byte[PasswordHashingConstants.SaltSize]).Value;
 
-        return User.Create(id, username, email, passwordHash, passwordSalt, nickname).Value;
+        return User.Create(id, username, email, password, nickname).Value;
     }
 }

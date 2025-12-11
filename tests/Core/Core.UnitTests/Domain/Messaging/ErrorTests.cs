@@ -1,4 +1,5 @@
 using Core.Domain.Messaging;
+using FluentAssertions;
 
 namespace Core.UnitTests.Domain.Messaging;
 
@@ -15,8 +16,8 @@ public sealed class ErrorTests
         var error = Error.Failure(code, description);
 
         // Assert
-        Assert.Equal(code, error.Code);
-        Assert.Equal(description, error.Description);
+        error.Code.Should().Be(code);
+        error.Description.Should().Be(description);
     }
 
     [Fact]
@@ -26,8 +27,8 @@ public sealed class ErrorTests
         var none = Error.None;
 
         // Assert
-        Assert.Equal(string.Empty, none.Code);
-        Assert.Equal(string.Empty, none.Description);
+        none.Code.Should().Be(string.Empty);
+        none.Description.Should().Be(string.Empty);
     }
 
     [Fact]
@@ -37,8 +38,8 @@ public sealed class ErrorTests
         var nullValue = Error.NullValue;
 
         // Assert
-        Assert.Equal(Error.NullValue.Code, nullValue.Code);
-        Assert.Equal(Error.NullValue.Description, nullValue.Description);
+        nullValue.Code.Should().Be(Error.NullValue.Code);
+        nullValue.Description.Should().Be(Error.NullValue.Description);
     }
 
     [Fact]
@@ -51,9 +52,9 @@ public sealed class ErrorTests
         Result result = error;
 
         // Assert
-        Assert.False(result.IsSuccess);
-        Assert.True(result.IsFailure);
-        Assert.Equal(error, result.Error);
+        result.IsSuccess.Should().BeFalse();
+        result.IsFailure.Should().BeTrue();
+        result.Error.Should().Be(error);
     }
 
     [Fact]
@@ -66,9 +67,9 @@ public sealed class ErrorTests
         var result = error.ToResult();
 
         // Assert
-        Assert.False(result.IsSuccess);
-        Assert.True(result.IsFailure);
-        Assert.Equal(error, result.Error);
+        result.IsSuccess.Should().BeFalse();
+        result.IsFailure.Should().BeTrue();
+        result.Error.Should().Be(error);
     }
 
     [Fact]
@@ -79,9 +80,9 @@ public sealed class ErrorTests
         var error2 = Error.Failure("Test.Error", "Description");
 
         // Act & Assert
-        Assert.Equal(error1, error2);
-        Assert.True(error1 == error2);
-        Assert.False(error1 != error2);
+        error1.Should().Be(error2);
+        (error1 == error2).Should().BeTrue();
+        (error1 != error2).Should().BeFalse();
     }
 
     [Fact]
@@ -92,9 +93,9 @@ public sealed class ErrorTests
         var error2 = Error.Failure("Test.Error2", "Description");
 
         // Act & Assert
-        Assert.NotEqual(error1, error2);
-        Assert.False(error1 == error2);
-        Assert.True(error1 != error2);
+        error1.Should().NotBe(error2);
+        (error1 == error2).Should().BeFalse();
+        (error1 != error2).Should().BeTrue();
     }
 
     [Fact]
@@ -105,9 +106,9 @@ public sealed class ErrorTests
         var error2 = Error.Failure("Test.Error", "Description2");
 
         // Act & Assert
-        Assert.NotEqual(error1, error2);
-        Assert.False(error1 == error2);
-        Assert.True(error1 != error2);
+        error1.Should().NotBe(error2);
+        (error1 == error2).Should().BeFalse();
+        (error1 != error2).Should().BeTrue();
     }
 
     [Fact]
@@ -118,7 +119,7 @@ public sealed class ErrorTests
         var error2 = Error.Failure("Test.Error", "Description");
 
         // Act & Assert
-        Assert.Equal(error1.GetHashCode(), error2.GetHashCode());
+        error1.GetHashCode().Should().Be(error2.GetHashCode());
     }
 
     [Fact]
@@ -131,8 +132,8 @@ public sealed class ErrorTests
         var result = error.ToString();
 
         // Assert
-        Assert.Contains("Test.Error", result);
-        Assert.Contains("Test description", result);
+        result.Should().Contain("Test.Error");
+        result.Should().Contain("Test description");
     }
 
     [Fact]
@@ -142,8 +143,8 @@ public sealed class ErrorTests
         var error = Error.Failure(string.Empty, "Description");
 
         // Assert
-        Assert.Equal(string.Empty, error.Code);
-        Assert.Equal("Description", error.Description);
+        error.Code.Should().Be(string.Empty);
+        error.Description.Should().Be("Description");
     }
 
     [Fact]
@@ -153,8 +154,8 @@ public sealed class ErrorTests
         var error = Error.Failure("Test.Error", string.Empty);
 
         // Assert
-        Assert.Equal("Test.Error", error.Code);
-        Assert.Equal(string.Empty, error.Description);
+        error.Code.Should().Be("Test.Error");
+        error.Description.Should().Be(string.Empty);
     }
 
     [Fact]
@@ -167,9 +168,9 @@ public sealed class ErrorTests
         var (code, description, type) = error;
 
         // Assert
-        Assert.Equal("Test.Error", code);
-        Assert.Equal("Test description", description);
-        Assert.Equal(ErrorType.Failure, type);
+        code.Should().Be("Test.Error");
+        description.Should().Be("Test description");
+        type.Should().Be(ErrorType.Failure);
     }
 }
 

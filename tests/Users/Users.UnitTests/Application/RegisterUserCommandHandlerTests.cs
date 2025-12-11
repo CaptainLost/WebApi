@@ -1,4 +1,5 @@
 using Core.Domain.Messaging;
+using FluentAssertions;
 using Users.Application.Abstractions;
 using Users.Application.Users.RegisterUser;
 
@@ -59,8 +60,8 @@ public sealed class RegisterUserCommandHandlerTests
         var result = await _handler.HandleAsync(command, CancellationToken.None);
 
         // Assert
-        Assert.True(result.IsSuccess);
-        Assert.Equal(expectedToken, result.Value);
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().Be(expectedToken);
     }
 
     [Fact]
@@ -81,8 +82,8 @@ public sealed class RegisterUserCommandHandlerTests
         var result = await _handler.HandleAsync(command, CancellationToken.None);
 
         // Assert
-        Assert.True(result.IsFailure);
-        Assert.Equal(error, result.Error);
+        result.IsFailure.Should().BeTrue();
+        result.Error.Should().Be(error);
     }
 
     [Fact]

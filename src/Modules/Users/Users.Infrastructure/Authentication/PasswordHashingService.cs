@@ -1,14 +1,15 @@
 using System.Security.Cryptography;
 using System.Text;
 using Users.Application.Abstractions;
+using Users.Domain.ValueObjects;
 
 namespace Users.Infrastructure.Authentication;
 
 internal sealed class PasswordHashingService : IPasswordHashingService
 {
-    private const int _keySize = 64;
-    private const int _interations = 350000;
-    private readonly static HashAlgorithmName _hashAlgorithm = HashAlgorithmName.SHA512;
+    private const int _keySize = PasswordHashingConstants.KeySize;
+    private const int _interations = PasswordHashingConstants.Iterations;
+    private readonly static HashAlgorithmName _hashAlgorithm = PasswordHashingConstants.HashAlgorithm;
 
     public string HashPassword(string password, out byte[] salt)
     {

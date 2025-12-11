@@ -24,13 +24,18 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
             .HasMaxLength(Email.MaxLength)
             .IsRequired();
 
-        builder.Property(u => u.PasswordHash)
-            .IsRequired()
-            .HasMaxLength(500);
+        builder.ComplexProperty(u => u.Password, passwordBuilder =>
+        {
+            passwordBuilder.Property(p => p.Hash)
+                .HasColumnName($"{nameof(User.Password)}{nameof(Password.Hash)}")
+                .IsRequired()
+                .HasMaxLength(PasswordHashingConstants.HashHexLength);
 
-        builder.Property(u => u.PasswordSalt)
-            .IsRequired()
-            .HasMaxLength(64);
+            passwordBuilder.Property(p => p.Salt)
+                .HasColumnName($"{nameof(User.Password)}{nameof(Password.Salt)}")
+                .IsRequired()
+                .HasMaxLength(PasswordHashingConstants.SaltSize);
+        });
 
         builder.Property(x => x.Nickname)
             .HasConversion(x => x.Value, v => Nickname.Create(v).Value)

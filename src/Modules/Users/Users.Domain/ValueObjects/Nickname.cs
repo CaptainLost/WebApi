@@ -21,17 +21,19 @@ public sealed class Nickname : ValueObject
 
     public static Result<Nickname> Create(string nickname)
     {
-        if (string.IsNullOrWhiteSpace(nickname))
+        if (nickname is null)
         {
             return Result.Failure<Nickname>(NicknameErrors.Empty);
         }
 
-        if (nickname.Length > MaxLength)
-        {
-            return Result.Failure<Nickname>(NicknameErrors.TooLong);
-        }
-
-        return new Nickname(nickname);
+        return Result.Create(nickname)
+            .Ensure(
+                n => !string.IsNullOrWhiteSpace(n),
+                NicknameErrors.Empty)
+            .Ensure(
+                n => n.Length <= MaxLength,
+                NicknameErrors.TooLong)
+            .Map(n => new Nickname(n));
     }
 
     public override IEnumerable<object> GetAtomicValues()

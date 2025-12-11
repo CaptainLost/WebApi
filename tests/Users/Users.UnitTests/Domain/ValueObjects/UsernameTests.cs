@@ -1,3 +1,4 @@
+using FluentAssertions;
 using Users.Domain.ValueObjects;
 
 namespace Users.UnitTests.Domain.ValueObjects;
@@ -14,8 +15,8 @@ public sealed class UsernameTests
         var result = Username.Create(validUsername);
 
         // Assert
-        Assert.True(result.IsSuccess);
-        Assert.Equal(validUsername, result.Value.Value);
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Value.Should().Be(validUsername);
     }
 
     [Theory]
@@ -28,8 +29,8 @@ public sealed class UsernameTests
         var result = Username.Create(emptyUsername!);
 
         // Assert
-        Assert.True(result.IsFailure);
-        Assert.Equal(UsernameErrors.Empty.Code, result.Error.Code);
+        result.IsFailure.Should().BeTrue();
+        result.Error.Should().Be(UsernameErrors.Empty);
     }
 
     [Fact]
@@ -42,8 +43,8 @@ public sealed class UsernameTests
         var result = Username.Create(tooLongUsername);
 
         // Assert
-        Assert.True(result.IsFailure);
-        Assert.Equal(UsernameErrors.TooLong.Code, result.Error.Code);
+        result.IsFailure.Should().BeTrue();
+        result.Error.Should().Be(UsernameErrors.TooLong);
     }
 
     [Fact]
@@ -56,7 +57,7 @@ public sealed class UsernameTests
         var result = Username.Create(maxLengthUsername);
 
         // Assert
-        Assert.True(result.IsSuccess);
+        result.IsSuccess.Should().BeTrue();
     }
 
     [Fact]
@@ -68,9 +69,9 @@ public sealed class UsernameTests
         var username2 = Username.Create(usernameValue).Value;
 
         // Act & Assert
-        Assert.Equal(username1, username2);
-        Assert.True(username1.Equals(username2));
-        Assert.Equal(username1.GetHashCode(), username2.GetHashCode());
+        username1.Should().Be(username2);
+        username1.Equals(username2).Should().BeTrue();
+        username1.GetHashCode().Should().Be(username2.GetHashCode());
     }
 
     [Fact]
@@ -81,7 +82,7 @@ public sealed class UsernameTests
         var username2 = Username.Create("user2").Value;
 
         // Act & Assert
-        Assert.NotEqual(username1, username2);
-        Assert.False(username1.Equals(username2));
+        username1.Should().NotBe(username2);
+        username1.Equals(username2).Should().BeFalse();
     }
 }

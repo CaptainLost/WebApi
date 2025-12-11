@@ -1,4 +1,5 @@
 using Core.Domain.Messaging;
+using FluentAssertions;
 using Users.Application.Abstractions;
 using Users.Application.Users.LoginUser;
 using Users.Domain.Users;
@@ -37,8 +38,8 @@ public sealed class LoginUserCommandHandlerTests
         var result = await _handler.HandleAsync(command, CancellationToken.None);
 
         // Assert
-        Assert.True(result.IsSuccess);
-        Assert.Equal(expectedToken, result.Value);
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().Be(expectedToken);
     }
 
     [Fact]
@@ -54,8 +55,8 @@ public sealed class LoginUserCommandHandlerTests
         var result = await _handler.HandleAsync(command, CancellationToken.None);
 
         // Assert
-        Assert.True(result.IsFailure);
-        Assert.Equal(UserErrors.InvalidCredentials, result.Error);
+        result.IsFailure.Should().BeTrue();
+        result.Error.Should().Be(UserErrors.InvalidCredentials);
         
         A.CallTo(() => _authenticationService.LoginAsync(A<User>._, A<string>._, A<CancellationToken>._))
             .MustNotHaveHappened();
@@ -79,8 +80,8 @@ public sealed class LoginUserCommandHandlerTests
         var result = await _handler.HandleAsync(command, CancellationToken.None);
 
         // Assert
-        Assert.True(result.IsFailure);
-        Assert.Equal(error, result.Error);
+        result.IsFailure.Should().BeTrue();
+        result.Error.Should().Be(error);
     }
 
     [Fact]
@@ -160,9 +161,10 @@ public sealed class LoginUserCommandHandlerTests
         var username = Username.Create("testuser").Value;
         var email = Email.Create("test@example.com").Value;
         var nickname = Nickname.Create("TestNick").Value;
-        const string passwordHash = "hash";
-        byte[] passwordSalt = [1, 2, 3, 4];
+        var password = Password.Create(
+            new string('A', PasswordHashingConstants.HashHexLength),
+            new byte[PasswordHashingConstants.SaltSize]).Value;
 
-        return User.Create(Guid.NewGuid(), username, email, passwordHash, passwordSalt, nickname).Value;
+        return User.Create(Guid.NewGuid(), username, email, password, nickname).Value;
     }
 }

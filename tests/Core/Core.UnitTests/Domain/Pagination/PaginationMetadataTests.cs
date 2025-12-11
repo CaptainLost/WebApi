@@ -1,5 +1,6 @@
 using Core.Domain.Messaging;
 using Core.Domain.Pagination;
+using FluentAssertions;
 
 namespace Core.UnitTests.Domain.Pagination;
 
@@ -12,11 +13,11 @@ public sealed class PaginationMetadataTests
         var result = PaginationMetadata.Create(totalCount: 100, pageNumber: 2, pageSize: 10);
 
         // Assert
-        Assert.True(result.IsSuccess);
-        Assert.Equal(100, result.Value.TotalCount);
-        Assert.Equal(2, result.Value.PageNumber);
-        Assert.Equal(10, result.Value.PageSize);
-        Assert.Equal(10, result.Value.TotalPages);
+        result.IsSuccess.Should().BeTrue();
+        result.Value.TotalCount.Should().Be(100);
+        result.Value.PageNumber.Should().Be(2);
+        result.Value.PageSize.Should().Be(10);
+        result.Value.TotalPages.Should().Be(10);
     }
 
     [Fact]
@@ -26,8 +27,8 @@ public sealed class PaginationMetadataTests
         var result = PaginationMetadata.Create(totalCount: -1, pageNumber: 1, pageSize: 10);
 
         // Assert
-        Assert.True(result.IsFailure);
-        Assert.Equal(PaginationErrors.NegativeTotalCount, result.Error);
+        result.IsFailure.Should().BeTrue();
+        result.Error.Should().Be(PaginationErrors.NegativeTotalCount);
     }
 
     [Fact]
@@ -37,8 +38,8 @@ public sealed class PaginationMetadataTests
         var result = PaginationMetadata.Create(totalCount: 100, pageNumber: 0, pageSize: 10);
 
         // Assert
-        Assert.True(result.IsFailure);
-        Assert.Equal(PaginationErrors.InvalidPageNumber, result.Error);
+        result.IsFailure.Should().BeTrue();
+        result.Error.Should().Be(PaginationErrors.InvalidPageNumber);
     }
 
     [Fact]
@@ -48,8 +49,8 @@ public sealed class PaginationMetadataTests
         var result = PaginationMetadata.Create(totalCount: 100, pageNumber: -1, pageSize: 10);
 
         // Assert
-        Assert.True(result.IsFailure);
-        Assert.Equal(PaginationErrors.InvalidPageNumber, result.Error);
+        result.IsFailure.Should().BeTrue();
+        result.Error.Should().Be(PaginationErrors.InvalidPageNumber);
     }
 
     [Fact]
@@ -59,8 +60,8 @@ public sealed class PaginationMetadataTests
         var result = PaginationMetadata.Create(totalCount: 100, pageNumber: 1, pageSize: 0);
 
         // Assert
-        Assert.True(result.IsFailure);
-        Assert.Equal(PaginationErrors.InvalidPageSize, result.Error);
+        result.IsFailure.Should().BeTrue();
+        result.Error.Should().Be(PaginationErrors.InvalidPageSize);
     }
 
     [Fact]
@@ -70,8 +71,8 @@ public sealed class PaginationMetadataTests
         var result = PaginationMetadata.Create(totalCount: 100, pageNumber: 1, pageSize: -5);
 
         // Assert
-        Assert.True(result.IsFailure);
-        Assert.Equal(PaginationErrors.InvalidPageSize, result.Error);
+        result.IsFailure.Should().BeTrue();
+        result.Error.Should().Be(PaginationErrors.InvalidPageSize);
     }
 
     [Fact]
@@ -81,8 +82,8 @@ public sealed class PaginationMetadataTests
         var result = PaginationMetadata.Create(totalCount: 100, pageNumber: 1, pageSize: 10);
 
         // Assert
-        Assert.True(result.IsSuccess);
-        Assert.Equal(10, result.Value.TotalPages);
+        result.IsSuccess.Should().BeTrue();
+        result.Value.TotalPages.Should().Be(10);
     }
 
     [Fact]
@@ -92,8 +93,8 @@ public sealed class PaginationMetadataTests
         var result = PaginationMetadata.Create(totalCount: 105, pageNumber: 1, pageSize: 10);
 
         // Assert
-        Assert.True(result.IsSuccess);
-        Assert.Equal(11, result.Value.TotalPages);
+        result.IsSuccess.Should().BeTrue();
+        result.Value.TotalPages.Should().Be(11);
     }
 
     [Fact]
@@ -103,8 +104,8 @@ public sealed class PaginationMetadataTests
         var result = PaginationMetadata.Create(totalCount: 0, pageNumber: 1, pageSize: 10);
 
         // Assert
-        Assert.True(result.IsSuccess);
-        Assert.Equal(0, result.Value.TotalPages);
+        result.IsSuccess.Should().BeTrue();
+        result.Value.TotalPages.Should().Be(0);
     }
 
     [Fact]
@@ -114,8 +115,8 @@ public sealed class PaginationMetadataTests
         var result = PaginationMetadata.Create(totalCount: 100, pageNumber: 1, pageSize: 10);
 
         // Assert
-        Assert.True(result.IsSuccess);
-        Assert.False(result.Value.HasPreviousPage);
+        result.IsSuccess.Should().BeTrue();
+        result.Value.HasPreviousPage.Should().BeFalse();
     }
 
     [Fact]
@@ -125,8 +126,8 @@ public sealed class PaginationMetadataTests
         var result = PaginationMetadata.Create(totalCount: 100, pageNumber: 2, pageSize: 10);
 
         // Assert
-        Assert.True(result.IsSuccess);
-        Assert.True(result.Value.HasPreviousPage);
+        result.IsSuccess.Should().BeTrue();
+        result.Value.HasPreviousPage.Should().BeTrue();
     }
 
     [Fact]
@@ -136,8 +137,8 @@ public sealed class PaginationMetadataTests
         var result = PaginationMetadata.Create(totalCount: 100, pageNumber: 10, pageSize: 10);
 
         // Assert
-        Assert.True(result.IsSuccess);
-        Assert.True(result.Value.HasPreviousPage);
+        result.IsSuccess.Should().BeTrue();
+        result.Value.HasPreviousPage.Should().BeTrue();
     }
 
     [Fact]
@@ -147,8 +148,8 @@ public sealed class PaginationMetadataTests
         var result = PaginationMetadata.Create(totalCount: 100, pageNumber: 1, pageSize: 10);
 
         // Assert
-        Assert.True(result.IsSuccess);
-        Assert.True(result.Value.HasNextPage);
+        result.IsSuccess.Should().BeTrue();
+        result.Value.HasNextPage.Should().BeTrue();
     }
 
     [Fact]
@@ -158,8 +159,8 @@ public sealed class PaginationMetadataTests
         var result = PaginationMetadata.Create(totalCount: 100, pageNumber: 5, pageSize: 10);
 
         // Assert
-        Assert.True(result.IsSuccess);
-        Assert.True(result.Value.HasNextPage);
+        result.IsSuccess.Should().BeTrue();
+        result.Value.HasNextPage.Should().BeTrue();
     }
 
     [Fact]
@@ -169,8 +170,8 @@ public sealed class PaginationMetadataTests
         var result = PaginationMetadata.Create(totalCount: 100, pageNumber: 10, pageSize: 10);
 
         // Assert
-        Assert.True(result.IsSuccess);
-        Assert.False(result.Value.HasNextPage);
+        result.IsSuccess.Should().BeTrue();
+        result.Value.HasNextPage.Should().BeFalse();
     }
 
     [Fact]
@@ -180,8 +181,8 @@ public sealed class PaginationMetadataTests
         var result = PaginationMetadata.Create(totalCount: 100, pageNumber: 15, pageSize: 10);
 
         // Assert
-        Assert.True(result.IsSuccess);
-        Assert.False(result.Value.HasNextPage);
+        result.IsSuccess.Should().BeTrue();
+        result.Value.HasNextPage.Should().BeFalse();
     }
 
     [Fact]
@@ -191,12 +192,12 @@ public sealed class PaginationMetadataTests
         var metadata = PaginationMetadata.Empty();
 
         // Assert
-        Assert.Equal(0, metadata.TotalCount);
-        Assert.Equal(PaginationConstants.DefaultPageNumber, metadata.PageNumber);
-        Assert.Equal(PaginationConstants.DefaultPageSize, metadata.PageSize);
-        Assert.Equal(0, metadata.TotalPages);
-        Assert.False(metadata.HasPreviousPage);
-        Assert.False(metadata.HasNextPage);
+        metadata.TotalCount.Should().Be(0);
+        metadata.PageNumber.Should().Be(PaginationConstants.DefaultPageNumber);
+        metadata.PageSize.Should().Be(PaginationConstants.DefaultPageSize);
+        metadata.TotalPages.Should().Be(0);
+        metadata.HasPreviousPage.Should().BeFalse();
+        metadata.HasNextPage.Should().BeFalse();
     }
 
     [Fact]
@@ -206,10 +207,10 @@ public sealed class PaginationMetadataTests
         var result = PaginationMetadata.Create(totalCount: 1, pageNumber: 1, pageSize: 10);
 
         // Assert
-        Assert.True(result.IsSuccess);
-        Assert.Equal(1, result.Value.TotalPages);
-        Assert.False(result.Value.HasPreviousPage);
-        Assert.False(result.Value.HasNextPage);
+        result.IsSuccess.Should().BeTrue();
+        result.Value.TotalPages.Should().Be(1);
+        result.Value.HasPreviousPage.Should().BeFalse();
+        result.Value.HasNextPage.Should().BeFalse();
     }
 
     [Fact]
@@ -219,9 +220,9 @@ public sealed class PaginationMetadataTests
         var result = PaginationMetadata.Create(totalCount: 10, pageNumber: 1, pageSize: 10);
 
         // Assert
-        Assert.True(result.IsSuccess);
-        Assert.Equal(1, result.Value.TotalPages);
-        Assert.False(result.Value.HasNextPage);
+        result.IsSuccess.Should().BeTrue();
+        result.Value.TotalPages.Should().Be(1);
+        result.Value.HasNextPage.Should().BeFalse();
     }
 
     [Fact]
@@ -231,9 +232,9 @@ public sealed class PaginationMetadataTests
         var result = PaginationMetadata.Create(totalCount: 11, pageNumber: 1, pageSize: 10);
 
         // Assert
-        Assert.True(result.IsSuccess);
-        Assert.Equal(2, result.Value.TotalPages);
-        Assert.True(result.Value.HasNextPage);
+        result.IsSuccess.Should().BeTrue();
+        result.Value.TotalPages.Should().Be(2);
+        result.Value.HasNextPage.Should().BeTrue();
     }
 
     [Theory]
@@ -255,10 +256,10 @@ public sealed class PaginationMetadataTests
         var result = PaginationMetadata.Create(totalCount, pageNumber, pageSize);
 
         // Assert
-        Assert.True(result.IsSuccess);
-        Assert.Equal(expectedTotalPages, result.Value.TotalPages);
-        Assert.Equal(expectedHasPrevious, result.Value.HasPreviousPage);
-        Assert.Equal(expectedHasNext, result.Value.HasNextPage);
+        result.IsSuccess.Should().BeTrue();
+        result.Value.TotalPages.Should().Be(expectedTotalPages);
+        result.Value.HasPreviousPage.Should().Be(expectedHasPrevious);
+        result.Value.HasNextPage.Should().Be(expectedHasNext);
     }
 
     [Fact]
@@ -268,13 +269,13 @@ public sealed class PaginationMetadataTests
         var result = PaginationMetadata.Create(totalCount: 10000, pageNumber: 50, pageSize: 100);
 
         // Assert
-        Assert.True(result.IsSuccess);
-        Assert.Equal(10000, result.Value.TotalCount);
-        Assert.Equal(50, result.Value.PageNumber);
-        Assert.Equal(100, result.Value.PageSize);
-        Assert.Equal(100, result.Value.TotalPages);
-        Assert.True(result.Value.HasPreviousPage);
-        Assert.True(result.Value.HasNextPage);
+        result.IsSuccess.Should().BeTrue();
+        result.Value.TotalCount.Should().Be(10000);
+        result.Value.PageNumber.Should().Be(50);
+        result.Value.PageSize.Should().Be(100);
+        result.Value.TotalPages.Should().Be(100);
+        result.Value.HasPreviousPage.Should().BeTrue();
+        result.Value.HasNextPage.Should().BeTrue();
     }
 
     [Fact]
@@ -284,9 +285,9 @@ public sealed class PaginationMetadataTests
         var result = PaginationMetadata.Create(totalCount: 100, pageNumber: 9, pageSize: 10);
 
         // Assert
-        Assert.True(result.IsSuccess);
-        Assert.Equal(10, result.Value.TotalPages);
-        Assert.True(result.Value.HasPreviousPage);
-        Assert.True(result.Value.HasNextPage);
+        result.IsSuccess.Should().BeTrue();
+        result.Value.TotalPages.Should().Be(10);
+        result.Value.HasPreviousPage.Should().BeTrue();
+        result.Value.HasNextPage.Should().BeTrue();
     }
 }

@@ -46,14 +46,14 @@ namespace Users.Persistence.Migrations
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
                     Username = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
                     Email = table.Column<string>(type: "TEXT", maxLength: 255, nullable: false),
-                    PasswordHash = table.Column<string>(type: "TEXT", maxLength: 500, nullable: false),
-                    PasswordSalt = table.Column<byte[]>(type: "BLOB", maxLength: 64, nullable: false),
                     Nickname = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
                     CreationDate = table.Column<DateTime>(type: "TEXT", nullable: false),
                     FailedLoginAttempts = table.Column<int>(type: "INTEGER", nullable: false),
                     LockoutEnd = table.Column<DateTime>(type: "TEXT", nullable: true),
                     LastLockout = table.Column<DateTime>(type: "TEXT", nullable: true),
-                    LockoutCount = table.Column<int>(type: "INTEGER", nullable: false)
+                    LockoutCount = table.Column<int>(type: "INTEGER", nullable: false),
+                    PasswordHash = table.Column<string>(type: "TEXT", maxLength: 128, nullable: false),
+                    PasswordSalt = table.Column<byte[]>(type: "BLOB", maxLength: 64, nullable: false)
                 },
                 constraints: table =>
                 {

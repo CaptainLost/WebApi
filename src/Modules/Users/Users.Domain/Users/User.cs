@@ -9,8 +9,7 @@ public sealed class User : Entity
 {
     public Username Username { get; private set; }
     public Email Email { get; private set; }
-    public string PasswordHash { get; set; } = string.Empty;
-    public byte[] PasswordSalt { get; set; } = [];
+    public Password Password { get; private set; }
     public Nickname Nickname { get; private set; }
     public DateTime CreationDate { get; set; }
     public int FailedLoginAttempts { get; set; }
@@ -20,13 +19,16 @@ public sealed class User : Entity
 
     public ICollection<Role> Roles { get; set; } = [];
 
-    private User(Guid id, Username username, Email email, string passwordHash, byte[] passwordSalt, Nickname nickname)
+    private User()
+    {
+    }
+
+    private User(Guid id, Username username, Email email, Password password, Nickname nickname)
         : base(id)
     {
         Username = username;
         Email = email;
-        PasswordHash = passwordHash;
-        PasswordSalt = passwordSalt;
+        Password = password;
         Nickname = nickname;
         CreationDate = DateTime.UtcNow;
         FailedLoginAttempts = 0;
@@ -35,19 +37,9 @@ public sealed class User : Entity
         LockoutCount = 0;
     }
 
-    public static Result<User> Create(Guid id, Username username, Email email, string passwordHash, byte[] passwordSalt, Nickname nickname)
+    public static Result<User> Create(Guid id, Username username, Email email, Password password, Nickname nickname)
     {
-        if (string.IsNullOrWhiteSpace(passwordHash))
-        {
-            return Result.Failure<User>(UserErrors.InvalidPasswordHash);
-        }
-
-        if (passwordSalt == null || passwordSalt.Length == 0)
-        {
-            return Result.Failure<User>(UserErrors.InvalidPasswordHash);
-        }
-
-        User user = new User(id, username, email, passwordHash, passwordSalt, nickname);
+        User user = new User(id, username, email, password, nickname);
 
         return Result.Success(user);
     }
@@ -93,20 +85,9 @@ public sealed class User : Entity
         // LockoutCount = 0;
     }
 
-    public Result UpdatePassword(string newPasswordHash, byte[] newPasswordSalt)
+    public Result UpdatePassword(Password newPassword)
     {
-        if (string.IsNullOrWhiteSpace(newPasswordHash))
-        {
-            return Result.Failure(UserErrors.InvalidPasswordHash);
-        }
-
-        if (newPasswordSalt == null || newPasswordSalt.Length == 0)
-        {
-            return Result.Failure(UserErrors.InvalidPasswordHash);
-        }
-
-        PasswordHash = newPasswordHash;
-        PasswordSalt = newPasswordSalt;
+        Password = newPassword;
 
         return Result.Success();
     }

@@ -24,10 +24,6 @@ public static class UserErrors
         "User.EmailAlreadyTaken",
         $"Email '{email}' is already taken.");
 
-    public static Error InvalidPasswordHash => Error.Validation(
-        "User.InvalidPasswordHash",
-        "Password hash cannot be empty.");
-
     public static Error InvalidCredentials => Error.Authorization(
         "User.InvalidCredentials",
         "The provided credentials are invalid.");
@@ -35,4 +31,8 @@ public static class UserErrors
     public static Error AccountLockedOut => Error.Authorization(
         "User.AccountLockedOut",
         "The account is locked out due to multiple failed login attempts.");
+
+    public static Error RegistrationFailed => Error.Failure(
+        "User.RegistrationFailed",
+        "Registration failed. Please try again.");
 }

@@ -12,7 +12,9 @@ public static class ApiResults
     private static IResult ProblemInternal(Result result)
     {
         if (result.IsSuccess)
+        {
             throw new InvalidOperationException("Cannot create problem result for a successful result");
+        }
 
         return Results.Problem(
             title: GetTitle(result.Error),
