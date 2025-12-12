@@ -1,4 +1,5 @@
 using System.Reflection;
+using FluentAssertions;
 using NetArchTest.Rules;
 
 namespace Common.ArchitectureTests;
@@ -16,7 +17,7 @@ public abstract class BaseArchitectureTests
             .Should()
             .NotHaveDependencyOnAny(assemblyNames)
             .GetResult()
-            .ShouldBeSuccessful();
+            .FailingTypesShouldBeEmpty();
     }
 
     protected static void AssertLayerDoesNotHaveDependencyOnAny(
@@ -27,7 +28,7 @@ public abstract class BaseArchitectureTests
             .Should()
             .NotHaveDependencyOnAny(forbiddenAssemblieNames)
             .GetResult()
-            .ShouldBeSuccessful();
+            .FailingTypesShouldBeEmpty();
     }
 
     protected static void AssertLayerDoesNotHaveDependencyOn(
@@ -38,7 +39,7 @@ public abstract class BaseArchitectureTests
             .Should()
             .NotHaveDependencyOn(forbiddenAssembly.GetName().Name)
             .GetResult()
-            .ShouldBeSuccessful();
+            .FailingTypesShouldBeEmpty();
     }
 
     protected static void AssertLayerDoesNotHaveDependencyOn(
@@ -49,6 +50,6 @@ public abstract class BaseArchitectureTests
             .Should()
             .NotHaveDependencyOn(forbiddenAssemblyName)
             .GetResult()
-            .ShouldBeSuccessful();
+            .FailingTypesShouldBeEmpty();
     }
 }

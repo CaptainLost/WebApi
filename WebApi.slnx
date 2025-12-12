@@ -30,6 +30,7 @@
     <Project Path="src/Modules/Users/Users.Domain/Users.Domain.csproj" />
     <Project Path="src/Modules/Users/Users.Facade/Users.Facade.csproj" />
     <Project Path="src/Modules/Users/Users.Infrastructure/Users.Infrastructure.csproj" />
+    <Project Path="src/Modules/Users/Users.IntegrationEvents/Users.IntegrationEvents.csproj" />
     <Project Path="src/Modules/Users/Users.Persistence/Users.Persistence.csproj" />
     <Project Path="src/Modules/Users/Users.Presentation/Users.Presentation.csproj" />
   </Folder>

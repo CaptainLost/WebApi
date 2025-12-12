@@ -4,7 +4,7 @@ using Users.Domain.Users;
 
 namespace Users.Application.Users.AssignRoleToUser;
 
-internal sealed class AssignRoleToUserCommandHandler(IUserRepository userRepository, IRoleRepository roleRepository) 
+internal sealed class AssignRoleToUserCommandHandler(IUserRepository userRepository, IRoleRepository roleRepository)
     : ICommandHandler<AssignRoleToUserCommand>
 {
     private readonly IUserRepository _userRepository = userRepository;

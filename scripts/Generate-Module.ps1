@@ -5,13 +5,22 @@
 .PARAMETER ModuleName
     Name of the module to create (e.g., "Authentication", "Orders", "Payments")
 
+.PARAMETER IncludeIntegrationEvents
+    If specified, creates an IntegrationEvents project for the module
+
 .EXAMPLE
     .\Generate-Module.ps1 -ModuleName "Orders"
+
+.EXAMPLE
+    .\Generate-Module.ps1 -ModuleName "Orders" -IncludeIntegrationEvents
 #>
 
 param(
     [Parameter(Mandatory=$true)]
-    [string]$ModuleName
+    [string]$ModuleName,
+    
+    [Parameter(Mandatory=$false)]
+    [switch]$IncludeIntegrationEvents
 )
 
 # Output colors
@@ -197,6 +206,7 @@ $appLines += "        // Assembly assembly = typeof(DependencyInjection).Assembl
 $appLines += "        //"
 $appLines += "        // services.AddCommandHandlers(assembly);"
 $appLines += "        // services.AddQueryHandlers(assembly);"
+$appLines += "        // services.AddDomainEventHandlers(assembly);"
 $appLines += ""
 $appLines += "        return services;"
 $appLines += "    }"
@@ -206,6 +216,19 @@ $appLines | Out-File -FilePath "$appPath\DependencyInjection.cs" -Encoding UTF8
 
 dotnet sln $solutionPath add "$appPath\$ModuleName.Application.csproj" 2>&1 | Out-Null
 Write-Success "Created $ModuleName.Application"
+
+# 2a. Create IntegrationEvents project (optional)
+if ($IncludeIntegrationEvents) {
+    Write-Step "Creating $ModuleName.IntegrationEvents..."
+    $integrationEventsPath = "$modulesPath\$ModuleName.IntegrationEvents"
+    New-Item -ItemType Directory -Path $integrationEventsPath -Force | Out-Null
+
+    New-ProjectFile -Path "$integrationEventsPath\$ModuleName.IntegrationEvents.csproj" `
+        -ProjectReferences @("..\..\Core\Core.Application\Core.Application.csproj")
+
+    dotnet sln $solutionPath add "$integrationEventsPath\$ModuleName.IntegrationEvents.csproj" 2>&1 | Out-Null
+    Write-Success "Created $ModuleName.IntegrationEvents"
+}
 
 # 3. Create Persistence project
 Write-Step "Creating $ModuleName.Persistence..."
@@ -329,6 +352,9 @@ $facadeCsprojLines += '  <ItemGroup>'
 $facadeCsprojLines += "    <ProjectReference Include=`"..\..\Core\Core.Facade\Core.Facade.csproj`" />"
 $facadeCsprojLines += "    <ProjectReference Include=`"..\$ModuleName.Domain\$ModuleName.Domain.csproj`" />"
 $facadeCsprojLines += "    <ProjectReference Include=`"..\$ModuleName.Application\$ModuleName.Application.csproj`" />"
+if ($IncludeIntegrationEvents) {
+    $facadeCsprojLines += "    <ProjectReference Include=`"..\$ModuleName.IntegrationEvents\$ModuleName.IntegrationEvents.csproj`" />"
+}
 $facadeCsprojLines += "    <ProjectReference Include=`"..\$ModuleName.Persistence\$ModuleName.Persistence.csproj`" />"
 $facadeCsprojLines += "    <ProjectReference Include=`"..\$ModuleName.Infrastructure\$ModuleName.Infrastructure.csproj`" />"
 $facadeCsprojLines += "    <ProjectReference Include=`"..\$ModuleName.Presentation\$ModuleName.Presentation.csproj`" />"
@@ -421,6 +447,9 @@ Write-Host "Structure:" -ForegroundColor Cyan
 Write-Host "  src/Modules/$ModuleName/" -ForegroundColor White
 Write-Host "    - $ModuleName.Domain" -ForegroundColor Gray
 Write-Host "    - $ModuleName.Application" -ForegroundColor Gray
+if ($IncludeIntegrationEvents) {
+    Write-Host "    - $ModuleName.IntegrationEvents" -ForegroundColor Gray
+}
 Write-Host "    - $ModuleName.Persistence" -ForegroundColor Gray
 Write-Host "    - $ModuleName.Infrastructure" -ForegroundColor Gray
 Write-Host "    - $ModuleName.Presentation" -ForegroundColor Gray

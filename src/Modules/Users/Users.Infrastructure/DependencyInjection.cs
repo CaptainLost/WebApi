@@ -28,7 +28,7 @@ public static class DependencyInjection
         IHostEnvironment environment,
         IConfiguration configuration)
     {
-        services.AddScoped<IAuthenticationService, AuthenticationService>();
+        services.AddScoped<IAccountService, AccountService>();
         services.AddScoped<IPasswordHashingService, PasswordHashingService>();
         services.AddScoped<IJwtTokenService, JwtTokenService>();
 

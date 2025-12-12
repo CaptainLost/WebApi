@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using Core.Application.Abstractions.Messaging.Commands;
 using Core.Application.Abstractions.Messaging.Decorators;
+using Core.Application.Abstractions.Messaging.Events;
 using Core.Application.Abstractions.Messaging.Queries;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -36,6 +37,19 @@ public static class MessagingServiceCollectionExtensions
             .WithScopedLifetime());
 
         services.TryDecorate(typeof(IQueryHandler<,>), typeof(QueryHandlerLoggingDecorator<,>));
+
+        return services;
+    }
+
+    public static IServiceCollection AddDomainEventHandlers(this IServiceCollection services, params Assembly[] assemblies)
+    {
+        services.Scan(scan => scan
+            .FromAssemblies(assemblies)
+            .AddClasses(classes => classes.AssignableTo(
+                typeof(IDomainEventHandler<>)
+                ), publicOnly: false)
+            .AsImplementedInterfaces()
+            .WithScopedLifetime());
 
         return services;
     }

@@ -20,7 +20,7 @@ public sealed class SortBuilder<T>
     public SortBuilder<T> By(string key, Expression<Func<T, object>> selector)
     {
         _sortMappings[key.ToLowerInvariant()] = selector;
-        
+
         return this;
     }
 

@@ -9,7 +9,7 @@ public static class UsersRoutes
     public const string GetByUsername = "{username}";
     public const string GetUserList = "";
     public const string AssignRole = "{userId}/roles";
-    
+
     public const string Login = "login";
     public const string Register = "register";
 }

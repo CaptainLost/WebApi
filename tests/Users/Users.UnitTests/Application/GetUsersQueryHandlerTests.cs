@@ -1,4 +1,3 @@
-using Core.Domain.Messaging;
 using Core.Domain.Pagination;
 using FluentAssertions;
 using Users.Application.Users.GetUsers;
@@ -29,7 +28,7 @@ public sealed class GetUsersQueryHandlerTests
             CreateValidUser(Guid.NewGuid(), "user2"),
             CreateValidUser(Guid.NewGuid(), "user3")
         };
-        
+
         A.CallTo(() => _userRepository.GetPagedAsync(A<PageRequest>._, A<CancellationToken>._))
             .Returns((users, 3));
 
@@ -56,7 +55,7 @@ public sealed class GetUsersQueryHandlerTests
             CreateValidUser(userId1, "user1"),
             CreateValidUser(userId2, "user2")
         };
-        
+
         A.CallTo(() => _userRepository.GetPagedAsync(A<PageRequest>._, A<CancellationToken>._))
             .Returns((users, 2));
 
@@ -78,7 +77,7 @@ public sealed class GetUsersQueryHandlerTests
     {
         // Arrange
         var query = new GetUsersQuery(PageNumber: 1, PageSize: 10);
-        
+
         A.CallTo(() => _userRepository.GetPagedAsync(A<PageRequest>._, A<CancellationToken>._))
             .Returns((Enumerable.Empty<User>(), 0));
 
@@ -96,7 +95,7 @@ public sealed class GetUsersQueryHandlerTests
     {
         // Arrange
         var query = new GetUsersQuery(PageNumber: 1, PageSize: 10, SearchTerm: "test");
-        
+
         A.CallTo(() => _userRepository.GetPagedAsync(A<PageRequest>._, A<CancellationToken>._))
             .Returns((Enumerable.Empty<User>(), 0));
 
@@ -115,11 +114,11 @@ public sealed class GetUsersQueryHandlerTests
     {
         // Arrange
         var query = new GetUsersQuery(
-            PageNumber: 1, 
-            PageSize: 10, 
-            SortBy: "Username", 
+            PageNumber: 1,
+            PageSize: 10,
+            SortBy: "Username",
             SortDescending: true);
-        
+
         A.CallTo(() => _userRepository.GetPagedAsync(A<PageRequest>._, A<CancellationToken>._))
             .Returns((Enumerable.Empty<User>(), 0));
 
@@ -128,8 +127,8 @@ public sealed class GetUsersQueryHandlerTests
 
         // Assert
         A.CallTo(() => _userRepository.GetPagedAsync(
-            A<PageRequest>.That.Matches(pr => 
-                pr.SortBy == "Username" && 
+            A<PageRequest>.That.Matches(pr =>
+                pr.SortBy == "Username" &&
                 pr.SortDescending == true),
             A<CancellationToken>._))
             .MustHaveHappenedOnceExactly();
@@ -140,7 +139,7 @@ public sealed class GetUsersQueryHandlerTests
     {
         // Arrange
         var query = new GetUsersQuery();
-        
+
         A.CallTo(() => _userRepository.GetPagedAsync(A<PageRequest>._, A<CancellationToken>._))
             .Returns((Enumerable.Empty<User>(), 0));
 
@@ -159,12 +158,12 @@ public sealed class GetUsersQueryHandlerTests
     {
         // Arrange
         var query = new GetUsersQuery(
-            PageNumber: 2, 
-            PageSize: 20, 
-            SearchTerm: "search", 
-            SortBy: "Id", 
+            PageNumber: 2,
+            PageSize: 20,
+            SearchTerm: "search",
+            SortBy: "Id",
             SortDescending: false);
-        
+
         A.CallTo(() => _userRepository.GetPagedAsync(A<PageRequest>._, A<CancellationToken>._))
             .Returns((Enumerable.Empty<User>(), 0));
 
@@ -173,7 +172,7 @@ public sealed class GetUsersQueryHandlerTests
 
         // Assert
         A.CallTo(() => _userRepository.GetPagedAsync(
-            A<PageRequest>.That.Matches(pr => 
+            A<PageRequest>.That.Matches(pr =>
                 pr.PageNumber == 2 &&
                 pr.PageSize == 20 &&
                 pr.SearchTerm == "search" &&
@@ -193,7 +192,7 @@ public sealed class GetUsersQueryHandlerTests
             CreateValidUser(Guid.NewGuid(), "user1"),
             CreateValidUser(Guid.NewGuid(), "user2")
         };
-        
+
         A.CallTo(() => _userRepository.GetPagedAsync(A<PageRequest>._, A<CancellationToken>._))
             .Returns((users, 12)); // 12 total users
 
@@ -219,7 +218,7 @@ public sealed class GetUsersQueryHandlerTests
         {
             CreateValidUser(Guid.NewGuid(), "user1")
         };
-        
+
         A.CallTo(() => _userRepository.GetPagedAsync(A<PageRequest>._, A<CancellationToken>._))
             .Returns((users, 11)); // 11 total users, 3 pages
 
@@ -238,7 +237,7 @@ public sealed class GetUsersQueryHandlerTests
         // Arrange
         var query = new GetUsersQuery(PageNumber: 1, PageSize: 10);
         var cancellationToken = new CancellationToken();
-        
+
         A.CallTo(() => _userRepository.GetPagedAsync(A<PageRequest>._, A<CancellationToken>._))
             .Returns((Enumerable.Empty<User>(), 0));
 

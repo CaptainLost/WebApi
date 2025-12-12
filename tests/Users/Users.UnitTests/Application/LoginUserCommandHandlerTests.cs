@@ -9,15 +9,15 @@ namespace Users.UnitTests.Application;
 
 public sealed class LoginUserCommandHandlerTests
 {
-    private readonly IAuthenticationService _authenticationService;
+    private readonly IAccountService _accountService;
     private readonly IUserRepository _userRepository;
     private readonly LoginUserCommandHandler _handler;
 
     public LoginUserCommandHandlerTests()
     {
-        _authenticationService = A.Fake<IAuthenticationService>();
+        _accountService = A.Fake<IAccountService>();
         _userRepository = A.Fake<IUserRepository>();
-        _handler = new LoginUserCommandHandler(_authenticationService, _userRepository);
+        _handler = new LoginUserCommandHandler(_accountService, _userRepository);
     }
 
     [Fact]
@@ -27,11 +27,11 @@ public sealed class LoginUserCommandHandlerTests
         var command = new LoginUserCommand("testuser", "Password123!");
         var user = CreateValidUser();
         var expectedToken = "jwt-token-123";
-        
+
         A.CallTo(() => _userRepository.GetByUsernameAsync(A<Username>._, A<CancellationToken>._))
             .Returns(user);
-        
-        A.CallTo(() => _authenticationService.LoginAsync(user, command.Password, A<CancellationToken>._))
+
+        A.CallTo(() => _accountService.LoginAsync(user, command.Password, A<CancellationToken>._))
             .Returns(Result.Success(expectedToken));
 
         // Act
@@ -47,7 +47,7 @@ public sealed class LoginUserCommandHandlerTests
     {
         // Arrange
         var command = new LoginUserCommand("nonexistentuser", "Password123!");
-        
+
         A.CallTo(() => _userRepository.GetByUsernameAsync(A<Username>._, A<CancellationToken>._))
             .Returns((User?)null);
 
@@ -57,8 +57,8 @@ public sealed class LoginUserCommandHandlerTests
         // Assert
         result.IsFailure.Should().BeTrue();
         result.Error.Should().Be(UserErrors.InvalidCredentials);
-        
-        A.CallTo(() => _authenticationService.LoginAsync(A<User>._, A<string>._, A<CancellationToken>._))
+
+        A.CallTo(() => _accountService.LoginAsync(A<User>._, A<string>._, A<CancellationToken>._))
             .MustNotHaveHappened();
     }
 
@@ -69,11 +69,11 @@ public sealed class LoginUserCommandHandlerTests
         var command = new LoginUserCommand("testuser", "WrongPassword");
         var user = CreateValidUser();
         var error = Error.Failure("Auth.InvalidPassword", "Invalid password");
-        
+
         A.CallTo(() => _userRepository.GetByUsernameAsync(A<Username>._, A<CancellationToken>._))
             .Returns(user);
-        
-        A.CallTo(() => _authenticationService.LoginAsync(user, command.Password, A<CancellationToken>._))
+
+        A.CallTo(() => _accountService.LoginAsync(user, command.Password, A<CancellationToken>._))
             .Returns(Result.Failure<string>(error));
 
         // Act
@@ -90,11 +90,11 @@ public sealed class LoginUserCommandHandlerTests
         // Arrange
         var command = new LoginUserCommand("testuser", "Password123!");
         var user = CreateValidUser();
-        
+
         A.CallTo(() => _userRepository.GetByUsernameAsync(A<Username>._, A<CancellationToken>._))
             .Returns(user);
-        
-        A.CallTo(() => _authenticationService.LoginAsync(A<User>._, A<string>._, A<CancellationToken>._))
+
+        A.CallTo(() => _accountService.LoginAsync(A<User>._, A<string>._, A<CancellationToken>._))
             .Returns(Result.Success("token"));
 
         // Act
@@ -113,18 +113,18 @@ public sealed class LoginUserCommandHandlerTests
         // Arrange
         var command = new LoginUserCommand("testuser", "Password123!");
         var user = CreateValidUser();
-        
+
         A.CallTo(() => _userRepository.GetByUsernameAsync(A<Username>._, A<CancellationToken>._))
             .Returns(user);
-        
-        A.CallTo(() => _authenticationService.LoginAsync(A<User>._, A<string>._, A<CancellationToken>._))
+
+        A.CallTo(() => _accountService.LoginAsync(A<User>._, A<string>._, A<CancellationToken>._))
             .Returns(Result.Success("token"));
 
         // Act
         await _handler.HandleAsync(command, CancellationToken.None);
 
         // Assert
-        A.CallTo(() => _authenticationService.LoginAsync(
+        A.CallTo(() => _accountService.LoginAsync(
             user,
             command.Password,
             A<CancellationToken>._))
@@ -138,11 +138,11 @@ public sealed class LoginUserCommandHandlerTests
         var command = new LoginUserCommand("testuser", "Password123!");
         var user = CreateValidUser();
         var cancellationToken = new CancellationToken();
-        
+
         A.CallTo(() => _userRepository.GetByUsernameAsync(A<Username>._, A<CancellationToken>._))
             .Returns(user);
-        
-        A.CallTo(() => _authenticationService.LoginAsync(A<User>._, A<string>._, A<CancellationToken>._))
+
+        A.CallTo(() => _accountService.LoginAsync(A<User>._, A<string>._, A<CancellationToken>._))
             .Returns(Result.Success("token"));
 
         // Act
@@ -151,8 +151,8 @@ public sealed class LoginUserCommandHandlerTests
         // Assert
         A.CallTo(() => _userRepository.GetByUsernameAsync(A<Username>._, cancellationToken))
             .MustHaveHappenedOnceExactly();
-        
-        A.CallTo(() => _authenticationService.LoginAsync(A<User>._, A<string>._, cancellationToken))
+
+        A.CallTo(() => _accountService.LoginAsync(A<User>._, A<string>._, cancellationToken))
             .MustHaveHappenedOnceExactly();
     }
 

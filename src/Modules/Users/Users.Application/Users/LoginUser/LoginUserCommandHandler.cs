@@ -7,11 +7,11 @@ using Users.Domain.ValueObjects;
 namespace Users.Application.Users.LoginUser;
 
 internal sealed class LoginUserCommandHandler(
-    IAuthenticationService authenticationService, 
-    IUserRepository userRepository) 
+    IAccountService accountService,
+    IUserRepository userRepository)
     : ICommandHandler<LoginUserCommand, string>
 {
-    private readonly IAuthenticationService _authenticationService = authenticationService;
+    private readonly IAccountService _accountService = accountService;
     private readonly IUserRepository _userRepository = userRepository;
 
     public async Task<Result<string>> HandleAsync(LoginUserCommand command, CancellationToken cancellationToken)
@@ -25,7 +25,7 @@ internal sealed class LoginUserCommandHandler(
             return Result.Failure<string>(UserErrors.InvalidCredentials);
         }
 
-        Result<string> tokenResult = await _authenticationService.LoginAsync(user, command.Password, cancellationToken);
+        Result<string> tokenResult = await _accountService.LoginAsync(user, command.Password, cancellationToken);
 
         return tokenResult;
     }

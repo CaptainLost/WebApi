@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Core.Persistence.DomainEvents;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Users.Domain.Users;
@@ -16,8 +17,14 @@ public static class DependencyInjection
         string connectionString = configuration.GetConnectionString("Database")
             ?? throw new InvalidOperationException("Database connection string not found");
 
-        services.AddDbContext<UsersDbContext>(options =>
-            options.UseSqlite(connectionString));
+        services.AddDbContext<UsersDbContext>((serviceProvider, options) =>
+        {
+            DomainEventDispatcherInterceptor interceptor = serviceProvider
+                .GetRequiredService<DomainEventDispatcherInterceptor>();
+
+            options.UseSqlite(connectionString)
+                .AddInterceptors(interceptor);
+        });
 
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IRoleRepository, RoleRepository>();

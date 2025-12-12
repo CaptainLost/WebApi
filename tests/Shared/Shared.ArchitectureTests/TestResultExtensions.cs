@@ -5,7 +5,7 @@ namespace Common.ArchitectureTests;
 
 public static class TestResultExtensions
 {
-    public static void ShouldBeSuccessful(this TestResult testResult)
+    public static void FailingTypesShouldBeEmpty(this TestResult testResult)
     {
         testResult.FailingTypes?
             .Should()

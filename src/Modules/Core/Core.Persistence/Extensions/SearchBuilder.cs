@@ -24,7 +24,7 @@ public sealed class SearchBuilder<T>
     public SortBuilder<T> Sort(string? sortBy, bool sortDescending)
     {
         IQueryable<T> filteredQuery = Apply();
-        
+
         return new SortBuilder<T>(filteredQuery, sortBy, sortDescending);
     }
 

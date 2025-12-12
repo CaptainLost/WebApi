@@ -1,4 +1,3 @@
-using Core.Domain.Messaging;
 using FluentAssertions;
 using Users.Application.Users.AssignRoleToUser;
 using Users.Domain.Users;
@@ -27,10 +26,10 @@ public sealed class AssignRoleToUserCommandHandlerTests
         var command = new AssignRoleToUserCommand(userId, "Administrator");
         var user = CreateValidUser(userId);
         var role = Role.Administrator;
-        
+
         A.CallTo(() => _userRepository.GetByIdAsync(userId, A<CancellationToken>._))
             .Returns(user);
-        
+
         A.CallTo(() => _roleRepository.GetByName(command.RoleName, A<CancellationToken>._))
             .Returns(role);
 
@@ -48,7 +47,7 @@ public sealed class AssignRoleToUserCommandHandlerTests
         // Arrange
         var userId = Guid.NewGuid();
         var command = new AssignRoleToUserCommand(userId, "Administrator");
-        
+
         A.CallTo(() => _userRepository.GetByIdAsync(userId, A<CancellationToken>._))
             .Returns((User?)null);
 
@@ -58,7 +57,7 @@ public sealed class AssignRoleToUserCommandHandlerTests
         // Assert
         result.IsFailure.Should().BeTrue();
         result.Error.Should().Be(UserErrors.UserNotFoundById(userId));
-        
+
         A.CallTo(() => _roleRepository.GetByName(A<string>._, A<CancellationToken>._))
             .MustNotHaveHappened();
     }
@@ -70,10 +69,10 @@ public sealed class AssignRoleToUserCommandHandlerTests
         var userId = Guid.NewGuid();
         var command = new AssignRoleToUserCommand(userId, "NonExistentRole");
         var user = CreateValidUser(userId);
-        
+
         A.CallTo(() => _userRepository.GetByIdAsync(userId, A<CancellationToken>._))
             .Returns(user);
-        
+
         A.CallTo(() => _roleRepository.GetByName(command.RoleName, A<CancellationToken>._))
             .Returns((Role?)null);
 
@@ -93,12 +92,12 @@ public sealed class AssignRoleToUserCommandHandlerTests
         var command = new AssignRoleToUserCommand(userId, "Registered");
         var user = CreateValidUser(userId);
         var role = Role.Registered;
-        
+
         user.Roles.Add(role); // User already has this role
-        
+
         A.CallTo(() => _userRepository.GetByIdAsync(userId, A<CancellationToken>._))
             .Returns(user);
-        
+
         A.CallTo(() => _roleRepository.GetByName(command.RoleName, A<CancellationToken>._))
             .Returns(role);
 
@@ -118,10 +117,10 @@ public sealed class AssignRoleToUserCommandHandlerTests
         var command = new AssignRoleToUserCommand(userId, "Administrator");
         var user = CreateValidUser(userId);
         var role = Role.Administrator;
-        
+
         A.CallTo(() => _userRepository.GetByIdAsync(userId, A<CancellationToken>._))
             .Returns(user);
-        
+
         A.CallTo(() => _roleRepository.GetByName(command.RoleName, A<CancellationToken>._))
             .Returns(role);
 
@@ -131,7 +130,7 @@ public sealed class AssignRoleToUserCommandHandlerTests
         // Assert
         A.CallTo(() => _userRepository.GetByIdAsync(userId, A<CancellationToken>._))
             .MustHaveHappenedOnceExactly();
-        
+
         A.CallTo(() => _roleRepository.GetByName(command.RoleName, A<CancellationToken>._))
             .MustHaveHappenedOnceExactly();
     }
@@ -145,10 +144,10 @@ public sealed class AssignRoleToUserCommandHandlerTests
         var user = CreateValidUser(userId);
         var role = Role.Administrator;
         var cancellationToken = new CancellationToken();
-        
+
         A.CallTo(() => _userRepository.GetByIdAsync(userId, A<CancellationToken>._))
             .Returns(user);
-        
+
         A.CallTo(() => _roleRepository.GetByName(command.RoleName, A<CancellationToken>._))
             .Returns(role);
 
@@ -168,13 +167,13 @@ public sealed class AssignRoleToUserCommandHandlerTests
         var command = new AssignRoleToUserCommand(userId, "Registered");
         var user = CreateValidUser(userId);
         var role = Role.Registered;
-        
+
         // Pre-assign the role to simulate failure
         user.Roles.Add(role);
-        
+
         A.CallTo(() => _userRepository.GetByIdAsync(userId, A<CancellationToken>._))
             .Returns(user);
-        
+
         A.CallTo(() => _roleRepository.GetByName(command.RoleName, A<CancellationToken>._))
             .Returns(role);
 

@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Core.Application.Abstractions.Messaging.Events;
+using Core.Infrastructure.EventBus;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -11,6 +13,8 @@ public static class DependencyInjection
         IHostEnvironment environment,
         IConfiguration configuration)
     {
+        services.AddSingleton<IIntegrationEventBus, InMemoryIntegrationEventBus>();
+
         return services;
     }
 }

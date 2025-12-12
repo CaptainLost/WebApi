@@ -1,29 +1,29 @@
 using Core.Domain.Messaging;
 using FluentAssertions;
 using Users.Application.Abstractions;
-using Users.Application.Users.RegisterUser;
+using Users.Application.Users.CreateUser;
 
 namespace Users.UnitTests.Application;
 
-public sealed class RegisterUserCommandHandlerTests
+public sealed class CreateUserCommandHandlerTests
 {
-    private readonly IAuthenticationService _authenticationService;
-    private readonly RegisterUserCommandHandler _handler;
+    private readonly IAccountService _accountService;
+    private readonly CreateUserCommandHandler _handler;
 
-    public RegisterUserCommandHandlerTests()
+    public CreateUserCommandHandlerTests()
     {
-        _authenticationService = A.Fake<IAuthenticationService>();
-        _handler = new RegisterUserCommandHandler(_authenticationService);
+        _accountService = A.Fake<IAccountService>();
+        _handler = new CreateUserCommandHandler(_accountService);
     }
 
     [Fact]
     public async Task HandleAsync_WithValidData_ShouldCallAuthenticationService()
     {
         // Arrange
-        var command = new RegisterUserCommand("testuser", "test@example.com", "Password123!");
+        var command = new CreateUserCommand("testuser", "test@example.com", "Password123!");
         var expectedToken = "jwt-token-123";
-        
-        A.CallTo(() => _authenticationService.RegisterAsync(
+
+        A.CallTo(() => _accountService.RegisterAsync(
             command.Username,
             command.Email,
             command.Password,
@@ -34,7 +34,7 @@ public sealed class RegisterUserCommandHandlerTests
         var result = await _handler.HandleAsync(command, CancellationToken.None);
 
         // Assert
-        A.CallTo(() => _authenticationService.RegisterAsync(
+        A.CallTo(() => _accountService.RegisterAsync(
             command.Username,
             command.Email,
             command.Password,
@@ -46,10 +46,10 @@ public sealed class RegisterUserCommandHandlerTests
     public async Task HandleAsync_ShouldReturnTokenFromAuthenticationService()
     {
         // Arrange
-        var command = new RegisterUserCommand("testuser", "test@example.com", "Password123!");
+        var command = new CreateUserCommand("testuser", "test@example.com", "Password123!");
         var expectedToken = "jwt-token-456";
-        
-        A.CallTo(() => _authenticationService.RegisterAsync(
+
+        A.CallTo(() => _accountService.RegisterAsync(
             A<string>._,
             A<string>._,
             A<string>._,
@@ -68,10 +68,10 @@ public sealed class RegisterUserCommandHandlerTests
     public async Task HandleAsync_WhenAuthenticationFails_ShouldReturnFailure()
     {
         // Arrange
-        var command = new RegisterUserCommand("testuser", "test@example.com", "Password123!");
+        var command = new CreateUserCommand("testuser", "test@example.com", "Password123!");
         var error = Error.Failure("Auth.Failed", "Registration failed");
-        
-        A.CallTo(() => _authenticationService.RegisterAsync(
+
+        A.CallTo(() => _accountService.RegisterAsync(
             A<string>._,
             A<string>._,
             A<string>._,
@@ -90,10 +90,10 @@ public sealed class RegisterUserCommandHandlerTests
     public async Task HandleAsync_ShouldPassCancellationToken()
     {
         // Arrange
-        var command = new RegisterUserCommand("testuser", "test@example.com", "Password123!");
+        var command = new CreateUserCommand("testuser", "test@example.com", "Password123!");
         var cancellationToken = new CancellationToken();
-        
-        A.CallTo(() => _authenticationService.RegisterAsync(
+
+        A.CallTo(() => _accountService.RegisterAsync(
             A<string>._,
             A<string>._,
             A<string>._,
@@ -104,7 +104,7 @@ public sealed class RegisterUserCommandHandlerTests
         await _handler.HandleAsync(command, cancellationToken);
 
         // Assert
-        A.CallTo(() => _authenticationService.RegisterAsync(
+        A.CallTo(() => _accountService.RegisterAsync(
             A<string>._,
             A<string>._,
             A<string>._,

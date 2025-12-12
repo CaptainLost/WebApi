@@ -94,6 +94,31 @@ public sealed class UserTests
     }
 
     [Fact]
+    public void Create_WithValidData_ShouldRaiseUserCreatedDomainEvent()
+    {
+        // Arrange
+        Guid userId = Guid.NewGuid();
+        Username username = CreateValidUsername();
+        Email email = CreateValidEmail();
+        Nickname nickname = CreateValidNickname();
+        Password password = CreateValidPassword();
+
+        // Act
+        var result = User.Create(userId, username, email, password, nickname);
+        var domainEvents = result.Value.GetDomainEvents();
+
+        // Assert
+        domainEvents.Should().ContainItemsAssignableTo<UserCreatedDomainEvent>();
+        domainEvents.OfType<UserCreatedDomainEvent>().Should().ContainSingle();
+        UserCreatedDomainEvent domainEvent = domainEvents.OfType<UserCreatedDomainEvent>().Single();
+        domainEvent.UserId.Should().Be(userId);
+        domainEvent.Username.Should().Be(username);
+        domainEvent.Email.Should().Be(email);
+        domainEvent.Nickname.Should().Be(nickname);
+        domainEvent.OccurredAtUtc.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
+    }
+
+    [Fact]
     public void HasRole_WhenUserHasRole_ShouldReturnTrue()
     {
         // Arrange
@@ -234,7 +259,7 @@ public sealed class UserTests
         // Arrange
         var user = CreateValidUser();
         var settings = CreateUserSettings(maxFailedAttempts: 5);
-        
+
         // First lockout
         for (int i = 0; i < settings.MaxFailedLoginAttempts; i++)
         {
@@ -327,14 +352,14 @@ public sealed class UserTests
         var user = CreateValidUser();
         var role1 = Role.Registered;
         var role2 = Role.Administrator;
-        
+
         // Add some permissions to roles
         role1.Permissions.Add(Permission.GetUser);
         role1.Permissions.Add(Permission.GetUserList);
         role2.Permissions.Add(Permission.GetUser); // Duplicate
         role2.Permissions.Add(Permission.ModifyUser);
         role2.Permissions.Add(Permission.DeleteUser);
-        
+
         user.Roles.Add(role1);
         user.Roles.Add(role2);
 

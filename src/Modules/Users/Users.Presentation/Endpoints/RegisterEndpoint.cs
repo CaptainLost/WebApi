@@ -6,7 +6,7 @@ using Core.Presentation.Endpoints;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
-using Users.Application.Users.RegisterUser;
+using Users.Application.Users.CreateUser;
 
 namespace Users.Presentation.Endpoints;
 
@@ -18,10 +18,10 @@ internal sealed class RegisterEndpoint : IEndpoint
     public void MapEndpoint(RouteGroupBuilder group)
     {
         group.MapPost(UsersRoutes.Register, async delegate (RegisterRequest request,
-            ICommandHandler<RegisterUserCommand, string> commandHandler,
+            ICommandHandler<CreateUserCommand, string> commandHandler,
             CancellationToken cancellationToken)
         {
-            RegisterUserCommand registerCommand = new(request.Username, request.Email, request.Password);
+            CreateUserCommand registerCommand = new(request.Username, request.Email, request.Password);
             Result<string> tokenResult = await commandHandler.HandleAsync(registerCommand, cancellationToken);
 
             return tokenResult.Match(

@@ -18,7 +18,7 @@ public static class EndpointRouteBuilderExtensions
         foreach (Type endpointType in endpointTypes)
         {
             IEndpoint? endpoint = builder.ServiceProvider.GetService(endpointType) as IEndpoint;
-            
+
             endpoint?.MapEndpoint(group);
         }
 

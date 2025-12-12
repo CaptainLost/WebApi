@@ -54,7 +54,7 @@ public sealed class LayerDependencyTests : BaseArchitectureTests
         AssertLayerDoesNotHaveDependencyOn(ApplicationAssembly,
             EntityFrameworkCoreName);
     }
-    
+
     #endregion
 
     #region Infrastructure Layer

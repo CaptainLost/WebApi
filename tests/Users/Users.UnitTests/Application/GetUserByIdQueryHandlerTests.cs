@@ -1,4 +1,3 @@
-using Core.Domain.Messaging;
 using FluentAssertions;
 using Users.Application.Users.GetUserById;
 using Users.Domain.Users;
@@ -24,7 +23,7 @@ public sealed class GetUserByIdQueryHandlerTests
         var userId = Guid.NewGuid();
         var query = new GetUserByIdQuery(userId);
         var user = CreateValidUser(userId, "testuser");
-        
+
         A.CallTo(() => _userRepository.GetByIdAsync(userId, A<CancellationToken>._))
             .Returns(user);
 
@@ -43,7 +42,7 @@ public sealed class GetUserByIdQueryHandlerTests
         // Arrange
         var userId = Guid.NewGuid();
         var query = new GetUserByIdQuery(userId);
-        
+
         A.CallTo(() => _userRepository.GetByIdAsync(userId, A<CancellationToken>._))
             .Returns((User?)null);
 
@@ -62,7 +61,7 @@ public sealed class GetUserByIdQueryHandlerTests
         var userId = Guid.NewGuid();
         var query = new GetUserByIdQuery(userId);
         var user = CreateValidUser(userId, "testuser");
-        
+
         A.CallTo(() => _userRepository.GetByIdAsync(A<Guid>._, A<CancellationToken>._))
             .Returns(user);
 
@@ -82,7 +81,7 @@ public sealed class GetUserByIdQueryHandlerTests
         var query = new GetUserByIdQuery(userId);
         var user = CreateValidUser(userId, "testuser");
         var cancellationToken = new CancellationToken();
-        
+
         A.CallTo(() => _userRepository.GetByIdAsync(A<Guid>._, A<CancellationToken>._))
             .Returns(user);
 
@@ -101,7 +100,7 @@ public sealed class GetUserByIdQueryHandlerTests
         var userId = Guid.NewGuid();
         var query = new GetUserByIdQuery(userId);
         var user = CreateValidUser(userId, "specificUsername");
-        
+
         A.CallTo(() => _userRepository.GetByIdAsync(userId, A<CancellationToken>._))
             .Returns(user);
 
@@ -121,7 +120,7 @@ public sealed class GetUserByIdQueryHandlerTests
         // Arrange
         var userId = Guid.NewGuid();
         var query = new GetUserByIdQuery(userId);
-        
+
         A.CallTo(() => _userRepository.GetByIdAsync(userId, A<CancellationToken>._))
             .Returns((User?)null);
 
@@ -141,7 +140,7 @@ public sealed class GetUserByIdQueryHandlerTests
         var userId2 = Guid.NewGuid();
         var user1 = CreateValidUser(userId1, "user1");
         var user2 = CreateValidUser(userId2, "user2");
-        
+
         A.CallTo(() => _userRepository.GetByIdAsync(userId1, A<CancellationToken>._))
             .Returns(user1);
         A.CallTo(() => _userRepository.GetByIdAsync(userId2, A<CancellationToken>._))

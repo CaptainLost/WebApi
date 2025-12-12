@@ -51,7 +51,7 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(u => u.LockoutEnd);
 
         builder.Property(u => u.LastLockout);
-        
+
         builder.Property(u => u.LockoutCount)
             .IsRequired();
 

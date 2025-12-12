@@ -56,7 +56,7 @@ internal sealed class UserRepository : IUserRepository
         if (!string.IsNullOrWhiteSpace(pageRequest.SearchTerm))
         {
             string normalizedSearchTerm = pageRequest.SearchTerm.ToUpperInvariant();
-            
+
             query = query.Where(u =>
                 u.Username.Value.ToUpper().Contains(normalizedSearchTerm) ||
                 (u.Email != null && u.Email.Value.ToUpper().Contains(normalizedSearchTerm)));

@@ -12,6 +12,7 @@ public static class DependencyInjection
 
         services.AddCommandHandlers(assembly);
         services.AddQueryHandlers(assembly);
+        services.AddDomainEventHandlers(assembly);
 
         return services;
     }

@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Core.Persistence.DomainEvents;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Core.Persistence;
@@ -9,7 +10,8 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
-
+        services.AddSingleton<DomainEventDispatcher>();
+        services.AddSingleton<DomainEventDispatcherInterceptor>();
 
         return services;
     }

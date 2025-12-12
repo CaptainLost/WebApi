@@ -21,7 +21,7 @@ public sealed record PagedResult<T>
         }
 
         Result<PaginationMetadata> metadataResult = PaginationMetadata.Create(totalCount, pageNumber, pageSize);
-        
+
         if (metadataResult.IsFailure)
         {
             return Result.Failure<PagedResult<T>>(metadataResult.Error);

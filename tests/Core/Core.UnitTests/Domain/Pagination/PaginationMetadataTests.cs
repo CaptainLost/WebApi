@@ -1,4 +1,3 @@
-using Core.Domain.Messaging;
 using Core.Domain.Pagination;
 using FluentAssertions;
 

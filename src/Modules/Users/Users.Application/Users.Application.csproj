@@ -7,6 +7,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Core\Core.Application\Core.Application.csproj" />
     <ProjectReference Include="..\Users.Domain\Users.Domain.csproj" />
+    <ProjectReference Include="..\Users.IntegrationEvents\Users.IntegrationEvents.csproj" />
   </ItemGroup>
 
   <ItemGroup>

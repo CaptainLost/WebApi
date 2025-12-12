@@ -5,7 +5,7 @@ using Users.Domain.ValueObjects;
 
 namespace Users.Domain.Users;
 
-public sealed class User : Entity
+public sealed class User : AggregateRoot
 {
     public Username Username { get; private set; }
     public Email Email { get; private set; }
@@ -40,6 +40,12 @@ public sealed class User : Entity
     public static Result<User> Create(Guid id, Username username, Email email, Password password, Nickname nickname)
     {
         User user = new User(id, username, email, password, nickname);
+
+        user.RaiseDomainEvent(new UserCreatedDomainEvent(
+            user.Id,
+            user.Username,
+            user.Email,
+            user.Nickname));
 
         return Result.Success(user);
     }

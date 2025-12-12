@@ -7,7 +7,7 @@ using Users.Domain.ValueObjects;
 
 namespace Users.Infrastructure.Authentication;
 
-internal sealed class AuthenticationService : IAuthenticationService
+internal sealed class AccountService : IAccountService
 {
     private readonly IUserRepository _userRepository;
     private readonly IRoleRepository _roleRepository;
@@ -15,7 +15,7 @@ internal sealed class AuthenticationService : IAuthenticationService
     private readonly IJwtTokenService _jwtTokenService;
     private readonly UserSettings _userSettings;
 
-    public AuthenticationService(
+    public AccountService(
         IUserRepository userRepository,
         IRoleRepository roleRepository,
         IPasswordHashingService passwordHashingService,
