@@ -1,15 +1,13 @@
 namespace Core.Domain.Messaging;
 
-public abstract class DomainEvent : IDomainEvent
+public abstract record DomainEvent : IDomainEvent
 {
-    public Guid Id { get; init; }
+    public Guid Id { get; init; } = Guid.NewGuid();
 
-    public DateTime OccurredAtUtc { get; init; }
+    public DateTime OccurredAtUtc { get; init; } = DateTime.UtcNow;
 
     protected DomainEvent()
     {
-        Id = Guid.NewGuid();
-        OccurredAtUtc = DateTime.UtcNow;
     }
 
     protected DomainEvent(Guid id, DateTime occurredAtUtc)

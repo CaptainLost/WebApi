@@ -5,7 +5,7 @@ using Users.Domain.ValueObjects;
 
 namespace Users.Domain.Users;
 
-public sealed class User : AggregateRoot
+public sealed class User : Entity
 {
     public Username Username { get; private set; }
     public Email Email { get; private set; }

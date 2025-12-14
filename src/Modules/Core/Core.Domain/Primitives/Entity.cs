@@ -1,3 +1,5 @@
+using Core.Domain.Messaging;
+
 namespace Core.Domain.Primitives;
 
 /// <summary>
@@ -5,7 +7,13 @@ namespace Core.Domain.Primitives;
 /// </summary>
 public abstract class Entity : IEquatable<Entity>
 {
+    public Guid Id { get; private init; }
+    public IReadOnlyCollection<IDomainEvent> GetDomainEvents() => _domainEvents.ToList();
+
+    private readonly List<IDomainEvent> _domainEvents = [];
+
     private const int HashCodeMultiplier = 41;
+
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Entity"/> class.
@@ -29,7 +37,17 @@ public abstract class Entity : IEquatable<Entity>
     /// <summary>
     /// Gets the unique identifier.
     /// </summary>
-    public Guid Id { get; private init; }
+    
+
+    public void ClearDomainEvents()
+    {
+        _domainEvents.Clear();
+    }
+
+    protected void RaiseDomainEvent(IDomainEvent domainEvent)
+    {
+        _domainEvents.Add(domainEvent);
+    }
 
     /// <summary>
     /// Checks if two entities are equal based on their identifier.
