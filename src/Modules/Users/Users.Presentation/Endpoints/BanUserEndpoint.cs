@@ -2,6 +2,7 @@ using Core.Application.Abstractions.Messaging.Commands;
 using Core.Domain.Messaging;
 using Core.Presentation.Common;
 using Core.Presentation.Endpoints;
+using Core.Presentation.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
@@ -23,16 +24,16 @@ internal sealed class BanUserEndpoint : IEndpoint
             ICommandHandler<BanUserCommand> commandHandler,
             CancellationToken cancellationToken)
         {
-            string? bannedByIdString = httpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            Guid? bannedBy = httpContext.GetUserId();
             
-            if (string.IsNullOrEmpty(bannedByIdString) || !Guid.TryParse(bannedByIdString, out Guid bannedBy))
+            if (bannedBy == null)
             {
                 return Results.Unauthorized();
             }
 
             DateTime expiresAt = DateTime.UtcNow.AddSeconds(request.DurationInSeconds);
             
-            BanUserCommand command = new(userId, request.Reason, bannedBy, expiresAt);
+            BanUserCommand command = new(userId, request.Reason, bannedBy.Value, expiresAt);
             Result result = await commandHandler.HandleAsync(command, cancellationToken);
 
             return result.Match(() => Results.Ok(), ApiResults.Problem);
