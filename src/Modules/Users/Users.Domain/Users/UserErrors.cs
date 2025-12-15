@@ -35,4 +35,24 @@ public static class UserErrors
     public static Error RegistrationFailed => Error.Failure(
         "User.RegistrationFailed",
         "Registration failed. Please try again.");
+
+    public static Error NotBanned => Error.Conflict(
+        "User.NotBanned",
+        "User is not currently banned.");
+
+    public static Error BanReasonRequired => Error.Validation(
+        "User.BanReasonRequired",
+        "Ban reason is required.");
+
+    public static Error BanExpirationMustBeInFuture => Error.Validation(
+        "User.BanExpirationMustBeInFuture",
+        "Ban expiration date must be in the future.");
+
+    public static Error BannedByRequired => Error.Validation(
+        "User.BannedByRequired",
+        "BannedBy user ID is required.");
+
+    public static Error UserIsBanned => Error.Authorization(
+        "User.UserIsBanned",
+        "The account is banned.");
 }

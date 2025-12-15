@@ -25,6 +25,11 @@ internal sealed class LoginUserCommandHandler(
             return Result.Failure<string>(UserErrors.InvalidCredentials);
         }
 
+        if (user.IsBanned())
+        {
+            return Result.Failure<string>(UserErrors.UserIsBanned);
+        }
+
         Result<string> tokenResult = await _accountService.LoginAsync(user, command.Password, cancellationToken);
 
         return tokenResult;

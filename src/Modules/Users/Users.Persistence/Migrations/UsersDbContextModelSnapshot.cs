@@ -63,6 +63,16 @@ namespace Users.Persistence.Migrations
                         {
                             Id = 6,
                             Name = "users:list"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Name = "users:ban"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Name = "users:unban"
                         });
                 });
 
@@ -148,6 +158,16 @@ namespace Users.Persistence.Migrations
                         {
                             RoleId = 2,
                             PermissionId = 6
+                        },
+                        new
+                        {
+                            RoleId = 2,
+                            PermissionId = 7
+                        },
+                        new
+                        {
+                            RoleId = 2,
+                            PermissionId = 8
                         });
                 });
 
@@ -170,6 +190,19 @@ namespace Users.Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("BanExpiresAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("BanReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("BannedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("BannedBy")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("CreationDate")

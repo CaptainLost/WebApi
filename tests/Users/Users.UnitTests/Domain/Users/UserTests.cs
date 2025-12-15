@@ -387,6 +387,233 @@ public sealed class UserTests
         permissions.Should().BeEmpty();
     }
 
+    [Fact]
+    public void Ban_WithValidData_ShouldSucceed()
+    {
+        // Arrange
+        User user = CreateValidUser();
+        string reason = "Violating terms of service";
+        Guid bannedBy = Guid.NewGuid();
+        DateTime expiresAt = DateTime.UtcNow.AddDays(7);
+
+        // Act
+        var result = user.Ban(reason, bannedBy, expiresAt);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        user.BanReason.Should().Be(reason);
+        user.BannedBy.Should().Be(bannedBy);
+        user.BannedAt.Should().NotBeNull();
+        user.BannedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
+        user.BanExpiresAt.Should().Be(expiresAt);
+    }
+
+    [Fact]
+    public void Ban_WhenAlreadyBanned_ShouldUpdateBan()
+    {
+        // Arrange
+        User user = CreateValidUser();
+        string originalReason = "Violating terms of service";
+        Guid originalBannedBy = Guid.NewGuid();
+        DateTime originalExpiresAt = DateTime.UtcNow.AddDays(7);
+        user.Ban(originalReason, originalBannedBy, originalExpiresAt);
+
+        string newReason = "Another reason";
+        Guid newBannedBy = Guid.NewGuid();
+        DateTime newExpiresAt = DateTime.UtcNow.AddDays(14);
+
+        // Act
+        var result = user.Ban(newReason, newBannedBy, newExpiresAt);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        user.BanReason.Should().Be(newReason);
+        user.BannedBy.Should().Be(newBannedBy);
+        user.BanExpiresAt.Should().Be(newExpiresAt);
+        user.IsBanned().Should().BeTrue();
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData(" ")]
+    [InlineData(null)]
+    public void Ban_WithInvalidReason_ShouldFail(string? invalidReason)
+    {
+        // Arrange
+        User user = CreateValidUser();
+        Guid bannedBy = Guid.NewGuid();
+        DateTime expiresAt = DateTime.UtcNow.AddDays(7);
+
+        // Act
+        var result = user.Ban(invalidReason!, bannedBy, expiresAt);
+
+        // Assert
+        result.IsFailure.Should().BeTrue();
+        result.Error.Should().Be(UserErrors.BanReasonRequired);
+    }
+
+    [Fact]
+    public void Ban_WithPastExpirationDate_ShouldFail()
+    {
+        // Arrange
+        User user = CreateValidUser();
+        string reason = "Violating terms of service";
+        Guid bannedBy = Guid.NewGuid();
+        DateTime expiresAt = DateTime.UtcNow.AddDays(-1);
+
+        // Act
+        var result = user.Ban(reason, bannedBy, expiresAt);
+
+        // Assert
+        result.IsFailure.Should().BeTrue();
+        result.Error.Should().Be(UserErrors.BanExpirationMustBeInFuture);
+    }
+
+    [Fact]
+    public void Ban_WithEmptyBannedBy_ShouldFail()
+    {
+        // Arrange
+        User user = CreateValidUser();
+        string reason = "Violating terms of service";
+        Guid bannedBy = Guid.Empty;
+        DateTime expiresAt = DateTime.UtcNow.AddDays(7);
+
+        // Act
+        var result = user.Ban(reason, bannedBy, expiresAt);
+
+        // Assert
+        result.IsFailure.Should().BeTrue();
+        result.Error.Should().Be(UserErrors.BannedByRequired);
+    }
+
+    [Fact]
+    public void Ban_ShouldRaiseUserBannedDomainEvent()
+    {
+        // Arrange
+        User user = CreateValidUser();
+        string reason = "Violating terms of service";
+        Guid bannedBy = Guid.NewGuid();
+        DateTime expiresAt = DateTime.UtcNow.AddDays(7);
+
+        // Act
+        user.Ban(reason, bannedBy, expiresAt);
+        var domainEvents = user.GetDomainEvents();
+
+        // Assert
+        domainEvents.Should().ContainItemsAssignableTo<UserBannedDomainEvent>();
+        domainEvents.OfType<UserBannedDomainEvent>().Should().ContainSingle();
+        UserBannedDomainEvent domainEvent = domainEvents.OfType<UserBannedDomainEvent>().Single();
+        domainEvent.UserId.Should().Be(user.Id);
+        domainEvent.Reason.Should().Be(reason);
+        domainEvent.BannedBy.Should().Be(bannedBy);
+        domainEvent.ExpiresAt.Should().Be(expiresAt);
+    }
+
+    [Fact]
+    public void Unban_WhenBanned_ShouldSucceed()
+    {
+        // Arrange
+        User user = CreateValidUser();
+        string reason = "Violating terms of service";
+        Guid bannedBy = Guid.NewGuid();
+        DateTime expiresAt = DateTime.UtcNow.AddDays(7);
+        user.Ban(reason, bannedBy, expiresAt);
+
+        // Act
+        var result = user.Unban();
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        user.BanReason.Should().BeNull();
+        user.BannedBy.Should().BeNull();
+        user.BannedAt.Should().BeNull();
+        user.BanExpiresAt.Should().BeNull();
+    }
+
+    [Fact]
+    public void Unban_WhenNotBanned_ShouldFail()
+    {
+        // Arrange
+        User user = CreateValidUser();
+
+        // Act
+        var result = user.Unban();
+
+        // Assert
+        result.IsFailure.Should().BeTrue();
+        result.Error.Should().Be(UserErrors.NotBanned);
+    }
+
+    [Fact]
+    public void Unban_ShouldRaiseUserUnbannedDomainEvent()
+    {
+        // Arrange
+        User user = CreateValidUser();
+        string reason = "Violating terms of service";
+        Guid bannedBy = Guid.NewGuid();
+        DateTime expiresAt = DateTime.UtcNow.AddDays(7);
+        user.Ban(reason, bannedBy, expiresAt);
+        user.ClearDomainEvents(); // Clear ban event
+
+        // Act
+        user.Unban();
+        var domainEvents = user.GetDomainEvents();
+
+        // Assert
+        domainEvents.Should().ContainItemsAssignableTo<UserUnbannedDomainEvent>();
+        domainEvents.OfType<UserUnbannedDomainEvent>().Should().ContainSingle();
+        UserUnbannedDomainEvent domainEvent = domainEvents.OfType<UserUnbannedDomainEvent>().Single();
+        domainEvent.UserId.Should().Be(user.Id);
+    }
+
+    [Fact]
+    public void IsBanned_WhenBannedAndNotExpired_ShouldReturnTrue()
+    {
+        // Arrange
+        User user = CreateValidUser();
+        string reason = "Violating terms of service";
+        Guid bannedBy = Guid.NewGuid();
+        DateTime expiresAt = DateTime.UtcNow.AddDays(7);
+        user.Ban(reason, bannedBy, expiresAt);
+
+        // Act
+        bool isBanned = user.IsBanned();
+
+        // Assert
+        isBanned.Should().BeTrue();
+    }
+
+    [Fact]
+    public void IsBanned_WhenBannedAndExpired_ShouldReturnFalse()
+    {
+        // Arrange
+        User user = CreateValidUser();
+        string reason = "Violating terms of service";
+        Guid bannedBy = Guid.NewGuid();
+        DateTime expiresAt = DateTime.UtcNow.AddSeconds(1);
+        user.Ban(reason, bannedBy, expiresAt);
+        Thread.Sleep(1100); // Wait for ban to expire
+
+        // Act
+        bool isBanned = user.IsBanned();
+
+        // Assert
+        isBanned.Should().BeFalse();
+    }
+
+    [Fact]
+    public void IsBanned_WhenNotBanned_ShouldReturnFalse()
+    {
+        // Arrange
+        User user = CreateValidUser();
+
+        // Act
+        bool isBanned = user.IsBanned();
+
+        // Assert
+        isBanned.Should().BeFalse();
+    }
+
     private static User CreateValidUser()
     {
         return User.Create(

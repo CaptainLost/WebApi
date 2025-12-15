@@ -37,6 +37,13 @@ internal sealed class PermissionAuthorizationHandler : AuthorizationHandler<Perm
             return;
         }
 
+        if (user.IsBanned())
+        {
+            context.Fail();
+            
+            return;
+        }
+
         HashSet<string> permissions = user.GetPermissions();
 
         if (permissions.Contains(requirement.Permission))

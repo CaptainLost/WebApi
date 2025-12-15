@@ -43,7 +43,7 @@ public static class IdentitySeeder
         }
 
         Role? defaultRole = await dbContext.Roles
-            .FirstOrDefaultAsync(r => r.Name == Role.DefaultUserRoleName);
+            .FirstOrDefaultAsync(r => r.Name == Role.DefaultAdminRoleName);
 
         if (defaultRole is null)
         {

@@ -32,7 +32,9 @@ internal sealed class RolePermissionConfiguration : IEntityTypeConfiguration<Rol
             Create(Role.Administrator, Permission.CreateUser),
             Create(Role.Administrator, Permission.DeleteUser),
             Create(Role.Administrator, Permission.AssignRole),
-            Create(Role.Administrator, Permission.GetUserList));
+            Create(Role.Administrator, Permission.GetUserList),
+            Create(Role.Administrator, Permission.BanUser),
+            Create(Role.Administrator, Permission.UnbanUser));
     }
 
     private static RolePermission Create(Role role, Permission permission)

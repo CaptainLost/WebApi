@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -7,7 +8,7 @@
 namespace Users.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class Initial : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -51,6 +52,10 @@ namespace Users.Persistence.Migrations
                     LockoutEnd = table.Column<DateTime>(type: "TEXT", nullable: true),
                     LastLockout = table.Column<DateTime>(type: "TEXT", nullable: true),
                     LockoutCount = table.Column<int>(type: "INTEGER", nullable: false),
+                    BanReason = table.Column<string>(type: "TEXT", maxLength: 500, nullable: true),
+                    BannedBy = table.Column<Guid>(type: "TEXT", nullable: true),
+                    BannedAt = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    BanExpiresAt = table.Column<DateTime>(type: "TEXT", nullable: true),
                     PasswordHash = table.Column<string>(type: "TEXT", maxLength: 128, nullable: false),
                     PasswordSalt = table.Column<byte[]>(type: "BLOB", maxLength: 64, nullable: false)
                 },
@@ -117,7 +122,9 @@ namespace Users.Persistence.Migrations
                     { 3, "users:create" },
                     { 4, "users:delete" },
                     { 5, "users:assign-role" },
-                    { 6, "users:list" }
+                    { 6, "users:list" },
+                    { 7, "users:ban" },
+                    { 8, "users:unban" }
                 });
 
             migrationBuilder.InsertData(
@@ -141,7 +148,9 @@ namespace Users.Persistence.Migrations
                     { 3, 2 },
                     { 4, 2 },
                     { 5, 2 },
-                    { 6, 2 }
+                    { 6, 2 },
+                    { 7, 2 },
+                    { 8, 2 }
                 });
 
             migrationBuilder.CreateIndex(

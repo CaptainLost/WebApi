@@ -8,6 +8,7 @@ public sealed class Role : Enumeration<Role>
     public static readonly Role Administrator = new(2, "Administrator");
 
     public static readonly string DefaultUserRoleName = Registered.Name;
+    public static readonly string DefaultAdminRoleName = Administrator.Name;
 
     public ICollection<Permission> Permissions { get; set; } = [];
     public ICollection<User> Users { get; set; } = [];
