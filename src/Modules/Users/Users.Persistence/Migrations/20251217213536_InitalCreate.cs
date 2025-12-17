@@ -144,7 +144,9 @@ namespace Users.Persistence.Migrations
                     { 5, "users:assign-role" },
                     { 6, "users:list" },
                     { 7, "users:ban" },
-                    { 8, "users:unban" }
+                    { 8, "users:unban" },
+                    { 9, "users:unban-single" },
+                    { 10, "users:unban-all" }
                 });
 
             migrationBuilder.InsertData(
@@ -170,7 +172,9 @@ namespace Users.Persistence.Migrations
                     { 5, 2 },
                     { 6, 2 },
                     { 7, 2 },
-                    { 8, 2 }
+                    { 8, 2 },
+                    { 9, 2 },
+                    { 10, 2 }
                 });
 
             migrationBuilder.CreateIndex(

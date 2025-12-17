@@ -55,4 +55,8 @@ public static class UserErrors
     public static Error UserIsBanned => Error.Authorization(
         "User.UserIsBanned",
         "The account is banned.");
+
+    public static Error BanNotFound(Guid banId) => Error.NotFound(
+        "User.BanNotFound",
+        $"Ban with id '{banId}' was not found.");
 }

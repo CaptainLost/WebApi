@@ -12,7 +12,7 @@ using Users.Persistence.Database;
 namespace Users.Persistence.Migrations
 {
     [DbContext(typeof(UsersDbContext))]
-    [Migration("20251215220027_InitalCreate")]
+    [Migration("20251217213536_InitalCreate")]
     partial class InitalCreate
     {
         /// <inheritdoc />
@@ -76,6 +76,16 @@ namespace Users.Persistence.Migrations
                         {
                             Id = 8,
                             Name = "users:unban"
+                        },
+                        new
+                        {
+                            Id = 9,
+                            Name = "users:unban-single"
+                        },
+                        new
+                        {
+                            Id = 10,
+                            Name = "users:unban-all"
                         });
                 });
 
@@ -171,6 +181,16 @@ namespace Users.Persistence.Migrations
                         {
                             RoleId = 2,
                             PermissionId = 8
+                        },
+                        new
+                        {
+                            RoleId = 2,
+                            PermissionId = 10
+                        },
+                        new
+                        {
+                            RoleId = 2,
+                            PermissionId = 9
                         });
                 });
 

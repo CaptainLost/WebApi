@@ -132,7 +132,7 @@ public sealed class User : Entity
         return Result.Success();
     }
 
-    public Result Unban(Guid unbannedBy)
+    public Result UnbanAll(Guid unbannedBy)
     {
         List<UserBan> activeBans = Bans.Where(b => b.IsCurrentlyActive()).ToList();
         
@@ -145,6 +145,27 @@ public sealed class User : Entity
         {
             ban.Deactivate(unbannedBy);
         }
+
+        RaiseDomainEvent(new UserUnbannedDomainEvent(Id));
+
+        return Result.Success();
+    }
+
+    public Result UnbanSingle(Guid banId, Guid unbannedBy)
+    {
+        UserBan? ban = Bans.FirstOrDefault(b => b.Id == banId);
+        
+        if (ban == null)
+        {
+            return UserErrors.BanNotFound(banId);
+        }
+
+        if (!ban.IsCurrentlyActive())
+        {
+            return UserErrors.NotBanned;
+        }
+
+        ban.Deactivate(unbannedBy);
 
         RaiseDomainEvent(new UserUnbannedDomainEvent(Id));
 

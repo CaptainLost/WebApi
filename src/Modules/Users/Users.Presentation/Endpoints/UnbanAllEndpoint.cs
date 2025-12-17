@@ -6,19 +6,19 @@ using Core.Presentation.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
-using Users.Application.Users.UnbanUser;
+using Users.Application.Users.UnbanAll;
 using Users.Domain.Users;
 
 namespace Users.Presentation.Endpoints;
 
-internal sealed class UnbanUserEndpoint : IEndpoint
+internal sealed class UnbanAllEndpoint : IEndpoint
 {
     public void MapEndpoint(RouteGroupBuilder group)
     {
-        group.MapPost(UsersRoutes.Unban, async delegate (
+        group.MapPost(UsersRoutes.UnbanAll, async delegate (
             Guid userId,
             HttpContext httpContext,
-            ICommandHandler<UnbanUserCommand> commandHandler,
+            ICommandHandler<UnbanAllCommand> commandHandler,
             CancellationToken cancellationToken)
         {
             Guid? unbannedBy = httpContext.GetUserId();
@@ -27,15 +27,15 @@ internal sealed class UnbanUserEndpoint : IEndpoint
                 return Results.Unauthorized();
             }
 
-            UnbanUserCommand command = new(userId, unbannedBy.Value);
+            UnbanAllCommand command = new(userId, unbannedBy.Value);
             Result result = await commandHandler.HandleAsync(command, cancellationToken);
 
             return result.Match(() => Results.Ok(), ApiResults.Problem);
         })
-        .RequireAuthorization(Permission.UnbanUser.Name)
-        .WithName("UnbanUser")
-        .WithSummary("Unbans a user")
-        .WithDescription("Removes the ban from a user by their user ID.")
+        .RequireAuthorization(Permission.UnbanAllBans.Name)
+        .WithName("UnbanAllBans")
+        .WithSummary("Removes all active bans from a user")
+        .WithDescription("Deactivates all currently active bans for a specific user by their user ID.")
         .Produces(StatusCodes.Status200OK)
         .Produces<ErrorResponse>(StatusCodes.Status400BadRequest);
     }

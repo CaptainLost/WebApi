@@ -527,7 +527,7 @@ public sealed class UserTests
     }
 
     [Fact]
-    public void Unban_WhenBanned_ShouldSucceed()
+    public void UnbanAll_WhenBanned_ShouldSucceed()
     {
         // Arrange
         User user = CreateValidUser();
@@ -538,7 +538,7 @@ public sealed class UserTests
         Guid unbannedBy = Guid.NewGuid();
 
         // Act
-        var result = user.Unban(unbannedBy);
+        var result = user.UnbanAll(unbannedBy);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -552,7 +552,7 @@ public sealed class UserTests
     }
 
     [Fact]
-    public void Unban_WhenMultipleBansActive_ShouldDeactivateAllBans()
+    public void UnbanAll_WhenMultipleBansActive_ShouldDeactivateAllBans()
     {
         // Arrange
         User user = CreateValidUser();
@@ -567,7 +567,7 @@ public sealed class UserTests
         Guid unbannedBy = Guid.NewGuid();
 
         // Act
-        var result = user.Unban(unbannedBy);
+        var result = user.UnbanAll(unbannedBy);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -582,14 +582,14 @@ public sealed class UserTests
     }
 
     [Fact]
-    public void Unban_WhenNotBanned_ShouldFail()
+    public void UnbanAll_WhenNotBanned_ShouldFail()
     {
         // Arrange
         User user = CreateValidUser();
         Guid unbannedBy = Guid.NewGuid();
 
         // Act
-        var result = user.Unban(unbannedBy);
+        var result = user.UnbanAll(unbannedBy);
 
         // Assert
         result.IsFailure.Should().BeTrue();
@@ -597,7 +597,7 @@ public sealed class UserTests
     }
 
     [Fact]
-    public void Unban_ShouldRaiseUserUnbannedDomainEvent()
+    public void UnbanAll_ShouldRaiseUserUnbannedDomainEvent()
     {
         // Arrange
         User user = CreateValidUser();
@@ -609,7 +609,7 @@ public sealed class UserTests
         Guid unbannedBy = Guid.NewGuid();
 
         // Act
-        user.Unban(unbannedBy);
+        user.UnbanAll(unbannedBy);
         var domainEvents = user.GetDomainEvents();
 
         // Assert
@@ -665,6 +665,128 @@ public sealed class UserTests
 
         // Assert
         isBanned.Should().BeFalse();
+    }
+
+    [Fact]
+    public void UnbanSingle_WithValidBanId_ShouldSucceed()
+    {
+        // Arrange
+        User user = CreateValidUser();
+        string reason = "Violating terms of service";
+        Guid bannedBy = Guid.NewGuid();
+        DateTime expiresAt = DateTime.UtcNow.AddDays(7);
+        user.Ban(reason, bannedBy, expiresAt);
+        Guid banId = user.Bans.First().Id;
+        Guid unbannedBy = Guid.NewGuid();
+
+        // Act
+        var result = user.UnbanSingle(banId, unbannedBy);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        UserBan ban = user.Bans.First();
+        ban.IsCurrentlyActive().Should().BeFalse();
+        ban.UnbannedAt.Should().NotBeNull();
+        ban.UnbannedBy.Should().Be(unbannedBy);
+        user.IsBanned().Should().BeFalse();
+    }
+
+    [Fact]
+    public void UnbanSingle_WithInvalidBanId_ShouldFail()
+    {
+        // Arrange
+        User user = CreateValidUser();
+        string reason = "Violating terms of service";
+        Guid bannedBy = Guid.NewGuid();
+        DateTime expiresAt = DateTime.UtcNow.AddDays(7);
+        user.Ban(reason, bannedBy, expiresAt);
+        Guid invalidBanId = Guid.NewGuid();
+        Guid unbannedBy = Guid.NewGuid();
+
+        // Act
+        var result = user.UnbanSingle(invalidBanId, unbannedBy);
+
+        // Assert
+        result.IsFailure.Should().BeTrue();
+        result.Error.Should().Be(UserErrors.BanNotFound(invalidBanId));
+    }
+
+    [Fact]
+    public void UnbanSingle_WithInactiveBan_ShouldFail()
+    {
+        // Arrange
+        User user = CreateValidUser();
+        string reason = "Violating terms of service";
+        Guid bannedBy = Guid.NewGuid();
+        DateTime expiresAt = DateTime.UtcNow.AddDays(7);
+        user.Ban(reason, bannedBy, expiresAt);
+        Guid banId = user.Bans.First().Id;
+        Guid unbannedBy = Guid.NewGuid();
+        user.UnbanSingle(banId, unbannedBy); // First unban
+
+        // Act
+        var result = user.UnbanSingle(banId, unbannedBy); // Try to unban again
+
+        // Assert
+        result.IsFailure.Should().BeTrue();
+        result.Error.Should().Be(UserErrors.NotBanned);
+    }
+
+    [Fact]
+    public void UnbanSingle_WithMultipleBans_ShouldOnlyUnbanSpecificOne()
+    {
+        // Arrange
+        User user = CreateValidUser();
+        Guid bannedBy1 = Guid.NewGuid();
+        Guid bannedBy2 = Guid.NewGuid();
+        DateTime expiresAt1 = DateTime.UtcNow.AddDays(7);
+        DateTime expiresAt2 = DateTime.UtcNow.AddDays(14);
+        
+        user.Ban("First ban", bannedBy1, expiresAt1);
+        user.Ban("Second ban", bannedBy2, expiresAt2);
+        
+        Guid firstBanId = user.Bans.First().Id;
+        Guid unbannedBy = Guid.NewGuid();
+
+        // Act
+        var result = user.UnbanSingle(firstBanId, unbannedBy);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        user.Bans.Should().HaveCount(2);
+        
+        UserBan firstBan = user.Bans.First(b => b.Id == firstBanId);
+        firstBan.IsCurrentlyActive().Should().BeFalse();
+        firstBan.UnbannedBy.Should().Be(unbannedBy);
+        
+        UserBan secondBan = user.Bans.First(b => b.Id != firstBanId);
+        secondBan.IsCurrentlyActive().Should().BeTrue();
+        
+        user.IsBanned().Should().BeTrue(); // Still banned because second ban is active
+    }
+
+    [Fact]
+    public void UnbanSingle_ShouldRaiseUserUnbannedDomainEvent()
+    {
+        // Arrange
+        User user = CreateValidUser();
+        string reason = "Violating terms of service";
+        Guid bannedBy = Guid.NewGuid();
+        DateTime expiresAt = DateTime.UtcNow.AddDays(7);
+        user.Ban(reason, bannedBy, expiresAt);
+        Guid banId = user.Bans.First().Id;
+        user.ClearDomainEvents(); // Clear ban event
+        Guid unbannedBy = Guid.NewGuid();
+
+        // Act
+        user.UnbanSingle(banId, unbannedBy);
+        var domainEvents = user.GetDomainEvents();
+
+        // Assert
+        domainEvents.Should().ContainItemsAssignableTo<UserUnbannedDomainEvent>();
+        domainEvents.OfType<UserUnbannedDomainEvent>().Should().ContainSingle();
+        UserUnbannedDomainEvent domainEvent = domainEvents.OfType<UserUnbannedDomainEvent>().Single();
+        domainEvent.UserId.Should().Be(user.Id);
     }
 
     private static User CreateValidUser()
