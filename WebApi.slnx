@@ -39,6 +39,9 @@
     <Project Path="tests/Core/Core.ArchitectureTests/Core.ArchitectureTests.csproj" />
     <Project Path="tests/Core/Core.UnitTests/Core.UnitTests.csproj" />
   </Folder>
+  <Folder Name="/tests/Host/">
+    <Project Path="tests/Host/Host.ArchitectureTests/Host.ArchitectureTests.csproj" />
+  </Folder>
   <Folder Name="/tests/Shared/">
     <Project Path="tests/Shared/Shared.ArchitectureTests/Shared.ArchitectureTests.csproj" />
   </Folder>
