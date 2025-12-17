@@ -31,7 +31,7 @@ public sealed class BanUserCommandHandlerTests
         
         var command = new BanUserCommand(userId, reason, bannedBy, expiresAt);
 
-        A.CallTo(() => _userRepository.GetByIdAsync(userId, A<CancellationToken>._))
+        A.CallTo(() => _userRepository.GetByIdWithBansAsync(userId, A<CancellationToken>._))
             .Returns(user);
 
         // Act
@@ -40,9 +40,12 @@ public sealed class BanUserCommandHandlerTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         user.IsBanned().Should().BeTrue();
-        user.BanReason.Should().Be(reason);
-        user.BannedBy.Should().Be(bannedBy);
-        user.BanExpiresAt.Should().Be(expiresAt);
+        user.Bans.Should().ContainSingle();
+        UserBan ban = user.Bans.First();
+        ban.Reason.Should().Be(reason);
+        ban.BannedBy.Should().Be(bannedBy);
+        ban.ExpiresAt.Should().Be(expiresAt);
+        ban.IsCurrentlyActive().Should().BeTrue();
     }
 
     [Fact]
@@ -56,7 +59,7 @@ public sealed class BanUserCommandHandlerTests
 
         var command = new BanUserCommand(userId, reason, bannedBy, expiresAt);
 
-        A.CallTo(() => _userRepository.GetByIdAsync(userId, A<CancellationToken>._))
+        A.CallTo(() => _userRepository.GetByIdWithBansAsync(userId, A<CancellationToken>._))
             .Returns((User?)null);
 
         // Act
@@ -68,7 +71,7 @@ public sealed class BanUserCommandHandlerTests
     }
 
     [Fact]
-    public async Task HandleAsync_WhenUserAlreadyBanned_ShouldUpdateBan()
+    public async Task HandleAsync_WhenUserAlreadyBanned_ShouldAddAnotherBan()
     {
         // Arrange
         Guid userId = Guid.NewGuid();
@@ -81,7 +84,7 @@ public sealed class BanUserCommandHandlerTests
 
         var command = new BanUserCommand(userId, newReason, newBannedBy, newExpiresAt);
 
-        A.CallTo(() => _userRepository.GetByIdAsync(userId, A<CancellationToken>._))
+        A.CallTo(() => _userRepository.GetByIdWithBansAsync(userId, A<CancellationToken>._))
             .Returns(user);
 
         // Act
@@ -89,9 +92,13 @@ public sealed class BanUserCommandHandlerTests
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        user.BanReason.Should().Be(newReason);
-        user.BannedBy.Should().Be(newBannedBy);
-        user.BanExpiresAt.Should().Be(newExpiresAt);
+        user.Bans.Should().HaveCount(2);
+        var activeBans = user.Bans.Where(b => b.IsCurrentlyActive()).ToList();
+        activeBans.Should().HaveCount(2);
+        UserBan newBan = user.Bans.Last();
+        newBan.Reason.Should().Be(newReason);
+        newBan.BannedBy.Should().Be(newBannedBy);
+        newBan.ExpiresAt.Should().Be(newExpiresAt);
     }
 
     [Fact]
@@ -107,7 +114,7 @@ public sealed class BanUserCommandHandlerTests
 
         var command = new BanUserCommand(userId, reason, bannedBy, expiresAt);
 
-        A.CallTo(() => _userRepository.GetByIdAsync(userId, A<CancellationToken>._))
+        A.CallTo(() => _userRepository.GetByIdWithBansAsync(userId, A<CancellationToken>._))
             .Returns(user);
 
         // Act

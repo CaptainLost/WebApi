@@ -12,8 +12,8 @@ using Users.Persistence.Database;
 namespace Users.Persistence.Migrations
 {
     [DbContext(typeof(UsersDbContext))]
-    [Migration("20251215175940_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20251215220027_InitalCreate")]
+    partial class InitalCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -195,19 +195,6 @@ namespace Users.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime?>("BanExpiresAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("BanReason")
-                        .HasMaxLength(500)
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime?>("BannedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid?>("BannedBy")
-                        .HasColumnType("TEXT");
-
                     b.Property<DateTime>("CreationDate")
                         .HasColumnType("TEXT");
 
@@ -266,6 +253,41 @@ namespace Users.Persistence.Migrations
                     b.ToTable("Users", (string)null);
                 });
 
+            modelBuilder.Entity("Users.Domain.Users.UserBan", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("BannedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("BannedBy")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("UnbannedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("UnbannedBy")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserBans", (string)null);
+                });
+
             modelBuilder.Entity("Users.Domain.Users.RolePermission", b =>
                 {
                     b.HasOne("Users.Domain.Users.Permission", null)
@@ -294,6 +316,20 @@ namespace Users.Persistence.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Users.Domain.Users.UserBan", b =>
+                {
+                    b.HasOne("Users.Domain.Users.User", null)
+                        .WithMany("Bans")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Users.Domain.Users.User", b =>
+                {
+                    b.Navigation("Bans");
                 });
 #pragma warning restore 612, 618
         }

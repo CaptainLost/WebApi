@@ -1,8 +1,10 @@
 using Core.Domain.Pagination;
+using Core.Persistence.Specifications;
 using Microsoft.EntityFrameworkCore;
 using Users.Domain.Users;
 using Users.Domain.ValueObjects;
 using Users.Persistence.Database;
+using Users.Persistence.Users.Specifications;
 
 namespace Users.Persistence.Users;
 
@@ -17,24 +19,38 @@ internal sealed class UserRepository : IUserRepository
 
     public async Task<User?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        return await _dbContext.Users
-            .Include(u => u.Roles)
-                .ThenInclude(r => r.Permissions)
-            .FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
+        UserByIdSpecification specification = new(id);
+        
+        return await SpecificationEvaluator
+            .GetQuery(_dbContext.Users, specification)
+            .FirstOrDefaultAsync(cancellationToken);
+    }
+
+    public async Task<User?> GetByIdWithRolesPermissionsAndBansAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        UserByIdWithRolesPermissionsAndBansSpecification specification = new(id);
+        
+        return await SpecificationEvaluator
+            .GetQuery(_dbContext.Users, specification)
+            .FirstOrDefaultAsync(cancellationToken);
+    }
+
+    public async Task<User?> GetByIdWithBansAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        UserByIdWithBansSpecification specification = new(id);
+        
+        return await SpecificationEvaluator
+            .GetQuery(_dbContext.Users, specification)
+            .FirstOrDefaultAsync(cancellationToken);
     }
 
     public async Task<User?> GetByUsernameAsync(Username username, CancellationToken cancellationToken = default)
     {
-        return await _dbContext.Users
-            .Include(u => u.Roles)
-                .ThenInclude(r => r.Permissions)
-            .FirstOrDefaultAsync(u => u.Username == username, cancellationToken);
-    }
-
-    public async Task<User?> GetByEmailAsync(Email email, CancellationToken cancellationToken = default)
-    {
-        return await _dbContext.Users
-            .FirstOrDefaultAsync(u => u.Email == email, cancellationToken);
+        UserByUsernameSpecification specification = new(username);
+        
+        return await SpecificationEvaluator
+            .GetQuery(_dbContext.Users, specification)
+            .FirstOrDefaultAsync(cancellationToken);
     }
 
     public async Task<bool> IsUsernameUniqueAsync(Username username, CancellationToken cancellationToken = default)

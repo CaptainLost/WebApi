@@ -11,7 +11,7 @@ internal sealed class BanUserCommandHandler(IUserRepository userRepository)
 
     public async Task<Result> HandleAsync(BanUserCommand command, CancellationToken cancellationToken)
     {
-        User? user = await _userRepository.GetByIdAsync(command.UserId, cancellationToken);
+        User? user = await _userRepository.GetByIdWithBansAsync(command.UserId, cancellationToken);
 
         if (user == null)
         {

@@ -401,15 +401,19 @@ public sealed class UserTests
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        user.BanReason.Should().Be(reason);
-        user.BannedBy.Should().Be(bannedBy);
-        user.BannedAt.Should().NotBeNull();
-        user.BannedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
-        user.BanExpiresAt.Should().Be(expiresAt);
+        user.Bans.Should().ContainSingle();
+        UserBan ban = user.Bans.First();
+        ban.Reason.Should().Be(reason);
+        ban.BannedBy.Should().Be(bannedBy);
+        ban.BannedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
+        ban.ExpiresAt.Should().Be(expiresAt);
+        ban.IsCurrentlyActive().Should().BeTrue();
+        ban.UnbannedAt.Should().BeNull();
+        ban.UnbannedBy.Should().BeNull();
     }
 
     [Fact]
-    public void Ban_WhenAlreadyBanned_ShouldUpdateBan()
+    public void Ban_WhenAlreadyBanned_ShouldCreateAnotherActiveBan()
     {
         // Arrange
         User user = CreateValidUser();
@@ -427,9 +431,19 @@ public sealed class UserTests
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        user.BanReason.Should().Be(newReason);
-        user.BannedBy.Should().Be(newBannedBy);
-        user.BanExpiresAt.Should().Be(newExpiresAt);
+        user.Bans.Should().HaveCount(2);
+        
+        UserBan oldBan = user.Bans.First();
+        oldBan.IsCurrentlyActive().Should().BeTrue();
+        oldBan.UnbannedAt.Should().BeNull();
+        oldBan.UnbannedBy.Should().BeNull();
+        
+        UserBan newBan = user.Bans.Last();
+        newBan.Reason.Should().Be(newReason);
+        newBan.BannedBy.Should().Be(newBannedBy);
+        newBan.ExpiresAt.Should().Be(newExpiresAt);
+        newBan.IsCurrentlyActive().Should().BeTrue();
+        
         user.IsBanned().Should().BeTrue();
     }
 
@@ -437,7 +451,7 @@ public sealed class UserTests
     [InlineData("")]
     [InlineData(" ")]
     [InlineData(null)]
-    public void Ban_WithInvalidReason_ShouldFail(string? invalidReason)
+    public void Ban_WithEmptyOrNullReason_ShouldSucceed(string? emptyReason)
     {
         // Arrange
         User user = CreateValidUser();
@@ -445,11 +459,14 @@ public sealed class UserTests
         DateTime expiresAt = DateTime.UtcNow.AddDays(7);
 
         // Act
-        var result = user.Ban(invalidReason!, bannedBy, expiresAt);
+        var result = user.Ban(emptyReason!, bannedBy, expiresAt);
 
         // Assert
-        result.IsFailure.Should().BeTrue();
-        result.Error.Should().Be(UserErrors.BanReasonRequired);
+        result.IsSuccess.Should().BeTrue();
+        user.Bans.Should().ContainSingle();
+        UserBan ban = user.Bans.First();
+        ban.Reason.Should().Be(emptyReason ?? string.Empty);
+        ban.IsCurrentlyActive().Should().BeTrue();
     }
 
     [Fact]
@@ -518,16 +535,50 @@ public sealed class UserTests
         Guid bannedBy = Guid.NewGuid();
         DateTime expiresAt = DateTime.UtcNow.AddDays(7);
         user.Ban(reason, bannedBy, expiresAt);
+        Guid unbannedBy = Guid.NewGuid();
 
         // Act
-        var result = user.Unban();
+        var result = user.Unban(unbannedBy);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        user.BanReason.Should().BeNull();
-        user.BannedBy.Should().BeNull();
-        user.BannedAt.Should().BeNull();
-        user.BanExpiresAt.Should().BeNull();
+        user.Bans.Should().ContainSingle();
+        UserBan ban = user.Bans.First();
+        ban.IsCurrentlyActive().Should().BeFalse();
+        ban.UnbannedAt.Should().NotBeNull();
+        ban.UnbannedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
+        ban.UnbannedBy.Should().Be(unbannedBy);
+        user.IsBanned().Should().BeFalse();
+    }
+
+    [Fact]
+    public void Unban_WhenMultipleBansActive_ShouldDeactivateAllBans()
+    {
+        // Arrange
+        User user = CreateValidUser();
+        Guid bannedBy1 = Guid.NewGuid();
+        Guid bannedBy2 = Guid.NewGuid();
+        DateTime expiresAt1 = DateTime.UtcNow.AddDays(7);
+        DateTime expiresAt2 = DateTime.UtcNow.AddDays(14);
+        
+        user.Ban("First ban", bannedBy1, expiresAt1);
+        user.Ban("Second ban", bannedBy2, expiresAt2);
+        
+        Guid unbannedBy = Guid.NewGuid();
+
+        // Act
+        var result = user.Unban(unbannedBy);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        user.Bans.Should().HaveCount(2);
+        user.Bans.Should().AllSatisfy(ban =>
+        {
+            ban.IsCurrentlyActive().Should().BeFalse();
+            ban.UnbannedAt.Should().NotBeNull();
+            ban.UnbannedBy.Should().Be(unbannedBy);
+        });
+        user.IsBanned().Should().BeFalse();
     }
 
     [Fact]
@@ -535,9 +586,10 @@ public sealed class UserTests
     {
         // Arrange
         User user = CreateValidUser();
+        Guid unbannedBy = Guid.NewGuid();
 
         // Act
-        var result = user.Unban();
+        var result = user.Unban(unbannedBy);
 
         // Assert
         result.IsFailure.Should().BeTrue();
@@ -554,9 +606,10 @@ public sealed class UserTests
         DateTime expiresAt = DateTime.UtcNow.AddDays(7);
         user.Ban(reason, bannedBy, expiresAt);
         user.ClearDomainEvents(); // Clear ban event
+        Guid unbannedBy = Guid.NewGuid();
 
         // Act
-        user.Unban();
+        user.Unban(unbannedBy);
         var domainEvents = user.GetDomainEvents();
 
         // Assert

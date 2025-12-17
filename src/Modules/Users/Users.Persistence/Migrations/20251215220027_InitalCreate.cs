@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Users.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class InitalCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -52,10 +52,6 @@ namespace Users.Persistence.Migrations
                     LockoutEnd = table.Column<DateTime>(type: "TEXT", nullable: true),
                     LastLockout = table.Column<DateTime>(type: "TEXT", nullable: true),
                     LockoutCount = table.Column<int>(type: "INTEGER", nullable: false),
-                    BanReason = table.Column<string>(type: "TEXT", maxLength: 500, nullable: true),
-                    BannedBy = table.Column<Guid>(type: "TEXT", nullable: true),
-                    BannedAt = table.Column<DateTime>(type: "TEXT", nullable: true),
-                    BanExpiresAt = table.Column<DateTime>(type: "TEXT", nullable: true),
                     PasswordHash = table.Column<string>(type: "TEXT", maxLength: 128, nullable: false),
                     PasswordSalt = table.Column<byte[]>(type: "BLOB", maxLength: 64, nullable: false)
                 },
@@ -106,6 +102,30 @@ namespace Users.Persistence.Migrations
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_RoleUser_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserBans",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    UserId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Reason = table.Column<string>(type: "TEXT", maxLength: 500, nullable: false),
+                    BannedBy = table.Column<Guid>(type: "TEXT", nullable: false),
+                    BannedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    ExpiresAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    UnbannedAt = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    UnbannedBy = table.Column<Guid>(type: "TEXT", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserBans", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_UserBans_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "Id",
@@ -164,6 +184,11 @@ namespace Users.Persistence.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_UserBans_UserId",
+                table: "UserBans",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Users_Email",
                 table: "Users",
                 column: "Email",
@@ -184,6 +209,9 @@ namespace Users.Persistence.Migrations
 
             migrationBuilder.DropTable(
                 name: "RoleUser");
+
+            migrationBuilder.DropTable(
+                name: "UserBans");
 
             migrationBuilder.DropTable(
                 name: "Permissions");

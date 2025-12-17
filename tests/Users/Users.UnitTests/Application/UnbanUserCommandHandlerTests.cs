@@ -23,13 +23,14 @@ public sealed class UnbanUserCommandHandlerTests
     {
         // Arrange
         Guid userId = Guid.NewGuid();
+        Guid unbannedBy = Guid.NewGuid();
 
         User user = CreateValidUser(userId);
         user.Ban("Violating terms", Guid.NewGuid(), DateTime.UtcNow.AddDays(7));
 
-        var command = new UnbanUserCommand(userId);
+        var command = new UnbanUserCommand(userId, unbannedBy);
 
-        A.CallTo(() => _userRepository.GetByIdAsync(userId, A<CancellationToken>._))
+        A.CallTo(() => _userRepository.GetByIdWithBansAsync(userId, A<CancellationToken>._))
             .Returns(user);
 
         // Act
@@ -38,10 +39,11 @@ public sealed class UnbanUserCommandHandlerTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         user.IsBanned().Should().BeFalse();
-        user.BanReason.Should().BeNull();
-        user.BannedBy.Should().BeNull();
-        user.BannedAt.Should().BeNull();
-        user.BanExpiresAt.Should().BeNull();
+        user.Bans.Should().ContainSingle();
+        UserBan ban = user.Bans.First();
+        ban.IsCurrentlyActive().Should().BeFalse();
+        ban.UnbannedAt.Should().NotBeNull();
+        ban.UnbannedBy.Should().Be(unbannedBy);
     }
 
     [Fact]
@@ -49,10 +51,11 @@ public sealed class UnbanUserCommandHandlerTests
     {
         // Arrange
         Guid userId = Guid.NewGuid();
+        Guid unbannedBy = Guid.NewGuid();
 
-        var command = new UnbanUserCommand(userId);
+        var command = new UnbanUserCommand(userId, unbannedBy);
 
-        A.CallTo(() => _userRepository.GetByIdAsync(userId, A<CancellationToken>._))
+        A.CallTo(() => _userRepository.GetByIdWithBansAsync(userId, A<CancellationToken>._))
             .Returns((User?)null);
 
         // Act
@@ -68,12 +71,13 @@ public sealed class UnbanUserCommandHandlerTests
     {
         // Arrange
         Guid userId = Guid.NewGuid();
+        Guid unbannedBy = Guid.NewGuid();
 
         User user = CreateValidUser(userId);
 
-        var command = new UnbanUserCommand(userId);
+        var command = new UnbanUserCommand(userId, unbannedBy);
 
-        A.CallTo(() => _userRepository.GetByIdAsync(userId, A<CancellationToken>._))
+        A.CallTo(() => _userRepository.GetByIdWithBansAsync(userId, A<CancellationToken>._))
             .Returns(user);
 
         // Act
@@ -89,13 +93,14 @@ public sealed class UnbanUserCommandHandlerTests
     {
         // Arrange
         Guid userId = Guid.NewGuid();
+        Guid unbannedBy = Guid.NewGuid();
 
         User user = CreateValidUser(userId);
         user.Ban("Violating terms", Guid.NewGuid(), DateTime.UtcNow.AddDays(7));
 
-        var command = new UnbanUserCommand(userId);
+        var command = new UnbanUserCommand(userId, unbannedBy);
 
-        A.CallTo(() => _userRepository.GetByIdAsync(userId, A<CancellationToken>._))
+        A.CallTo(() => _userRepository.GetByIdWithBansAsync(userId, A<CancellationToken>._))
             .Returns(user);
 
         // Act

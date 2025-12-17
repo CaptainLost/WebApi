@@ -30,7 +30,7 @@ internal sealed class PermissionAuthorizationHandler : AuthorizationHandler<Perm
         IUserRepository userRepository = scope.ServiceProvider
             .GetRequiredService<IUserRepository>();
 
-        User? user = await userRepository.GetByIdAsync(parsedUserId);
+        User? user = await userRepository.GetByIdWithRolesPermissionsAndBansAsync(parsedUserId);
 
         if (user == null)
         {

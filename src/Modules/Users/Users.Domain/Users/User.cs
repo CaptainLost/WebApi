@@ -17,12 +17,8 @@ public sealed class User : Entity
     public DateTime? LastLockout { get; set; }
     public int LockoutCount { get; set; }
 
-    public string? BanReason { get; private set; }
-    public Guid? BannedBy { get; private set; }
-    public DateTime? BannedAt { get; private set; }
-    public DateTime? BanExpiresAt { get; private set; }
-
     public ICollection<Role> Roles { get; set; } = [];
+    public ICollection<UserBan> Bans { get; private set; } = [];
 
     private User()
     {
@@ -118,11 +114,6 @@ public sealed class User : Entity
 
     public Result Ban(string reason, Guid bannedBy, DateTime expiresAt)
     {
-        if (string.IsNullOrWhiteSpace(reason))
-        {
-            return UserErrors.BanReasonRequired;
-        }
-
         if (bannedBy == Guid.Empty)
         {
             return UserErrors.BannedByRequired;
@@ -133,27 +124,27 @@ public sealed class User : Entity
             return UserErrors.BanExpirationMustBeInFuture;
         }
 
-        BanReason = reason;
-        BannedBy = bannedBy;
-        BannedAt = DateTime.UtcNow;
-        BanExpiresAt = expiresAt;
+        UserBan newBan = UserBan.Create(Id, reason ?? string.Empty, bannedBy, expiresAt);
+        Bans.Add(newBan);
 
-        RaiseDomainEvent(new UserBannedDomainEvent(Id, reason, bannedBy, expiresAt));
+        RaiseDomainEvent(new UserBannedDomainEvent(Id, reason ?? string.Empty, bannedBy, expiresAt));
 
         return Result.Success();
     }
 
-    public Result Unban()
+    public Result Unban(Guid unbannedBy)
     {
-        if (BannedAt == null)
+        List<UserBan> activeBans = Bans.Where(b => b.IsCurrentlyActive()).ToList();
+        
+        if (activeBans.Count == 0)
         {
             return UserErrors.NotBanned;
         }
 
-        BanReason = null;
-        BannedBy = null;
-        BannedAt = null;
-        BanExpiresAt = null;
+        foreach (UserBan ban in activeBans)
+        {
+            ban.Deactivate(unbannedBy);
+        }
 
         RaiseDomainEvent(new UserUnbannedDomainEvent(Id));
 
@@ -162,7 +153,7 @@ public sealed class User : Entity
 
     public bool IsBanned()
     {
-        return BannedAt.HasValue && BanExpiresAt.HasValue && BanExpiresAt.Value > DateTime.UtcNow;
+        return Bans.Any(b => b.IsCurrentlyActive());
     }
 
     private int CalculateLockoutDurationInMinutes(UserSettings settings)

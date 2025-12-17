@@ -2,6 +2,7 @@ using Core.Application.Abstractions.Messaging.Commands;
 using Core.Domain.Messaging;
 using Core.Presentation.Common;
 using Core.Presentation.Endpoints;
+using Core.Presentation.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
@@ -16,10 +17,17 @@ internal sealed class UnbanUserEndpoint : IEndpoint
     {
         group.MapPost(UsersRoutes.Unban, async delegate (
             Guid userId,
+            HttpContext httpContext,
             ICommandHandler<UnbanUserCommand> commandHandler,
             CancellationToken cancellationToken)
         {
-            UnbanUserCommand command = new(userId);
+            Guid? unbannedBy = httpContext.GetUserId();
+            if (unbannedBy == null)
+            {
+                return Results.Unauthorized();
+            }
+
+            UnbanUserCommand command = new(userId, unbannedBy.Value);
             Result result = await commandHandler.HandleAsync(command, cancellationToken);
 
             return result.Match(() => Results.Ok(), ApiResults.Problem);

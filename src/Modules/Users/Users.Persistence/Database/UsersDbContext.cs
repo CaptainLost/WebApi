@@ -8,6 +8,7 @@ public sealed class UsersDbContext : DbContext
     internal DbSet<User> Users => Set<User>();
     internal DbSet<Role> Roles => Set<Role>();
     internal DbSet<Permission> Permissions => Set<Permission>();
+    internal DbSet<UserBan> UserBans => Set<UserBan>();
 
     public UsersDbContext(DbContextOptions<UsersDbContext> options)
         : base(options)

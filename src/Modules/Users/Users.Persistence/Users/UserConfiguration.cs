@@ -55,14 +55,10 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(u => u.LockoutCount)
             .IsRequired();
 
-        builder.Property(u => u.BanReason)
-            .HasMaxLength(500);
-
-        builder.Property(u => u.BannedBy);
-
-        builder.Property(u => u.BannedAt);
-
-        builder.Property(u => u.BanExpiresAt);
+        builder.HasMany(u => u.Bans)
+            .WithOne()
+            .HasForeignKey(ub => ub.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasIndex(u => u.Username)
             .IsUnique();
