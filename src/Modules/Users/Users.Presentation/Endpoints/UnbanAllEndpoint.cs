@@ -3,6 +3,7 @@ using Core.Domain.Messaging;
 using Core.Presentation.Common;
 using Core.Presentation.Endpoints;
 using Core.Presentation.Extensions;
+using Core.Presentation.RateLimiting;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
@@ -32,6 +33,7 @@ internal sealed class UnbanAllEndpoint : IEndpoint
 
             return result.Match(() => Results.Ok(), ApiResults.Problem);
         })
+        .RequireRateLimiting(RateLimiterNames.WriteFixed)
         .RequireAuthorization(Permission.UnbanAllBans.Name)
         .WithName("UnbanAllBans")
         .WithSummary("Removes all active bans from a user")

@@ -3,6 +3,7 @@ using Core.Domain.Messaging;
 using Core.Presentation.Common;
 using Core.Presentation.Endpoints;
 using Core.Presentation.Extensions;
+using Core.Presentation.RateLimiting;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
@@ -38,6 +39,7 @@ internal sealed class BanUserEndpoint : IEndpoint
 
             return result.Match(() => Results.Ok(), ApiResults.Problem);
         })
+        .RequireRateLimiting(RateLimiterNames.WriteFixed)
         .RequireAuthorization(Permission.BanUser.Name)
         .WithName("BanUser")
         .WithSummary("Bans a user")

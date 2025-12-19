@@ -31,6 +31,7 @@ internal static class WebApplicationExtensions
     {
         // app.UseHttpsRedirection();
         app.UseCors();
+        app.UseRateLimiter();
         app.UseExceptionHandler();
         app.UseAuthentication();
         app.UseAuthorization();

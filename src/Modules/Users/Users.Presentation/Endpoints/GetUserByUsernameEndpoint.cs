@@ -2,7 +2,7 @@ using Core.Application.Abstractions.Messaging.Queries;
 using Core.Domain.Messaging;
 using Core.Presentation.Common;
 using Core.Presentation.Endpoints;
-
+using Core.Presentation.RateLimiting;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
@@ -24,6 +24,7 @@ internal sealed class GetUserByUsernameEndpoint : IEndpoint
 
             return result.Match(Results.Ok, ApiResults.Problem);
         })
+        .RequireRateLimiting(RateLimiterNames.ReadFixed)
         .RequireAuthorization(Permission.GetUser.Name)
         .WithName("GetUserByUsername")
         .WithSummary("Gets a user by username")

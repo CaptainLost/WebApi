@@ -1,4 +1,7 @@
+using System.Threading.RateLimiting;
+using Core.Presentation.RateLimiting;
 using Host.Middleware;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.OpenApi.Models;
 
 namespace Host.Extensions;
@@ -9,6 +12,7 @@ internal static class HostApplicationBuilderExtensions
     {
         builder.AddExceptionHandlingServices();
         builder.AddOpenApiServices();
+        builder.AddRateLimiter();
         builder.AddApplicationModules();
         builder.AddCorsPolicy();
 
@@ -57,6 +61,40 @@ internal static class HostApplicationBuilderExtensions
 
                 return Task.CompletedTask;
             });
+        });
+
+        return builder;
+    }
+
+    private static WebApplicationBuilder AddRateLimiter(this WebApplicationBuilder builder)
+    {
+        builder.Services.AddRateLimiter(rateLimiterOptions =>
+        {
+            rateLimiterOptions.AddFixedWindowLimiter(RateLimiterNames.AuthFixed, options =>
+            {
+                options.Window = TimeSpan.FromMinutes(1);
+                options.PermitLimit = 5;
+                options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+                options.QueueLimit = 2;
+            });
+
+            rateLimiterOptions.AddFixedWindowLimiter(RateLimiterNames.WriteFixed, options =>
+            {
+                options.Window = TimeSpan.FromMinutes(1);
+                options.PermitLimit = 20;
+                options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+                options.QueueLimit = 5;
+            });
+
+            rateLimiterOptions.AddFixedWindowLimiter(RateLimiterNames.ReadFixed, options =>
+            {
+                options.Window = TimeSpan.FromMinutes(1);
+                options.PermitLimit = 60;
+                options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+                options.QueueLimit = 10;
+            });
+
+            rateLimiterOptions.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
         });
 
         return builder;

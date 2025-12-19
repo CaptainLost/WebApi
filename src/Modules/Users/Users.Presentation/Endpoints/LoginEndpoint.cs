@@ -2,7 +2,7 @@ using Core.Application.Abstractions.Messaging.Commands;
 using Core.Domain.Messaging;
 using Core.Presentation.Common;
 using Core.Presentation.Endpoints;
-
+using Core.Presentation.RateLimiting;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
@@ -28,6 +28,7 @@ internal sealed class LoginEndpoint : IEndpoint
                 token => Results.Ok(new LoginResponse(token)),
                 ApiResults.Problem);
         })
+        .RequireRateLimiting(RateLimiterNames.AuthFixed)
         .WithName("Login")
         .WithSummary("Authenticates a user")
         .WithDescription("Authenticates a user with username and password. Returns a JWT token upon success.")

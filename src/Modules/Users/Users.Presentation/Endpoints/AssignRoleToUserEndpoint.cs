@@ -2,6 +2,7 @@ using Core.Application.Abstractions.Messaging.Commands;
 using Core.Domain.Messaging;
 using Core.Presentation.Common;
 using Core.Presentation.Endpoints;
+using Core.Presentation.RateLimiting;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
@@ -28,6 +29,7 @@ internal sealed class AssignRoleToUserEndpoint : IEndpoint
 
             return result.Match(() => Results.Ok(), ApiResults.Problem);
         })
+        .RequireRateLimiting(RateLimiterNames.WriteFixed)
         .RequireAuthorization(Permission.AssignRole.Name)
         .WithName("AssignRoleToUser")
         .WithSummary("Assigns a role to a user")

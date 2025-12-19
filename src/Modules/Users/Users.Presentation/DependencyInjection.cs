@@ -1,5 +1,6 @@
 using System.Reflection;
 using Core.Presentation.Extensions;
+using Core.Presentation.RateLimiting;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
