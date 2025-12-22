@@ -25,16 +25,16 @@ internal sealed class BanUserEndpoint : IEndpoint
             ICommandHandler<BanUserCommand> commandHandler,
             CancellationToken cancellationToken)
         {
-            Guid? bannedBy = httpContext.GetUserId();
-            
-            if (bannedBy == null)
+            Guid? banImposerId = httpContext.GetUserId();
+
+            if (banImposerId == null)
             {
                 return Results.Unauthorized();
             }
 
             DateTime expiresAt = DateTime.UtcNow.AddSeconds(request.DurationInSeconds);
-            
-            BanUserCommand command = new(userId, request.Reason, bannedBy.Value, expiresAt);
+
+            BanUserCommand command = new(userId, request.Reason, banImposerId.Value, expiresAt);
             Result result = await commandHandler.HandleAsync(command, cancellationToken);
 
             return result.Match(() => Results.Ok(), ApiResults.Problem);

@@ -10,12 +10,12 @@ namespace Users.UnitTests.Application;
 public sealed class UnbanSingleUserCommandHandlerTests
 {
     private readonly IUserRepository _userRepository;
-    private readonly UnbanSingleUserCommandHandler _handler;
+    private readonly RemoveSingleUserBanCommandHandler _handler;
 
     public UnbanSingleUserCommandHandlerTests()
     {
         _userRepository = A.Fake<IUserRepository>();
-        _handler = new UnbanSingleUserCommandHandler(_userRepository);
+        _handler = new RemoveSingleUserBanCommandHandler(_userRepository);
     }
 
     [Fact]
@@ -23,13 +23,13 @@ public sealed class UnbanSingleUserCommandHandlerTests
     {
         // Arrange
         Guid userId = Guid.NewGuid();
-        Guid unbannedBy = Guid.NewGuid();
-        
+        Guid banRemoverId = Guid.NewGuid();
+
         User user = CreateValidUser(userId);
         user.Ban("Test reason", Guid.NewGuid(), DateTime.UtcNow.AddDays(7));
         Guid banId = user.Bans.First().Id;
-        
-        var command = new UnbanSingleUserCommand(userId, banId, unbannedBy);
+
+        var command = new RemoveSingleUserBanCommand(userId, banId, banRemoverId);
 
         A.CallTo(() => _userRepository.GetByIdWithBansAsync(userId, A<CancellationToken>._))
             .Returns(user);
@@ -42,7 +42,7 @@ public sealed class UnbanSingleUserCommandHandlerTests
         user.IsBanned().Should().BeFalse();
         UserBan ban = user.Bans.First();
         ban.IsCurrentlyActive().Should().BeFalse();
-        ban.UnbannedBy.Should().Be(unbannedBy);
+        ban.BanRemoverId.Should().Be(banRemoverId);
     }
 
     [Fact]
@@ -51,9 +51,9 @@ public sealed class UnbanSingleUserCommandHandlerTests
         // Arrange
         Guid userId = Guid.NewGuid();
         Guid banId = Guid.NewGuid();
-        Guid unbannedBy = Guid.NewGuid();
+        Guid banRemoverId = Guid.NewGuid();
 
-        var command = new UnbanSingleUserCommand(userId, banId, unbannedBy);
+        var command = new RemoveSingleUserBanCommand(userId, banId, banRemoverId);
 
         A.CallTo(() => _userRepository.GetByIdWithBansAsync(userId, A<CancellationToken>._))
             .Returns((User?)null);
@@ -72,12 +72,12 @@ public sealed class UnbanSingleUserCommandHandlerTests
         // Arrange
         Guid userId = Guid.NewGuid();
         Guid invalidBanId = Guid.NewGuid();
-        Guid unbannedBy = Guid.NewGuid();
+        Guid banRemoverId = Guid.NewGuid();
 
         User user = CreateValidUser(userId);
         user.Ban("Test reason", Guid.NewGuid(), DateTime.UtcNow.AddDays(7));
 
-        var command = new UnbanSingleUserCommand(userId, invalidBanId, unbannedBy);
+        var command = new RemoveSingleUserBanCommand(userId, invalidBanId, banRemoverId);
 
         A.CallTo(() => _userRepository.GetByIdWithBansAsync(userId, A<CancellationToken>._))
             .Returns(user);
@@ -95,15 +95,15 @@ public sealed class UnbanSingleUserCommandHandlerTests
     {
         // Arrange
         Guid userId = Guid.NewGuid();
-        Guid unbannedBy = Guid.NewGuid();
+        Guid banRemoverId = Guid.NewGuid();
 
         User user = CreateValidUser(userId);
         user.Ban("First ban", Guid.NewGuid(), DateTime.UtcNow.AddDays(7));
         user.Ban("Second ban", Guid.NewGuid(), DateTime.UtcNow.AddDays(14));
-        
+
         Guid firstBanId = user.Bans.First().Id;
 
-        var command = new UnbanSingleUserCommand(userId, firstBanId, unbannedBy);
+        var command = new RemoveSingleUserBanCommand(userId, firstBanId, banRemoverId);
 
         A.CallTo(() => _userRepository.GetByIdWithBansAsync(userId, A<CancellationToken>._))
             .Returns(user);
@@ -114,13 +114,13 @@ public sealed class UnbanSingleUserCommandHandlerTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         user.Bans.Should().HaveCount(2);
-        
+
         UserBan unbannedBan = user.Bans.First(b => b.Id == firstBanId);
         unbannedBan.IsCurrentlyActive().Should().BeFalse();
-        
+
         UserBan stillActiveBan = user.Bans.First(b => b.Id != firstBanId);
         stillActiveBan.IsCurrentlyActive().Should().BeTrue();
-        
+
         user.IsBanned().Should().BeTrue(); // Still banned due to second ban
     }
 
@@ -129,13 +129,13 @@ public sealed class UnbanSingleUserCommandHandlerTests
     {
         // Arrange
         Guid userId = Guid.NewGuid();
-        Guid unbannedBy = Guid.NewGuid();
+        Guid banRemoverId = Guid.NewGuid();
 
         User user = CreateValidUser(userId);
         user.Ban("Test reason", Guid.NewGuid(), DateTime.UtcNow.AddDays(7));
         Guid banId = user.Bans.First().Id;
 
-        var command = new UnbanSingleUserCommand(userId, banId, unbannedBy);
+        var command = new RemoveSingleUserBanCommand(userId, banId, banRemoverId);
 
         A.CallTo(() => _userRepository.GetByIdWithBansAsync(userId, A<CancellationToken>._))
             .Returns(user);

@@ -23,7 +23,7 @@ internal sealed class UserBanConfiguration : IEntityTypeConfiguration<UserBan>
             .IsRequired()
             .HasMaxLength(500);
 
-        builder.Property(ub => ub.BannedBy)
+        builder.Property(ub => ub.BanImposerId)
             .IsRequired();
 
         builder.Property(ub => ub.BannedAt)
@@ -34,7 +34,7 @@ internal sealed class UserBanConfiguration : IEntityTypeConfiguration<UserBan>
 
         builder.Property(ub => ub.UnbannedAt);
 
-        builder.Property(ub => ub.UnbannedBy);
+        builder.Property(ub => ub.BanRemoverId);
 
         builder.HasIndex(ub => ub.UserId);
     }

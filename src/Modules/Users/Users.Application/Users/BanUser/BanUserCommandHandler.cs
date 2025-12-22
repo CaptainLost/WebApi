@@ -18,7 +18,7 @@ internal sealed class BanUserCommandHandler(IUserRepository userRepository)
             return Result.Failure(UserErrors.UserNotFoundById(command.UserId));
         }
 
-        Result banResult = user.Ban(command.Reason, command.BannedBy, command.ExpiresAt);
+        Result banResult = user.Ban(command.Reason, command.BanImposerId, command.ExpiresAt);
 
         if (banResult.IsFailure)
         {

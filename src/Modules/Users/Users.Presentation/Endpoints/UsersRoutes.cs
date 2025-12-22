@@ -10,8 +10,8 @@ public static class UsersRoutes
     public const string GetUserList = "";
     public const string AssignRole = "{userId}/roles";
     public const string Ban = "{userId}/ban";
-    public const string UnbanAll = "{userId}/unban-all";
-    public const string UnbanSingle = "{userId}/bans/{banId}";
+    public const string RemoveAllUserBans = "{userId}/bans";
+    public const string RemoveSingleBan = "{userId}/bans/{banId}";
 
     public const string Login = "login";
     public const string Register = "register";

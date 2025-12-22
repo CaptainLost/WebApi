@@ -112,11 +112,11 @@ public sealed class User : Entity
             .ToHashSet();
     }
 
-    public Result Ban(string reason, Guid bannedBy, DateTime expiresAt)
+    public Result Ban(string reason, Guid banImposerId, DateTime expiresAt)
     {
-        if (bannedBy == Guid.Empty)
+        if (banImposerId == Guid.Empty)
         {
-            return UserErrors.BannedByRequired;
+            return UserErrors.BanImposerIdRequired;
         }
 
         if (expiresAt <= DateTime.UtcNow)
@@ -124,37 +124,22 @@ public sealed class User : Entity
             return UserErrors.BanExpirationMustBeInFuture;
         }
 
-        UserBan newBan = UserBan.Create(Id, reason ?? string.Empty, bannedBy, expiresAt);
-        Bans.Add(newBan);
+        Result<UserBan> newBanResult = UserBan.Create(Id, reason ?? string.Empty, banImposerId, expiresAt);
 
-        RaiseDomainEvent(new UserBannedDomainEvent(Id, reason ?? string.Empty, bannedBy, expiresAt));
+        if (newBanResult.IsFailure)
+        {
+            return newBanResult;
+        }
+
+        Bans.Add(newBanResult.Value);
 
         return Result.Success();
     }
 
-    public Result UnbanAll(Guid unbannedBy)
-    {
-        List<UserBan> activeBans = Bans.Where(b => b.IsCurrentlyActive()).ToList();
-        
-        if (activeBans.Count == 0)
-        {
-            return UserErrors.NotBanned;
-        }
-
-        foreach (UserBan ban in activeBans)
-        {
-            ban.Deactivate(unbannedBy);
-        }
-
-        RaiseDomainEvent(new UserUnbannedDomainEvent(Id));
-
-        return Result.Success();
-    }
-
-    public Result UnbanSingle(Guid banId, Guid unbannedBy)
+    public Result RemoveBan(Guid banId, Guid banRemoverId)
     {
         UserBan? ban = Bans.FirstOrDefault(b => b.Id == banId);
-        
+
         if (ban == null)
         {
             return UserErrors.BanNotFound(banId);
@@ -165,9 +150,24 @@ public sealed class User : Entity
             return UserErrors.NotBanned;
         }
 
-        ban.Deactivate(unbannedBy);
+        ban.Deactivate(banRemoverId);
 
-        RaiseDomainEvent(new UserUnbannedDomainEvent(Id));
+        return Result.Success();
+    }
+
+    public Result RemoveAllBans(Guid banRemoverId)
+    {
+        List<UserBan> activeBans = Bans.Where(b => b.IsCurrentlyActive()).ToList();
+
+        if (activeBans.Count == 0)
+        {
+            return UserErrors.NotBanned;
+        }
+
+        foreach (UserBan ban in activeBans)
+        {
+            ban.Deactivate(banRemoverId);
+        }
 
         return Result.Success();
     }

@@ -1,3 +1,4 @@
+using Core.Domain.Messaging;
 using Core.Domain.Primitives;
 
 namespace Users.Domain.Users;
@@ -6,15 +7,15 @@ public sealed class UserBan : Entity
 {
     public Guid UserId { get; private set; }
     public string Reason { get; private set; } = string.Empty;
-    public Guid BannedBy { get; private set; }
+    public Guid BanImposerId { get; private set; }
     public DateTime BannedAt { get; private set; }
     public DateTime ExpiresAt { get; private set; }
     public DateTime? UnbannedAt { get; private set; }
-    public Guid? UnbannedBy { get; private set; }
+    public Guid? BanRemoverId { get; private set; }
 
     private UserBan()
     {
-        
+
     }
 
     private UserBan(Guid id, Guid userId, string reason, Guid bannedBy, DateTime expiresAt)
@@ -22,20 +23,22 @@ public sealed class UserBan : Entity
     {
         UserId = userId;
         Reason = reason;
-        BannedBy = bannedBy;
+        BanImposerId = bannedBy;
         BannedAt = DateTime.UtcNow;
         ExpiresAt = expiresAt;
     }
 
-    public static UserBan Create(Guid userId, string reason, Guid bannedBy, DateTime expiresAt)
+    public static Result<UserBan> Create(Guid userId, string reason, Guid bannedBy, DateTime expiresAt)
     {
-        return new UserBan(Guid.NewGuid(), userId, reason, bannedBy, expiresAt);
+        UserBan userBan = new UserBan(Guid.NewGuid(), userId, reason, bannedBy, expiresAt);
+
+        return Result.Success(userBan);
     }
 
-    public void Deactivate(Guid unbannedBy)
+    public void Deactivate(Guid banRemoverId)
     {
         UnbannedAt = DateTime.UtcNow;
-        UnbannedBy = unbannedBy;
+        BanRemoverId = banRemoverId;
     }
 
     public bool IsCurrentlyActive()

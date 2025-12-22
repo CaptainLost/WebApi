@@ -35,8 +35,8 @@ internal sealed class RolePermissionConfiguration : IEntityTypeConfiguration<Rol
             Create(Role.Administrator, Permission.GetUserList),
             Create(Role.Administrator, Permission.BanUser),
             Create(Role.Administrator, Permission.UnbanUser),
-            Create(Role.Administrator, Permission.UnbanAllBans),
-            Create(Role.Administrator, Permission.UnbanSingleBan));
+            Create(Role.Administrator, Permission.RemoveAllUserBans),
+            Create(Role.Administrator, Permission.RemoveSingleBan));
     }
 
     private static RolePermission Create(Role role, Permission permission)

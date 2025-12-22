@@ -16,28 +16,28 @@ internal sealed class UnbanSingleUserEndpoint : IEndpoint
 {
     public void MapEndpoint(RouteGroupBuilder group)
     {
-        group.MapDelete(UsersRoutes.UnbanSingle, async delegate (
+        group.MapDelete(UsersRoutes.RemoveSingleBan, async delegate (
             Guid userId,
             Guid banId,
             HttpContext httpContext,
-            ICommandHandler<UnbanSingleUserCommand> commandHandler,
+            ICommandHandler<RemoveSingleUserBanCommand> commandHandler,
             CancellationToken cancellationToken)
         {
-            Guid? unbannedBy = httpContext.GetUserId();
-            if (unbannedBy == null)
+            Guid? banRemoverId = httpContext.GetUserId();
+            if (banRemoverId == null)
             {
                 return Results.Unauthorized();
             }
 
-            UnbanSingleUserCommand command = new(userId, banId, unbannedBy.Value);
+            RemoveSingleUserBanCommand command = new(userId, banId, banRemoverId.Value);
             Result result = await commandHandler.HandleAsync(command, cancellationToken);
 
             return result.Match(() => Results.Ok(), ApiResults.Problem);
         })
         .RequireRateLimiting(RateLimiterNames.WriteFixed)
-        .RequireAuthorization(Permission.UnbanSingleBan.Name)
-        .WithName("UnbanSingleUser")
-        .WithSummary("Unbans a single ban from a user")
+        .RequireAuthorization(Permission.RemoveSingleBan.Name)
+        .WithName("RemoveSingleBan")
+        .WithSummary("Removes a specific ban from a user")
         .WithDescription("Removes a specific ban from a user by ban ID.")
         .Produces(StatusCodes.Status200OK)
         .Produces<ErrorResponse>(StatusCodes.Status400BadRequest)

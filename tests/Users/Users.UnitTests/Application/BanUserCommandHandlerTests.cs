@@ -23,13 +23,13 @@ public sealed class BanUserCommandHandlerTests
     {
         // Arrange
         Guid userId = Guid.NewGuid();
-        Guid bannedBy = Guid.NewGuid();
+        Guid banImposerId = Guid.NewGuid();
         string reason = "Violating terms of service";
         DateTime expiresAt = DateTime.UtcNow.AddDays(7);
-        
+
         User user = CreateValidUser(userId);
-        
-        var command = new BanUserCommand(userId, reason, bannedBy, expiresAt);
+
+        var command = new BanUserCommand(userId, reason, banImposerId, expiresAt);
 
         A.CallTo(() => _userRepository.GetByIdWithBansAsync(userId, A<CancellationToken>._))
             .Returns(user);
@@ -43,7 +43,7 @@ public sealed class BanUserCommandHandlerTests
         user.Bans.Should().ContainSingle();
         UserBan ban = user.Bans.First();
         ban.Reason.Should().Be(reason);
-        ban.BannedBy.Should().Be(bannedBy);
+        ban.BanImposerId.Should().Be(banImposerId);
         ban.ExpiresAt.Should().Be(expiresAt);
         ban.IsCurrentlyActive().Should().BeTrue();
     }
@@ -53,11 +53,11 @@ public sealed class BanUserCommandHandlerTests
     {
         // Arrange
         Guid userId = Guid.NewGuid();
-        Guid bannedBy = Guid.NewGuid();
+        Guid banImposerId = Guid.NewGuid();
         string reason = "Violating terms of service";
         DateTime expiresAt = DateTime.UtcNow.AddDays(7);
 
-        var command = new BanUserCommand(userId, reason, bannedBy, expiresAt);
+        var command = new BanUserCommand(userId, reason, banImposerId, expiresAt);
 
         A.CallTo(() => _userRepository.GetByIdWithBansAsync(userId, A<CancellationToken>._))
             .Returns((User?)null);
@@ -75,14 +75,14 @@ public sealed class BanUserCommandHandlerTests
     {
         // Arrange
         Guid userId = Guid.NewGuid();
-        Guid newBannedBy = Guid.NewGuid();
+        Guid newBanImposerId = Guid.NewGuid();
         string newReason = "Violating terms of service";
         DateTime newExpiresAt = DateTime.UtcNow.AddDays(7);
 
         User user = CreateValidUser(userId);
         user.Ban("Previous reason", Guid.NewGuid(), DateTime.UtcNow.AddDays(1));
 
-        var command = new BanUserCommand(userId, newReason, newBannedBy, newExpiresAt);
+        var command = new BanUserCommand(userId, newReason, newBanImposerId, newExpiresAt);
 
         A.CallTo(() => _userRepository.GetByIdWithBansAsync(userId, A<CancellationToken>._))
             .Returns(user);
@@ -97,7 +97,7 @@ public sealed class BanUserCommandHandlerTests
         activeBans.Should().HaveCount(2);
         UserBan newBan = user.Bans.Last();
         newBan.Reason.Should().Be(newReason);
-        newBan.BannedBy.Should().Be(newBannedBy);
+        newBan.BanImposerId.Should().Be(newBanImposerId);
         newBan.ExpiresAt.Should().Be(newExpiresAt);
     }
 
@@ -106,13 +106,13 @@ public sealed class BanUserCommandHandlerTests
     {
         // Arrange
         Guid userId = Guid.NewGuid();
-        Guid bannedBy = Guid.NewGuid();
+        Guid banImposerId = Guid.NewGuid();
         string reason = "Violating terms of service";
         DateTime expiresAt = DateTime.UtcNow.AddDays(7);
 
         User user = CreateValidUser(userId);
 
-        var command = new BanUserCommand(userId, reason, bannedBy, expiresAt);
+        var command = new BanUserCommand(userId, reason, banImposerId, expiresAt);
 
         A.CallTo(() => _userRepository.GetByIdWithBansAsync(userId, A<CancellationToken>._))
             .Returns(user);

@@ -5,5 +5,5 @@ namespace Users.Application.Users.BanUser;
 public sealed record BanUserCommand(
     Guid UserId,
     string Reason,
-    Guid BannedBy,
+    Guid BanImposerId,
     DateTime ExpiresAt) : ICommand;

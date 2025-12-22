@@ -10,12 +10,12 @@ namespace Users.UnitTests.Application;
 public sealed class UnbanAllCommandHandlerTests
 {
     private readonly IUserRepository _userRepository;
-    private readonly UnbanAllCommandHandler _handler;
+    private readonly RemoveAllUserBansCommandHandler _handler;
 
     public UnbanAllCommandHandlerTests()
     {
         _userRepository = A.Fake<IUserRepository>();
-        _handler = new UnbanAllCommandHandler(_userRepository);
+        _handler = new RemoveAllUserBansCommandHandler(_userRepository);
     }
 
     [Fact]
@@ -23,12 +23,12 @@ public sealed class UnbanAllCommandHandlerTests
     {
         // Arrange
         Guid userId = Guid.NewGuid();
-        Guid unbannedBy = Guid.NewGuid();
+        Guid banRemoverId = Guid.NewGuid();
 
         User user = CreateValidUser(userId);
-        user.Ban("Violating terms", Guid.NewGuid(), DateTime.UtcNow.AddDays(7));
+        user.Ban("Previous reason", Guid.NewGuid(), DateTime.UtcNow.AddDays(1));
 
-        var command = new UnbanAllCommand(userId, unbannedBy);
+        var command = new RemoveAllUserBansCommand(userId, banRemoverId);
 
         A.CallTo(() => _userRepository.GetByIdWithBansAsync(userId, A<CancellationToken>._))
             .Returns(user);
@@ -43,7 +43,7 @@ public sealed class UnbanAllCommandHandlerTests
         UserBan ban = user.Bans.First();
         ban.IsCurrentlyActive().Should().BeFalse();
         ban.UnbannedAt.Should().NotBeNull();
-        ban.UnbannedBy.Should().Be(unbannedBy);
+        ban.BanRemoverId.Should().Be(banRemoverId);
     }
 
     [Fact]
@@ -51,9 +51,9 @@ public sealed class UnbanAllCommandHandlerTests
     {
         // Arrange
         Guid userId = Guid.NewGuid();
-        Guid unbannedBy = Guid.NewGuid();
+        Guid banRemoverId = Guid.NewGuid();
 
-        var command = new UnbanAllCommand(userId, unbannedBy);
+        var command = new RemoveAllUserBansCommand(userId, banRemoverId);
 
         A.CallTo(() => _userRepository.GetByIdWithBansAsync(userId, A<CancellationToken>._))
             .Returns((User?)null);
@@ -71,11 +71,11 @@ public sealed class UnbanAllCommandHandlerTests
     {
         // Arrange
         Guid userId = Guid.NewGuid();
-        Guid unbannedBy = Guid.NewGuid();
+        Guid banRemoverId = Guid.NewGuid();
 
         User user = CreateValidUser(userId);
 
-        var command = new UnbanAllCommand(userId, unbannedBy);
+        var command = new RemoveAllUserBansCommand(userId, banRemoverId);
 
         A.CallTo(() => _userRepository.GetByIdWithBansAsync(userId, A<CancellationToken>._))
             .Returns(user);
@@ -93,12 +93,12 @@ public sealed class UnbanAllCommandHandlerTests
     {
         // Arrange
         Guid userId = Guid.NewGuid();
-        Guid unbannedBy = Guid.NewGuid();
+        Guid banRemoverId = Guid.NewGuid();
 
         User user = CreateValidUser(userId);
         user.Ban("Violating terms", Guid.NewGuid(), DateTime.UtcNow.AddDays(7));
 
-        var command = new UnbanAllCommand(userId, unbannedBy);
+        var command = new RemoveAllUserBansCommand(userId, banRemoverId);
 
         A.CallTo(() => _userRepository.GetByIdWithBansAsync(userId, A<CancellationToken>._))
             .Returns(user);

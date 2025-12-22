@@ -2,14 +2,14 @@ using Core.Application.Abstractions.Messaging.Commands;
 using Core.Domain.Messaging;
 using Users.Domain.Users;
 
-namespace Users.Application.Users.UnbanSingleUser;
+namespace Users.Application.Users.UnbanAll;
 
-internal sealed class UnbanSingleUserCommandHandler(IUserRepository userRepository)
-    : ICommandHandler<UnbanSingleUserCommand>
+internal sealed class RemoveAllUserBansCommandHandler(IUserRepository userRepository)
+    : ICommandHandler<RemoveAllUserBansCommand>
 {
     private readonly IUserRepository _userRepository = userRepository;
 
-    public async Task<Result> HandleAsync(UnbanSingleUserCommand command, CancellationToken cancellationToken)
+    public async Task<Result> HandleAsync(RemoveAllUserBansCommand command, CancellationToken cancellationToken)
     {
         User? user = await _userRepository.GetByIdWithBansAsync(command.UserId, cancellationToken);
 
@@ -18,7 +18,7 @@ internal sealed class UnbanSingleUserCommandHandler(IUserRepository userReposito
             return Result.Failure(UserErrors.UserNotFoundById(command.UserId));
         }
 
-        Result unbanResult = user.UnbanSingle(command.BanId, command.UnbannedBy);
+        Result unbanResult = user.RemoveAllBans(command.BanRemoverId);
 
         if (unbanResult.IsFailure)
         {

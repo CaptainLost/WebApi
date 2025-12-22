@@ -48,9 +48,9 @@ public static class UserErrors
         "User.BanExpirationMustBeInFuture",
         "Ban expiration date must be in the future.");
 
-    public static Error BannedByRequired => Error.Validation(
-        "User.BannedByRequired",
-        "BannedBy user ID is required.");
+    public static Error BanImposerIdRequired => Error.Validation(
+        "User.BanImposerIdRequired",
+        "BanImposerId user ID is required.");
 
     public static Error UserIsBanned => Error.Authorization(
         "User.UserIsBanned",

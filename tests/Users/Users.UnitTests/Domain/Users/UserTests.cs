@@ -393,23 +393,23 @@ public sealed class UserTests
         // Arrange
         User user = CreateValidUser();
         string reason = "Violating terms of service";
-        Guid bannedBy = Guid.NewGuid();
+        Guid banImposerId = Guid.NewGuid();
         DateTime expiresAt = DateTime.UtcNow.AddDays(7);
 
         // Act
-        var result = user.Ban(reason, bannedBy, expiresAt);
+        var result = user.Ban(reason, banImposerId, expiresAt);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
         user.Bans.Should().ContainSingle();
         UserBan ban = user.Bans.First();
         ban.Reason.Should().Be(reason);
-        ban.BannedBy.Should().Be(bannedBy);
+        ban.BanImposerId.Should().Be(banImposerId);
         ban.BannedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
         ban.ExpiresAt.Should().Be(expiresAt);
         ban.IsCurrentlyActive().Should().BeTrue();
         ban.UnbannedAt.Should().BeNull();
-        ban.UnbannedBy.Should().BeNull();
+        ban.BanRemoverId.Should().BeNull();
     }
 
     [Fact]
@@ -418,32 +418,32 @@ public sealed class UserTests
         // Arrange
         User user = CreateValidUser();
         string originalReason = "Violating terms of service";
-        Guid originalBannedBy = Guid.NewGuid();
+        Guid originalBanImposerId = Guid.NewGuid();
         DateTime originalExpiresAt = DateTime.UtcNow.AddDays(7);
-        user.Ban(originalReason, originalBannedBy, originalExpiresAt);
+        user.Ban(originalReason, originalBanImposerId, originalExpiresAt);
 
         string newReason = "Another reason";
-        Guid newBannedBy = Guid.NewGuid();
+        Guid newBanImposerId = Guid.NewGuid();
         DateTime newExpiresAt = DateTime.UtcNow.AddDays(14);
 
         // Act
-        var result = user.Ban(newReason, newBannedBy, newExpiresAt);
+        var result = user.Ban(newReason, newBanImposerId, newExpiresAt);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
         user.Bans.Should().HaveCount(2);
-        
+
         UserBan oldBan = user.Bans.First();
         oldBan.IsCurrentlyActive().Should().BeTrue();
         oldBan.UnbannedAt.Should().BeNull();
-        oldBan.UnbannedBy.Should().BeNull();
-        
+        oldBan.BanRemoverId.Should().BeNull();
+
         UserBan newBan = user.Bans.Last();
         newBan.Reason.Should().Be(newReason);
-        newBan.BannedBy.Should().Be(newBannedBy);
+        newBan.BanImposerId.Should().Be(newBanImposerId);
         newBan.ExpiresAt.Should().Be(newExpiresAt);
         newBan.IsCurrentlyActive().Should().BeTrue();
-        
+
         user.IsBanned().Should().BeTrue();
     }
 
@@ -455,11 +455,11 @@ public sealed class UserTests
     {
         // Arrange
         User user = CreateValidUser();
-        Guid bannedBy = Guid.NewGuid();
+        Guid banImposerId = Guid.NewGuid();
         DateTime expiresAt = DateTime.UtcNow.AddDays(7);
 
         // Act
-        var result = user.Ban(emptyReason!, bannedBy, expiresAt);
+        var result = user.Ban(emptyReason!, banImposerId, expiresAt);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -475,11 +475,11 @@ public sealed class UserTests
         // Arrange
         User user = CreateValidUser();
         string reason = "Violating terms of service";
-        Guid bannedBy = Guid.NewGuid();
+        Guid banImposerId = Guid.NewGuid();
         DateTime expiresAt = DateTime.UtcNow.AddDays(-1);
 
         // Act
-        var result = user.Ban(reason, bannedBy, expiresAt);
+        var result = user.Ban(reason, banImposerId, expiresAt);
 
         // Assert
         result.IsFailure.Should().BeTrue();
@@ -487,58 +487,35 @@ public sealed class UserTests
     }
 
     [Fact]
-    public void Ban_WithEmptyBannedBy_ShouldFail()
+    public void Ban_WithEmptyBanImposerId_ShouldFail()
     {
         // Arrange
         User user = CreateValidUser();
         string reason = "Violating terms of service";
-        Guid bannedBy = Guid.Empty;
+        Guid banImposerId = Guid.Empty;
         DateTime expiresAt = DateTime.UtcNow.AddDays(7);
 
         // Act
-        var result = user.Ban(reason, bannedBy, expiresAt);
+        var result = user.Ban(reason, banImposerId, expiresAt);
 
         // Assert
         result.IsFailure.Should().BeTrue();
-        result.Error.Should().Be(UserErrors.BannedByRequired);
+        result.Error.Should().Be(UserErrors.BanImposerIdRequired);
     }
 
     [Fact]
-    public void Ban_ShouldRaiseUserBannedDomainEvent()
+    public void RemoveAllBans_WhenBanned_ShouldSucceed()
     {
         // Arrange
         User user = CreateValidUser();
         string reason = "Violating terms of service";
-        Guid bannedBy = Guid.NewGuid();
+        Guid banImposerId = Guid.NewGuid();
         DateTime expiresAt = DateTime.UtcNow.AddDays(7);
+        user.Ban(reason, banImposerId, expiresAt);
+        Guid banRemoverId = Guid.NewGuid();
 
         // Act
-        user.Ban(reason, bannedBy, expiresAt);
-        var domainEvents = user.GetDomainEvents();
-
-        // Assert
-        domainEvents.Should().ContainItemsAssignableTo<UserBannedDomainEvent>();
-        domainEvents.OfType<UserBannedDomainEvent>().Should().ContainSingle();
-        UserBannedDomainEvent domainEvent = domainEvents.OfType<UserBannedDomainEvent>().Single();
-        domainEvent.UserId.Should().Be(user.Id);
-        domainEvent.Reason.Should().Be(reason);
-        domainEvent.BannedBy.Should().Be(bannedBy);
-        domainEvent.ExpiresAt.Should().Be(expiresAt);
-    }
-
-    [Fact]
-    public void UnbanAll_WhenBanned_ShouldSucceed()
-    {
-        // Arrange
-        User user = CreateValidUser();
-        string reason = "Violating terms of service";
-        Guid bannedBy = Guid.NewGuid();
-        DateTime expiresAt = DateTime.UtcNow.AddDays(7);
-        user.Ban(reason, bannedBy, expiresAt);
-        Guid unbannedBy = Guid.NewGuid();
-
-        // Act
-        var result = user.UnbanAll(unbannedBy);
+        var result = user.RemoveAllBans(banRemoverId);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -547,27 +524,27 @@ public sealed class UserTests
         ban.IsCurrentlyActive().Should().BeFalse();
         ban.UnbannedAt.Should().NotBeNull();
         ban.UnbannedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
-        ban.UnbannedBy.Should().Be(unbannedBy);
+        ban.BanRemoverId.Should().Be(banRemoverId);
         user.IsBanned().Should().BeFalse();
     }
 
     [Fact]
-    public void UnbanAll_WhenMultipleBansActive_ShouldDeactivateAllBans()
+    public void RemoveAllBans_WhenMultipleBansActive_ShouldDeactivateAllBans()
     {
         // Arrange
         User user = CreateValidUser();
-        Guid bannedBy1 = Guid.NewGuid();
-        Guid bannedBy2 = Guid.NewGuid();
+        Guid banImposerId1 = Guid.NewGuid();
+        Guid banImposerId2 = Guid.NewGuid();
         DateTime expiresAt1 = DateTime.UtcNow.AddDays(7);
         DateTime expiresAt2 = DateTime.UtcNow.AddDays(14);
-        
-        user.Ban("First ban", bannedBy1, expiresAt1);
-        user.Ban("Second ban", bannedBy2, expiresAt2);
-        
-        Guid unbannedBy = Guid.NewGuid();
+
+        user.Ban("First ban", banImposerId1, expiresAt1);
+        user.Ban("Second ban", banImposerId2, expiresAt2);
+
+        Guid banRemoverId = Guid.NewGuid();
 
         // Act
-        var result = user.UnbanAll(unbannedBy);
+        var result = user.RemoveAllBans(banRemoverId);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -576,47 +553,24 @@ public sealed class UserTests
         {
             ban.IsCurrentlyActive().Should().BeFalse();
             ban.UnbannedAt.Should().NotBeNull();
-            ban.UnbannedBy.Should().Be(unbannedBy);
+            ban.BanRemoverId.Should().Be(banRemoverId);
         });
         user.IsBanned().Should().BeFalse();
     }
 
     [Fact]
-    public void UnbanAll_WhenNotBanned_ShouldFail()
+    public void RemoveAllBans_WhenNotBanned_ShouldFail()
     {
         // Arrange
         User user = CreateValidUser();
-        Guid unbannedBy = Guid.NewGuid();
+        Guid banRemoverId = Guid.NewGuid();
 
         // Act
-        var result = user.UnbanAll(unbannedBy);
+        var result = user.RemoveAllBans(banRemoverId);
 
         // Assert
         result.IsFailure.Should().BeTrue();
         result.Error.Should().Be(UserErrors.NotBanned);
-    }
-
-    [Fact]
-    public void UnbanAll_ShouldRaiseUserUnbannedDomainEvent()
-    {
-        // Arrange
-        User user = CreateValidUser();
-        string reason = "Violating terms of service";
-        Guid bannedBy = Guid.NewGuid();
-        DateTime expiresAt = DateTime.UtcNow.AddDays(7);
-        user.Ban(reason, bannedBy, expiresAt);
-        user.ClearDomainEvents(); // Clear ban event
-        Guid unbannedBy = Guid.NewGuid();
-
-        // Act
-        user.UnbanAll(unbannedBy);
-        var domainEvents = user.GetDomainEvents();
-
-        // Assert
-        domainEvents.Should().ContainItemsAssignableTo<UserUnbannedDomainEvent>();
-        domainEvents.OfType<UserUnbannedDomainEvent>().Should().ContainSingle();
-        UserUnbannedDomainEvent domainEvent = domainEvents.OfType<UserUnbannedDomainEvent>().Single();
-        domainEvent.UserId.Should().Be(user.Id);
     }
 
     [Fact]
@@ -625,9 +579,9 @@ public sealed class UserTests
         // Arrange
         User user = CreateValidUser();
         string reason = "Violating terms of service";
-        Guid bannedBy = Guid.NewGuid();
+        Guid banImposerId = Guid.NewGuid();
         DateTime expiresAt = DateTime.UtcNow.AddDays(7);
-        user.Ban(reason, bannedBy, expiresAt);
+        user.Ban(reason, banImposerId, expiresAt);
 
         // Act
         bool isBanned = user.IsBanned();
@@ -642,9 +596,9 @@ public sealed class UserTests
         // Arrange
         User user = CreateValidUser();
         string reason = "Violating terms of service";
-        Guid bannedBy = Guid.NewGuid();
+        Guid banImposerId = Guid.NewGuid();
         DateTime expiresAt = DateTime.UtcNow.AddSeconds(1);
-        user.Ban(reason, bannedBy, expiresAt);
+        user.Ban(reason, banImposerId, expiresAt);
         Thread.Sleep(1100); // Wait for ban to expire
 
         // Act
@@ -668,43 +622,43 @@ public sealed class UserTests
     }
 
     [Fact]
-    public void UnbanSingle_WithValidBanId_ShouldSucceed()
+    public void RemoveBan_WithValidBanId_ShouldSucceed()
     {
         // Arrange
         User user = CreateValidUser();
         string reason = "Violating terms of service";
-        Guid bannedBy = Guid.NewGuid();
+        Guid banImposerId = Guid.NewGuid();
         DateTime expiresAt = DateTime.UtcNow.AddDays(7);
-        user.Ban(reason, bannedBy, expiresAt);
+        user.Ban(reason, banImposerId, expiresAt);
         Guid banId = user.Bans.First().Id;
-        Guid unbannedBy = Guid.NewGuid();
+        Guid banRemoverId = Guid.NewGuid();
 
         // Act
-        var result = user.UnbanSingle(banId, unbannedBy);
+        var result = user.RemoveBan(banId, banRemoverId);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
         UserBan ban = user.Bans.First();
         ban.IsCurrentlyActive().Should().BeFalse();
         ban.UnbannedAt.Should().NotBeNull();
-        ban.UnbannedBy.Should().Be(unbannedBy);
+        ban.BanRemoverId.Should().Be(banRemoverId);
         user.IsBanned().Should().BeFalse();
     }
 
     [Fact]
-    public void UnbanSingle_WithInvalidBanId_ShouldFail()
+    public void RemoveBan_WithInvalidBanId_ShouldFail()
     {
         // Arrange
         User user = CreateValidUser();
         string reason = "Violating terms of service";
-        Guid bannedBy = Guid.NewGuid();
+        Guid banImposerId = Guid.NewGuid();
         DateTime expiresAt = DateTime.UtcNow.AddDays(7);
-        user.Ban(reason, bannedBy, expiresAt);
+        user.Ban(reason, banImposerId, expiresAt);
         Guid invalidBanId = Guid.NewGuid();
-        Guid unbannedBy = Guid.NewGuid();
+        Guid banRemoverId = Guid.NewGuid();
 
         // Act
-        var result = user.UnbanSingle(invalidBanId, unbannedBy);
+        var result = user.RemoveBan(invalidBanId, banRemoverId);
 
         // Assert
         result.IsFailure.Should().BeTrue();
@@ -712,20 +666,20 @@ public sealed class UserTests
     }
 
     [Fact]
-    public void UnbanSingle_WithInactiveBan_ShouldFail()
+    public void RemoveBan_WithInactiveBan_ShouldFail()
     {
         // Arrange
         User user = CreateValidUser();
         string reason = "Violating terms of service";
-        Guid bannedBy = Guid.NewGuid();
+        Guid banImposerId = Guid.NewGuid();
         DateTime expiresAt = DateTime.UtcNow.AddDays(7);
-        user.Ban(reason, bannedBy, expiresAt);
+        user.Ban(reason, banImposerId, expiresAt);
         Guid banId = user.Bans.First().Id;
-        Guid unbannedBy = Guid.NewGuid();
-        user.UnbanSingle(banId, unbannedBy); // First unban
+        Guid banRemoverId = Guid.NewGuid();
+        user.RemoveBan(banId, banRemoverId); // First unban
 
         // Act
-        var result = user.UnbanSingle(banId, unbannedBy); // Try to unban again
+        var result = user.RemoveBan(banId, banRemoverId); // Try to unban again
 
         // Assert
         result.IsFailure.Should().BeTrue();
@@ -733,60 +687,36 @@ public sealed class UserTests
     }
 
     [Fact]
-    public void UnbanSingle_WithMultipleBans_ShouldOnlyUnbanSpecificOne()
+    public void RemoveBan_WithMultipleBans_ShouldOnlyUnbanSpecificOne()
     {
         // Arrange
         User user = CreateValidUser();
-        Guid bannedBy1 = Guid.NewGuid();
-        Guid bannedBy2 = Guid.NewGuid();
+        Guid banImposerId1 = Guid.NewGuid();
+        Guid banImposerId2 = Guid.NewGuid();
         DateTime expiresAt1 = DateTime.UtcNow.AddDays(7);
         DateTime expiresAt2 = DateTime.UtcNow.AddDays(14);
-        
-        user.Ban("First ban", bannedBy1, expiresAt1);
-        user.Ban("Second ban", bannedBy2, expiresAt2);
-        
+
+        user.Ban("First ban", banImposerId1, expiresAt1);
+        user.Ban("Second ban", banImposerId2, expiresAt2);
+
         Guid firstBanId = user.Bans.First().Id;
-        Guid unbannedBy = Guid.NewGuid();
+        Guid banRemoverId = Guid.NewGuid();
 
         // Act
-        var result = user.UnbanSingle(firstBanId, unbannedBy);
+        var result = user.RemoveBan(firstBanId, banRemoverId);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
         user.Bans.Should().HaveCount(2);
-        
+
         UserBan firstBan = user.Bans.First(b => b.Id == firstBanId);
         firstBan.IsCurrentlyActive().Should().BeFalse();
-        firstBan.UnbannedBy.Should().Be(unbannedBy);
-        
+        firstBan.BanRemoverId.Should().Be(banRemoverId);
+
         UserBan secondBan = user.Bans.First(b => b.Id != firstBanId);
         secondBan.IsCurrentlyActive().Should().BeTrue();
-        
+
         user.IsBanned().Should().BeTrue(); // Still banned because second ban is active
-    }
-
-    [Fact]
-    public void UnbanSingle_ShouldRaiseUserUnbannedDomainEvent()
-    {
-        // Arrange
-        User user = CreateValidUser();
-        string reason = "Violating terms of service";
-        Guid bannedBy = Guid.NewGuid();
-        DateTime expiresAt = DateTime.UtcNow.AddDays(7);
-        user.Ban(reason, bannedBy, expiresAt);
-        Guid banId = user.Bans.First().Id;
-        user.ClearDomainEvents(); // Clear ban event
-        Guid unbannedBy = Guid.NewGuid();
-
-        // Act
-        user.UnbanSingle(banId, unbannedBy);
-        var domainEvents = user.GetDomainEvents();
-
-        // Assert
-        domainEvents.Should().ContainItemsAssignableTo<UserUnbannedDomainEvent>();
-        domainEvents.OfType<UserUnbannedDomainEvent>().Should().ContainSingle();
-        UserUnbannedDomainEvent domainEvent = domainEvents.OfType<UserUnbannedDomainEvent>().Single();
-        domainEvent.UserId.Should().Be(user.Id);
     }
 
     private static User CreateValidUser()

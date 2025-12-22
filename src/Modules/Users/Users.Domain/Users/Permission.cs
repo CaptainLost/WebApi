@@ -12,8 +12,8 @@ public sealed class Permission : Enumeration<Permission>
     public static readonly Permission GetUserList = new(6, "users:list");
     public static readonly Permission BanUser = new(7, "users:ban");
     public static readonly Permission UnbanUser = new(8, "users:unban");
-    public static readonly Permission UnbanSingleBan = new(9, "users:unban-single");
-    public static readonly Permission UnbanAllBans = new(10, "users:unban-all");
+    public static readonly Permission RemoveSingleBan = new(9, "users:remove-single-ban");
+    public static readonly Permission RemoveAllUserBans = new(10, "users:remove-all-bans");
 
     private Permission(int id, string name)
         : base(id, name)
